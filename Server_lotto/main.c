@@ -143,6 +143,7 @@ int main(int argc, char* argv[]) {
 
                     us= strtok(buffer,s);
                     us= strtok(NULL, s);
+                    pwd = strtok(NULL, s);
 
                     printf("us è %s\n", us);
 
@@ -221,7 +222,9 @@ int main(int argc, char* argv[]) {
                         fflush(stdout);
 
 
+                        //fprintf(f1,"\n");
                         fprintf(f1,"%s ", us);
+                        fprintf(f1,"%s", pwd);
 
                         strcpy(msg_signup, "Registazione avvenuta con successo\n");
                         len_msg_signup = strlen(msg_signup) + 1;
