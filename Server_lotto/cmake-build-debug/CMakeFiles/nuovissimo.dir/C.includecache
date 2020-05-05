@@ -1,0 +1,28 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/giuseppe/Scrivania/Progetto2/Server_lotto/main.c
+stdio.h
+-
+arpa/inet.h
+-
+sys/types.h
+-
+sys/socket.h
+-
+netinet/in.h
+-
+string.h
+-
+stdio.h
+-
+stdlib.h
+-
+unistd.h
+-
+

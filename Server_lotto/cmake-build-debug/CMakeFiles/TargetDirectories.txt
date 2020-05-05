@@ -1,0 +1,3 @@
+/home/giuseppe/Scrivania/Progetto2/Server_lotto/cmake-build-debug/CMakeFiles/rebuild_cache.dir
+/home/giuseppe/Scrivania/Progetto2/Server_lotto/cmake-build-debug/CMakeFiles/edit_cache.dir
+/home/giuseppe/Scrivania/Progetto2/Server_lotto/cmake-build-debug/CMakeFiles/nuovissimo.dir
