@@ -60,6 +60,7 @@ int main(int argc, char* argv[]) {
     uint16_t lmsg, lmsg_signup;
     char buffer[BUFFER_SIZE];
     char *us;
+    char *ustmp;
     char *pwd;
     const char s[2] = " ";
     struct users users_list[N];
@@ -155,11 +156,14 @@ int main(int argc, char* argv[]) {
 
                  //   temp_word = strtok(lline,s);
                   //  printf("%s\n", temp_word);
-                    //flag = 0;
+                    flag = 0;
                     while ((read = getline(&lline, &length, f1)) != -1)
                   {
+                       // ustmp = strtok(lline,s);
+                       // ustmp = strtok(NULL,s);
+                      //  printf("ustmp è %s", ustmp);
 
-                      if (strncmp(lline,us,strlen(us)) == 0 )
+                      if (strncmp(strtok(lline,s),us,strlen(us)) == 0 )
                       {
                           flag = 1;
                           printf("Entrato nel blocco, setto flag a %d\n",flag);
@@ -217,6 +221,7 @@ int main(int argc, char* argv[]) {
                         fflush(stdout);
 
 
+                        fprintf(f1,"%s ", us);
 
                         strcpy(msg_signup, "Registazione avvenuta con successo\n");
                         len_msg_signup = strlen(msg_signup) + 1;
