@@ -16,10 +16,21 @@ struct users
 {
     char username[N];
     char password[N];
-    int session_id;
-    FILE* fp;
+    char session_id[10];
 };
 
+void gen_random(char *s, const int len) {
+    static const char alphanum[] =
+            "0123456789"
+            "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+            "abcdefghijklmnopqrstuvwxyz";
+
+    for (int i = 0; i < len; ++i) {
+        s[i] = alphanum[rand() % (sizeof(alphanum) - 1)];
+    }
+
+    s[len] = 0;
+}
 
 int main(int argc, char* argv[]) {
   //  printf("Ci sei?\n");
@@ -35,7 +46,7 @@ int main(int argc, char* argv[]) {
     char *pwd_log;
     char *pwd;
     const char s[2] = " ";
-    struct users users_list[N];
+    struct users users_list;
     int i;
     int cont = 0;
     char msg_signup[50];
@@ -162,6 +173,10 @@ int main(int argc, char* argv[]) {
                         lmsg_signup = htons(len_msg_signup);
                         ret = send(new_sd, (void *) &lmsg_signup, sizeof(uint16_t), 0);
                         ret = send(new_sd, (void *) msg_signup, len_msg_signup, 0);
+
+                        f2 = fopen("/home/giuseppe/Scrivania/utenti2.txt","a");
+                        fprintf(f2,"$%s\n",us);
+                        fclose(f2);
                     }
 
 
@@ -192,18 +207,23 @@ int main(int argc, char* argv[]) {
                             printf("Entrato nel blocco, setto flag a %d\n",flag);
                             fflush(stdout);
 
+                          /*  for (i = 0; i < 10; i++)
+                            {
+                                users_list.session_id[i] = rand();
+                            }
+                                */
+                          gen_random(users_list.session_id, 10);
 
-                            strcpy(msg_signup, "Accesso effettuato, id: $");
-                            strcat(msg_signup,us);
+                            strcpy(msg_signup, "Accesso effettuato, id:");
+                            strcat(msg_signup,users_list.session_id);
                             strcat(msg_signup,"\n");
                             len_msg_signup = strlen(msg_signup) + 1;
                             lmsg_signup = htons(len_msg_signup);
                             ret = send(new_sd, (void *) &lmsg_signup, sizeof(uint16_t), 0);
                             ret = send(new_sd, (void *) msg_signup, len_msg_signup, 0);
 
-                            f2 = fopen("/home/giuseppe/Scrivania/utenti2.txt","a");
-                            fprintf(f2,"$%s",us);
-                            fclose(f2);
+
+
 
 
                             break;
@@ -213,7 +233,7 @@ int main(int argc, char* argv[]) {
                     if (flag == 0)
                     {
 
-                        strcpy(msg_signup, "Accesso negato, riprovare\n");
+                        strcpy(msg_signup, "Errore: Accesso negato, riprovare\n");
                         len_msg_signup = strlen(msg_signup) + 1;
                         lmsg_signup = htons(len_msg_signup);
                         ret = send(new_sd, (void *) &lmsg_signup, sizeof(uint16_t), 0);
