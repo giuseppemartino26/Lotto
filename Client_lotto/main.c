@@ -7,6 +7,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #define BUFFER_SIZE 1024
+#define N 100
 
 
 void help_cmd(char string[])
@@ -52,6 +53,13 @@ void help_cmd(char string[])
 
 }
 
+struct users
+{
+    char username[N];
+    char password[N];
+    char session_id[10];
+};
+
 
 int main(int argc, char* argv[]) {
     int ret, sd, len;
@@ -59,6 +67,9 @@ int main(int argc, char* argv[]) {
     struct sockaddr_in srv_addr; //indirizzo server
     char str_cmd[BUFFER_SIZE];   // stringa per salvare il comando inserito da tastiera dall'utente
     char buffer[BUFFER_SIZE];
+    const char st[2] = ":";
+    char* tok;
+    struct users users_list;
 
 
     /* Creazione socket */
@@ -174,9 +185,31 @@ int main(int argc, char* argv[]) {
 
             }
 
-            printf("%s",buffer);
+           /* printf("%s",buffer);
             fflush(stdout);
             continue;
+            */
+
+
+
+
+            if(strncmp(buffer, "A",1) ==0)
+            {
+                printf("Accesso effettuato\n");
+                tok = strtok(buffer,st);
+                tok = strtok(NULL,st);
+                strcpy(users_list.username,tok);
+                printf("%s", users_list.username);
+
+
+                continue;
+            }
+
+            if(strncmp(buffer, "E",1) ==0)
+            {
+                printf("%s",buffer);
+                continue;
+            }
 
 
 
