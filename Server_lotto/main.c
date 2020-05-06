@@ -31,13 +31,16 @@ int main(int argc, char* argv[]) {
     char buffer[BUFFER_SIZE];
     char *us;
     char *ustmp;
+    char *us_log;
+    char *pwd_log;
     char *pwd;
     const char s[2] = " ";
     struct users users_list[N];
     int i;
     int cont = 0;
     char msg_signup[50];
-    FILE* f1;
+    FILE* f1; //file contenente tutti gli username con le relative password
+    FILE* f2;
     char* temp;
     char* temp_word;
     int len_word;
@@ -106,7 +109,7 @@ int main(int argc, char* argv[]) {
                     continue;
                 }
 
-
+                /* !signup */
                 if (strncmp(buffer, "!signup", 7) == 0) {
                     printf("Sono dentro\n");
                     printf("Il buffer ricevuto è %s",buffer);
@@ -119,6 +122,7 @@ int main(int argc, char* argv[]) {
 
 
                     f1 = fopen("/home/giuseppe/Scrivania/utenti.txt","a+");
+
 
 
                     flag = 0;
@@ -167,18 +171,84 @@ int main(int argc, char* argv[]) {
                     }
                 }
 
+                /* login */
+                if (strncmp(buffer, "!login",6 ) == 0)
+                {
+                    us= strtok(buffer,s);
+                    us= strtok(NULL, s);
+                    pwd = strtok(NULL, s);
+
+                    f1 = fopen("/home/giuseppe/Scrivania/utenti.txt","r");
+
+                    flag = 0;
+                    while ((read = getline(&lline, &length, f1)) != -1)
+                    {
+                        us_log = strtok(lline,s);
+                        pwd_log = strtok(NULL,s);
+
+                        if (strncmp(us_log,us,strlen(us)) == 0 && strncmp(pwd_log,pwd,strlen(pwd))==0)
+                        {
+                            flag = 1;
+                            printf("Entrato nel blocco, setto flag a %d\n",flag);
+                            fflush(stdout);
+
+
+                            strcpy(msg_signup, "Accesso effettuato, id: $");
+                            strcat(msg_signup,us);
+                            strcat(msg_signup,"\n");
+                            len_msg_signup = strlen(msg_signup) + 1;
+                            lmsg_signup = htons(len_msg_signup);
+                            ret = send(new_sd, (void *) &lmsg_signup, sizeof(uint16_t), 0);
+                            ret = send(new_sd, (void *) msg_signup, len_msg_signup, 0);
+
+                            f2 = fopen("/home/giuseppe/Scrivania/utenti2.txt","a");
+                            fprintf(f2,"$%s",us);
+                            fclose(f2);
+
+
+                            break;
+                        }
+                    }
+
+                    if (flag == 0)
+                    {
+
+                        strcpy(msg_signup, "Accesso negato, riprovare\n");
+                        len_msg_signup = strlen(msg_signup) + 1;
+                        lmsg_signup = htons(len_msg_signup);
+                        ret = send(new_sd, (void *) &lmsg_signup, sizeof(uint16_t), 0);
+                        ret = send(new_sd, (void *) msg_signup, len_msg_signup, 0);
+                    }
+
+
+                    fclose(f1);
+                    if (lline) {
+                        free(lline);
+                    }
+                }
+
+
+
+
+
+
+
+
+                }
             }
 
-
-        }
         printf("Ciao sono il padre");
         fflush(stdout);
         close(new_sd);
 
 
+        }
+
+
+
     }
 
-}
+
 
 
 
