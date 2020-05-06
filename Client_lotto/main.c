@@ -14,7 +14,7 @@ void help_cmd(char string[])
     char *token;
     const char s[2] = " ";
     token = strtok(string, s);
-    token = strtok(NULL, s);
+    token = strtok(NULL, s); // in token ho il comando che deve essere descritto
 
 
 
@@ -57,7 +57,7 @@ int main(int argc, char* argv[]) {
     int ret, sd, len;
     uint16_t lmsg;
     struct sockaddr_in srv_addr; //indirizzo server
-    char str_cmd[BUFFER_SIZE];
+    char str_cmd[BUFFER_SIZE];   // stringa per salvare il comando inserito da tastiera dall'utente
     char buffer[BUFFER_SIZE];
 
 
@@ -84,11 +84,13 @@ int main(int argc, char* argv[]) {
     {
         fgets(str_cmd, BUFFER_SIZE, stdin); //Attendo input da tastiera
 
+        /* help senza specificare il comando */
         if (strncmp(str_cmd, "!help ", 6) == 0)
         {
             help_cmd(str_cmd);
         }
 
+        /* !help  */
         if (strncmp(str_cmd, "!help", 5) == 0 && strlen(str_cmd) == 6)
         {
             printf("Sono disponibili i seguenti comandi:\n"
@@ -104,15 +106,17 @@ int main(int argc, char* argv[]) {
                    "7) !esci --> termina il client\n");
         }
 
+        /* !signup */
         if (strncmp(str_cmd, "!signup",7)==0)
         {
-            printf("okk");
+            printf("okk\n");
             // Invio al server la quantita di dati
             len = strlen(str_cmd) + 1; // Voglio inviare anche il carattere di fine stringa
             lmsg = htons(len); // Per passarlo al server lo converto in formato big endian
             ret = send(sd, (void*) &lmsg, sizeof(uint16_t), 0); // mando la dimensione del messaggio
 
             ret = send(sd, (void*) str_cmd, len, 0); // invio il messaggio
+            printf("Messaggio inviato\n");
 
             //Attendo dimensione messaggio di risposta
             ret = recv(sd,(void*) &lmsg, sizeof(uint16_t),0 );
@@ -128,17 +132,53 @@ int main(int argc, char* argv[]) {
                 continue;
             }
 
+            // Ricevo U dal server nel caso in cui ci sia già un username, altrimenti ricevo R
             if(strncmp(buffer, "U",1) ==0)
             {
-                printf("Username non disponibile, riprovare");
+                printf("Username non disponibile, riprovare\n");
                 continue;
             }
 
             if (strncmp(buffer,"R",1)== 0)
             {
-                printf("Registazione avvenuta con successo");
+                printf("Registazione avvenuta con successo\n");
                 continue;
             }
+
+        }
+
+        /*login*/
+        if (strncmp(str_cmd, "!login",6)==0){
+            // Invio al server la quantita di dati
+            len = strlen(str_cmd) + 1; // Voglio inviare anche il carattere di fine stringa
+            lmsg = htons(len); // Per passarlo al server lo converto in formato big endian
+            ret = send(sd, (void*) &lmsg, sizeof(uint16_t), 0); // mando la dimensione del messaggio
+
+            ret = send(sd, (void*) str_cmd, len, 0); // invio il messaggio
+            printf("Messaggio inviato\n");
+
+            //Attendo dimensione messaggio di risposta
+            ret = recv(sd,(void*) &lmsg, sizeof(uint16_t),0 );
+            len = ntohs(lmsg); // Rinconverto in formato host
+
+
+
+            //Ricevo il messaggio di risposta
+            ret = recv(sd, (void*)buffer, len, 0);
+
+
+
+            if(ret < 0){
+                perror("Errore in fase di ricezione: \n");
+                continue;
+
+            }
+
+            printf("%s",buffer);
+            fflush(stdout);
+            continue;
+
+
 
         }
 
