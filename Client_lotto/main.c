@@ -70,6 +70,7 @@ int main(int argc, char* argv[]) {
     const char st[2] = ":";
     char* tok;
     struct users users_list;
+    int attempt = 0;
 
 
     /* Creazione socket */
@@ -207,7 +208,17 @@ int main(int argc, char* argv[]) {
 
             if(strncmp(buffer, "E",1) ==0)
             {
+                attempt ++;
                 printf("%s",buffer);
+
+                if (attempt == 3)
+                {
+                    perror("Numero massimo di tentativi provati. Può effettuare altri 3 tentativi tra 30 minuti");
+                    close(sd);
+                   // break;
+                    exit(-1);
+                }
+
                 continue;
             }
 
