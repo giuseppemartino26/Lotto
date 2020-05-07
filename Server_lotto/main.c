@@ -20,12 +20,13 @@ struct users
 };
 
 void gen_random(char *s, const int len) {
+    int i;
     static const char alphanum[] =
             "0123456789"
             "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
             "abcdefghijklmnopqrstuvwxyz";
 
-    for (int i = 0; i < len; ++i) {
+    for ( i = 0; i < len; ++i) {
         s[i] = alphanum[rand() % (sizeof(alphanum) - 1)];
     }
 
@@ -34,7 +35,9 @@ void gen_random(char *s, const int len) {
 
 int main(int argc, char* argv[]) {
   //  printf("Ci sei?\n");
-    int sd, new_sd, ret, len, len_msg_signup;
+    int sd, new_sd, ret, len_msg_signup;
+    int attempt = 0;
+    socklen_t len;
     struct sockaddr_in my_addr;
     struct sockaddr_in cl_addr;
     pid_t pid;
@@ -49,9 +52,10 @@ int main(int argc, char* argv[]) {
     struct users users_list;
     int i;
     int cont = 0;
-    char msg_signup[50];
+    char msg_signup[N];
     FILE* f1; //file contenente tutti gli username con le relative password
     FILE* f2;
+    FILE* f3;
     char* temp;
     char* temp_word;
     int len_word;
@@ -60,6 +64,7 @@ int main(int argc, char* argv[]) {
     char * lline = NULL;
     size_t length = 0;
     ssize_t read;
+    char try[len];
 
     /* Creazione socket */
     sd = socket(AF_INET, SOCK_STREAM, 0);
@@ -99,6 +104,8 @@ int main(int argc, char* argv[]) {
             close(sd);
             printf("Ciao sono il figlio\n");
             fflush(stdout);
+
+
             while (1) {
                 printf("pronto per ricevere\n");
                 fflush(stdout);
@@ -140,7 +147,8 @@ int main(int argc, char* argv[]) {
                     while ((read = getline(&lline, &length, f1)) != -1)
                     {
 
-                      if (strncmp(strtok(lline,s),us,strlen(us)) == 0 )
+                    //  if (strncmp(strtok(lline,s),us,strlen(us)) == 0 )
+                        if(strcmp(strtok(lline,s),us) == 0 )
                       {
                           flag = 1;
                           printf("Entrato nel blocco, setto flag a %d\n",flag);
@@ -152,7 +160,7 @@ int main(int argc, char* argv[]) {
                           lmsg_signup = htons(len_msg_signup);
                           ret = send(new_sd, (void *) &lmsg_signup, sizeof(uint16_t), 0);
                           ret = send(new_sd, (void *) msg_signup, len_msg_signup, 0);
-                          break;
+                          //break;
                       }
                     }
 
@@ -201,7 +209,7 @@ int main(int argc, char* argv[]) {
                         us_log = strtok(lline,s);
                         pwd_log = strtok(NULL,s);
 
-                        if (strncmp(us_log,us,strlen(us)) == 0 && strncmp(pwd_log,pwd,strlen(pwd))==0)
+                        if (strcmp(us_log,us) == 0 && strcmp(pwd_log,pwd)==0)
                         {
                             flag = 1;
                             printf("Entrato nel blocco, setto flag a %d\n",flag);
@@ -226,18 +234,45 @@ int main(int argc, char* argv[]) {
 
 
 
-                            break;
+                           // break;
                         }
                     }
 
                     if (flag == 0)
                     {
 
-                        strcpy(msg_signup, "Errore: Accesso negato, riprovare\n");
+                        strcpy(msg_signup, "ERRORE: Accesso negato. (MASSIMO 3 TENTATIVI)\n");
                         len_msg_signup = strlen(msg_signup) + 1;
                         lmsg_signup = htons(len_msg_signup);
                         ret = send(new_sd, (void *) &lmsg_signup, sizeof(uint16_t), 0);
                         ret = send(new_sd, (void *) msg_signup, len_msg_signup, 0);
+
+                        attempt ++;
+
+                        if (attempt == 3)
+                        {
+                            attempt = 0;
+
+                            strcpy(msg_signup, "EFFETTUATO IL MASSIMO DEI TENTATIVI, può riprovare l'accesso tra 30 minuti\n");
+                            len_msg_signup = strlen(msg_signup) + 1;
+                            lmsg_signup = htons(len_msg_signup);
+                            ret = send(new_sd, (void *) &lmsg_signup, sizeof(uint16_t), 0);
+                            ret = send(new_sd, (void *) msg_signup, len_msg_signup, 0);
+
+                            f3 = fopen("/home/giuseppe/Scrivania/tentativi.txt","a+");
+                            inet_ntop(AF_INET, &cl_addr.sin_addr,try,len);
+                            fprintf(f3,"%s",try);
+                            fclose(f3);
+
+
+
+
+
+
+                            close(new_sd);
+                            exit(-1);
+
+                        }
                     }
 
 
@@ -255,11 +290,12 @@ int main(int argc, char* argv[]) {
 
 
                 }
-            }
+            } else {
 
-        printf("Ciao sono il padre");
-        fflush(stdout);
-        close(new_sd);
+            printf("Ciao sono il padre");
+            fflush(stdout);
+            close(new_sd);
+        }
 
 
         }
