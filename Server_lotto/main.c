@@ -1,4 +1,6 @@
-#include <stdio.h>
+#define _GNU_SOURCE
+#define _XOPEN_SOURCE  #include <stdio.h>
+#define __USE_XOPEN
 #include <arpa/inet.h>
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -7,9 +9,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <time.h>
 #define BUFFER_SIZE 1024
 #define N 100
-#define _GNU_SOURCE
+
 
 
 struct users
@@ -33,8 +36,29 @@ void gen_random(char *s, const int len) {
     s[len] = 0;
 }
 
+int Differenza(struct tm t1)
+{
+    int diff;
+    time_t tt;
+    struct tm* tmm;
+    char buf[N];
+    struct tm tmmn;
+
+    tt = time(NULL);
+    tmm = localtime(&tt);
+    strftime(buf,sizeof(buf), "%d/%m/%Y-%H:%M", tmm);
+    strptime(buf,"%d/%m/%Y-%H:%M",&tmmn);
+  //  printf("%d\n",tmmn.tm_hour);
+  //  printf("%d\n",t1.tm_hour);
+
+
+    diff = (tmmn.tm_min - t1.tm_min) + (tmmn.tm_hour - t1.tm_hour)*60 + (tmmn.tm_mday - t1.tm_mday)*1440;
+    return diff;
+}
+
+
 int main(int argc, char* argv[]) {
-  //  printf("Ci sei?\n");
+    //  printf("Ci sei?\n");
     int sd, new_sd, ret, len_msg_signup;
     int attempt = 0;
     socklen_t len;
@@ -66,6 +90,25 @@ int main(int argc, char* argv[]) {
     ssize_t read;
     char try[len];
 
+    char buf[100];
+    time_t t;
+    struct tm *timeptr;
+
+
+    char lline2[N];
+    FILE *f4;
+    struct tm tmm2;
+    unsigned long int a;
+    int b;
+
+    char *tokl = NULL;
+    char *tokl2 = NULL;
+    char tokl22[N];
+
+    char * lline3 = NULL;
+    ssize_t read2;
+    size_t lenght2;
+
     /* Creazione socket */
     sd = socket(AF_INET, SOCK_STREAM, 0);
     printf("Socket creato\n");
@@ -92,10 +135,95 @@ int main(int argc, char* argv[]) {
 
         len = sizeof(cl_addr);
 
+
+
+
+
+
+
+
+
+
+
+
+
         // Accetto nuove connessioni
         new_sd = accept(sd, (struct sockaddr *) &cl_addr, &len);
-        printf("Connessione accettata\n");
-        fflush(stdout);
+        printf("Connessione accettata");
+
+
+        f4 = fopen("/home/giuseppe/Scrivania/tentativi.txt", "r");
+
+        memset(&tmm2, 0, sizeof(struct tm));
+        while  (fgets(lline2,100,f4) != NULL)
+      //  while ((read2 = getline(&lline3, &lenght2, f1)) != -1)
+        {
+
+
+
+
+
+
+            tokl = strtok(lline2, " ");
+            tokl2 = strtok(NULL, " ");
+
+
+
+
+            //a = strlen(tokl2);
+            strncpy(tokl22,tokl2,16);
+          //  printf("%ld",strlen(tokl22));
+           // printf("%s",tokl22);
+
+          /* for( i =0; i< 16; i++)
+           {
+               tokl22[i] = *tokl2 + i;
+
+           }
+           */
+        //  tokl22[0] = *tokl2;
+
+
+
+           // sscanf(tokl2,"%d/%d/%d-%d:%d", &tmm2.tm_mday,&tmm2.tm_mon, &tmm2.tm_year, &tmm2.tm_hour, &tmm2.tm_min);
+
+          // tokl22[0] = tokl2[0];
+
+            strptime(tokl22, "%d/%m/%Y-%H:%M", &tmm2);
+
+            printf("giorno: %d, ,mese: %d, ore: %d, minuti: %d\n", tmm2.tm_mday, tmm2.tm_mon +1, tmm2.tm_hour, tmm2.tm_min);
+            printf("La differenza in minuti è: %d\n", Differenza(tmm2));
+
+            inet_ntop(AF_INET, &cl_addr.sin_addr, try, len);
+            if (strcmp(try, tokl) == 0 && Differenza(tmm2) < 30)
+            {
+                strcpy(msg_signup,
+                       "Non sono ancora trascorsi 30 minuti dal suo ultimo tentativo di accesso. Aspettare\n");
+                len_msg_signup = strlen(msg_signup) + 1;
+                lmsg_signup = htons(len_msg_signup);
+                ret = send(new_sd, (void *) &lmsg_signup, sizeof(uint16_t), 0);
+                ret = send(new_sd, (void *) msg_signup, len_msg_signup, 0);
+
+                fclose(f4);
+                close(sd);
+                 exit(-1);
+            }
+
+
+        }
+
+        fclose(f4);
+
+
+
+
+
+
+        strcpy(msg_signup, "Connessione accettata\n");
+        len_msg_signup = strlen(msg_signup) + 1;
+        lmsg_signup = htons(len_msg_signup);
+        ret = send(new_sd, (void *) &lmsg_signup, sizeof(uint16_t), 0);
+        ret = send(new_sd, (void *) msg_signup, len_msg_signup, 0);
 
         pid = fork();
 
@@ -147,21 +275,21 @@ int main(int argc, char* argv[]) {
                     while ((read = getline(&lline, &length, f1)) != -1)
                     {
 
-                    //  if (strncmp(strtok(lline,s),us,strlen(us)) == 0 )
+                        //  if (strncmp(strtok(lline,s),us,strlen(us)) == 0 )
                         if(strcmp(strtok(lline,s),us) == 0 )
-                      {
-                          flag = 1;
-                          printf("Entrato nel blocco, setto flag a %d\n",flag);
-                          fflush(stdout);
+                        {
+                            flag = 1;
+                            printf("Entrato nel blocco, setto flag a %d\n",flag);
+                            fflush(stdout);
 
 
-                          strcpy(msg_signup, "Username non disponibile, riprovare\n");
-                          len_msg_signup = strlen(msg_signup) + 1;
-                          lmsg_signup = htons(len_msg_signup);
-                          ret = send(new_sd, (void *) &lmsg_signup, sizeof(uint16_t), 0);
-                          ret = send(new_sd, (void *) msg_signup, len_msg_signup, 0);
-                          //break;
-                      }
+                            strcpy(msg_signup, "Username non disponibile, riprovare\n");
+                            len_msg_signup = strlen(msg_signup) + 1;
+                            lmsg_signup = htons(len_msg_signup);
+                            ret = send(new_sd, (void *) &lmsg_signup, sizeof(uint16_t), 0);
+                            ret = send(new_sd, (void *) msg_signup, len_msg_signup, 0);
+                            //break;
+                        }
                     }
 
                     //printf("%d\n",flag);
@@ -215,12 +343,12 @@ int main(int argc, char* argv[]) {
                             printf("Entrato nel blocco, setto flag a %d\n",flag);
                             fflush(stdout);
 
-                          /*  for (i = 0; i < 10; i++)
-                            {
-                                users_list.session_id[i] = rand();
-                            }
-                                */
-                          gen_random(users_list.session_id, 10);
+                            /*  for (i = 0; i < 10; i++)
+                              {
+                                  users_list.session_id[i] = rand();
+                              }
+                                  */
+                            gen_random(users_list.session_id, 10);
 
                             strcpy(msg_signup, "Accesso effettuato, id:");
                             strcat(msg_signup,users_list.session_id);
@@ -234,7 +362,7 @@ int main(int argc, char* argv[]) {
 
 
 
-                           // break;
+                            // break;
                         }
                     }
 
@@ -259,11 +387,19 @@ int main(int argc, char* argv[]) {
                             ret = send(new_sd, (void *) &lmsg_signup, sizeof(uint16_t), 0);
                             ret = send(new_sd, (void *) msg_signup, len_msg_signup, 0);
 
+                            t = time(NULL);
+                            timeptr = localtime(&t);
+                            strftime(buf,sizeof(buf), "%d/%m/%Y-%H:%M", timeptr);
+
+
+
+
+
                             f3 = fopen("/home/giuseppe/Scrivania/tentativi.txt","a+");
                             inet_ntop(AF_INET, &cl_addr.sin_addr,try,len);
-                            fprintf(f3,"%s",try);
+                           // fprintf(f3,"%s %d:%d-%d/%d/%d\n",try,timeptr->tm_hour, timeptr->tm_min, timeptr->tm_mday, timeptr->tm_mon + 1, timeptr->tm_year + 1900);
+                           fprintf(f3, "%s %s",try,buf);
                             fclose(f3);
-
 
 
 
@@ -289,8 +425,8 @@ int main(int argc, char* argv[]) {
 
 
 
-                }
-            } else {
+            }
+        } else {
 
             printf("Ciao sono il padre");
             fflush(stdout);
@@ -298,14 +434,8 @@ int main(int argc, char* argv[]) {
         }
 
 
-        }
-
-
-
     }
 
 
 
-
-
-
+}
