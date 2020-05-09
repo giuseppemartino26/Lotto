@@ -152,78 +152,6 @@ int main(int argc, char* argv[]) {
         printf("Connessione accettata");
 
 
-        f4 = fopen("/home/giuseppe/Scrivania/tentativi.txt", "r");
-
-        memset(&tmm2, 0, sizeof(struct tm));
-        while  (fgets(lline2,100,f4) != NULL)
-      //  while ((read2 = getline(&lline3, &lenght2, f1)) != -1)
-        {
-
-
-
-
-
-
-            tokl = strtok(lline2, " ");
-            tokl2 = strtok(NULL, " ");
-
-
-
-
-            //a = strlen(tokl2);
-            strncpy(tokl22,tokl2,16);
-          //  printf("%ld",strlen(tokl22));
-           // printf("%s",tokl22);
-
-          /* for( i =0; i< 16; i++)
-           {
-               tokl22[i] = *tokl2 + i;
-
-           }
-           */
-        //  tokl22[0] = *tokl2;
-
-
-
-           // sscanf(tokl2,"%d/%d/%d-%d:%d", &tmm2.tm_mday,&tmm2.tm_mon, &tmm2.tm_year, &tmm2.tm_hour, &tmm2.tm_min);
-
-          // tokl22[0] = tokl2[0];
-
-            strptime(tokl22, "%d/%m/%Y-%H:%M", &tmm2);
-
-            printf("giorno: %d, ,mese: %d, ore: %d, minuti: %d\n", tmm2.tm_mday, tmm2.tm_mon +1, tmm2.tm_hour, tmm2.tm_min);
-            printf("La differenza in minuti è: %d\n", Differenza(tmm2));
-
-            inet_ntop(AF_INET, &cl_addr.sin_addr, try, len);
-            if (strcmp(try, tokl) == 0 && Differenza(tmm2) < 30)
-            {
-                strcpy(msg_signup,
-                       "Non sono ancora trascorsi 30 minuti dal suo ultimo tentativo di accesso. Aspettare\n");
-                len_msg_signup = strlen(msg_signup) + 1;
-                lmsg_signup = htons(len_msg_signup);
-                ret = send(new_sd, (void *) &lmsg_signup, sizeof(uint16_t), 0);
-                ret = send(new_sd, (void *) msg_signup, len_msg_signup, 0);
-
-                fclose(f4);
-                close(sd);
-                 exit(-1);
-            }
-
-
-        }
-
-        fclose(f4);
-
-
-
-
-
-
-        strcpy(msg_signup, "Connessione accettata\n");
-        len_msg_signup = strlen(msg_signup) + 1;
-        lmsg_signup = htons(len_msg_signup);
-        ret = send(new_sd, (void *) &lmsg_signup, sizeof(uint16_t), 0);
-        ret = send(new_sd, (void *) msg_signup, len_msg_signup, 0);
 
         pid = fork();
 
@@ -232,6 +160,75 @@ int main(int argc, char* argv[]) {
             close(sd);
             printf("Ciao sono il figlio\n");
             fflush(stdout);
+
+
+            f4 = fopen("/home/giuseppe/Scrivania/tentativi.txt", "r");
+
+            memset(&tmm2, 0, sizeof(struct tm));
+            while  (fgets(lline2,100,f4) != NULL)
+                //  while ((read2 = getline(&lline3, &lenght2, f1)) != -1)
+            {
+
+
+
+
+
+
+                tokl = strtok(lline2, " ");
+                tokl2 = strtok(NULL, " ");
+
+
+
+
+                //a = strlen(tokl2);
+                strncpy(tokl22,tokl2,16);
+                //  printf("%ld",strlen(tokl22));
+                // printf("%s",tokl22);
+
+                /* for( i =0; i< 16; i++)
+                 {
+                     tokl22[i] = *tokl2 + i;
+
+                 }
+                 */
+                //  tokl22[0] = *tokl2;
+
+
+
+                // sscanf(tokl2,"%d/%d/%d-%d:%d", &tmm2.tm_mday,&tmm2.tm_mon, &tmm2.tm_year, &tmm2.tm_hour, &tmm2.tm_min);
+
+                // tokl22[0] = tokl2[0];
+
+                strptime(tokl22, "%d/%m/%Y-%H:%M", &tmm2);
+
+                printf("giorno: %d, ,mese: %d, ore: %d, minuti: %d\n", tmm2.tm_mday, tmm2.tm_mon +1, tmm2.tm_hour, tmm2.tm_min);
+                printf("La differenza in minuti è: %d\n", Differenza(tmm2));
+
+                inet_ntop(AF_INET, &cl_addr.sin_addr, try, len);
+                if (strcmp(try, tokl) == 0 && Differenza(tmm2) < 30)
+                {
+                    strcpy(msg_signup,
+                           "Non sono ancora trascorsi 30 minuti dal suo ultimo tentativo di accesso. Aspettare\n");
+                    len_msg_signup = strlen(msg_signup) + 1;
+                    lmsg_signup = htons(len_msg_signup);
+                    ret = send(new_sd, (void *) &lmsg_signup, sizeof(uint16_t), 0);
+                    ret = send(new_sd, (void *) msg_signup, len_msg_signup, 0);
+
+                    fclose(f4);
+                    close(new_sd);
+                    exit(-1);
+                }
+
+
+            }
+            strcpy(msg_signup,"Puoi andare avanti\n");
+            len_msg_signup = strlen(msg_signup) + 1;
+            lmsg_signup = htons(len_msg_signup);
+            ret = send(new_sd, (void *) &lmsg_signup, sizeof(uint16_t), 0);
+            ret = send(new_sd, (void *) msg_signup, len_msg_signup, 0);
+
+
+            fclose(f4);
 
 
             while (1) {
