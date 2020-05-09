@@ -18,7 +18,7 @@
 struct users
 {
     char username[N];
-    char password[N];
+    //char password[N];
     char session_id[10];
 };
 
@@ -185,22 +185,7 @@ int main(int argc, char* argv[]) {
 
                 //a = strlen(tokl2);
                 strncpy(tokl22,tokl2,16);
-                //  printf("%ld",strlen(tokl22));
-                // printf("%s",tokl22);
 
-                /* for( i =0; i< 16; i++)
-                 {
-                     tokl22[i] = *tokl2 + i;
-
-                 }
-                 */
-                //  tokl22[0] = *tokl2;
-
-
-
-                // sscanf(tokl2,"%d/%d/%d-%d:%d", &tmm2.tm_mday,&tmm2.tm_mon, &tmm2.tm_year, &tmm2.tm_hour, &tmm2.tm_min);
-
-                // tokl22[0] = tokl2[0];
 
                 strptime(tokl22, "%d/%m/%Y-%H:%M", &tmm2);
 
@@ -292,15 +277,10 @@ int main(int argc, char* argv[]) {
                         }
                     }
 
-                    //printf("%d\n",flag);
 
+                    //USERNAME DISPONIBILE
                     if (flag == 0)
                     {
-                        printf("Apposto\n");
-                        fflush(stdout);
-
-
-                        //fprintf(f1,"\n");
                         fprintf(f1,"%s ", us);
                         fprintf(f1,"%s", pwd);
                         fclose(f1);
@@ -310,10 +290,6 @@ int main(int argc, char* argv[]) {
                         lmsg_signup = htons(len_msg_signup);
                         ret = send(new_sd, (void *) &lmsg_signup, sizeof(uint16_t), 0);
                         ret = send(new_sd, (void *) msg_signup, len_msg_signup, 0);
-
-                      /*  f2 = fopen("/home/giuseppe/Scrivania/utenti.txt","a");
-                        fprintf(f2,"$%s\n",us);
-                        fclose(f2); */
 
                         strcpy(nomefile,"/home/giuseppe/Scrivania/");
                         printf("%s",nomefile);
@@ -349,17 +325,15 @@ int main(int argc, char* argv[]) {
                         us_log = strtok(lline,s);
                         pwd_log = strtok(NULL,s);
 
+
+                        //DATI LOGIN CORRETTI
                         if (strcmp(us_log,us) == 0 && strcmp(pwd_log,pwd)==0)
                         {
                             flag = 1;
                             printf("Entrato nel blocco, setto flag a %d\n",flag);
                             fflush(stdout);
 
-                            /*  for (i = 0; i < 10; i++)
-                              {
-                                  users_list.session_id[i] = rand();
-                              }
-                                  */
+                            //Salvo il session id e lo mando al client
                             gen_random(users_list.session_id, 10);
 
                             strcpy(msg_signup, "Accesso effettuato, id:");
@@ -370,25 +344,23 @@ int main(int argc, char* argv[]) {
                             ret = send(new_sd, (void *) &lmsg_signup, sizeof(uint16_t), 0);
                             ret = send(new_sd, (void *) msg_signup, len_msg_signup, 0);
 
-
-
-
-
                             // break;
                         }
                     }
 
+                    //DATI LOGIN ERRATI
                     if (flag == 0)
                     {
-
+                        //Mando messaggio di errore al client
                         strcpy(msg_signup, "ERRORE: Accesso negato. (MASSIMO 3 TENTATIVI)\n");
                         len_msg_signup = strlen(msg_signup) + 1;
                         lmsg_signup = htons(len_msg_signup);
                         ret = send(new_sd, (void *) &lmsg_signup, sizeof(uint16_t), 0);
                         ret = send(new_sd, (void *) msg_signup, len_msg_signup, 0);
 
-                        attempt ++;
+                        attempt ++; //incremento il numero di tentativi effettuati
 
+                        //Se il client ha sbagliato per la terza volta
                         if (attempt == 3)
                         {
                             attempt = 0;
@@ -399,22 +371,16 @@ int main(int argc, char* argv[]) {
                             ret = send(new_sd, (void *) &lmsg_signup, sizeof(uint16_t), 0);
                             ret = send(new_sd, (void *) msg_signup, len_msg_signup, 0);
 
+                            //Salvo il timestamp in "buf" e nel file "tentativi.txt"
                             t = time(NULL);
                             timeptr = localtime(&t);
                             strftime(buf,sizeof(buf), "%d/%m/%Y-%H:%M", timeptr);
-
-
-
-
 
                             f3 = fopen("/home/giuseppe/Scrivania/tentativi.txt","a+");
                             inet_ntop(AF_INET, &cl_addr.sin_addr,try,len);
                            // fprintf(f3,"%s %d:%d-%d/%d/%d\n",try,timeptr->tm_hour, timeptr->tm_min, timeptr->tm_mday, timeptr->tm_mon + 1, timeptr->tm_year + 1900);
                            fprintf(f3, "%s %s\n",try,buf);
                             fclose(f3);
-
-
-
 
 
                             close(new_sd);

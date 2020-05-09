@@ -53,12 +53,13 @@ void help_cmd(char string[])
 
 }
 
-struct users
+/*struct users
 {
     char username[N];
     char password[N];
     char session_id[10];
 };
+ */
 
 
 int main(int argc, char* argv[]) {
@@ -69,8 +70,8 @@ int main(int argc, char* argv[]) {
     char buffer[BUFFER_SIZE];
     const char st[2] = ":";
     char* tok;
-    struct users users_list;
     int attempt = 0;
+    char session_id[10];
 
 
     /* Creazione socket */
@@ -212,11 +213,11 @@ int main(int argc, char* argv[]) {
 
             if(strncmp(buffer, "A",1) ==0)
             {
-                printf("Accesso effettuato\n");
+                printf("%s",buffer);
                 tok = strtok(buffer,st);
                 tok = strtok(NULL,st);
-                strcpy(users_list.username,tok);
-                printf("%s", users_list.username);
+                strcpy(session_id,tok);
+             //   printf("%s",session_id);
 
 
                 continue;
