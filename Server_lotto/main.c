@@ -48,8 +48,8 @@ int Differenza(struct tm t1)
     tmm = localtime(&tt);
     strftime(buf,sizeof(buf), "%d/%m/%Y-%H:%M", tmm);
     strptime(buf,"%d/%m/%Y-%H:%M",&tmmn);
-  //  printf("%d\n",tmmn.tm_hour);
-  //  printf("%d\n",t1.tm_hour);
+    //  printf("%d\n",tmmn.tm_hour);
+    //  printf("%d\n",t1.tm_hour);
 
 
     diff = (tmmn.tm_min - t1.tm_min) + (tmmn.tm_hour - t1.tm_hour)*60 + (tmmn.tm_mday - t1.tm_mday)*1440;
@@ -111,6 +111,8 @@ int main(int argc, char* argv[]) {
 
     FILE *f_utente;
     char nomefile[N];
+
+    char *id_session = malloc(sizeof(char)*10);
 
     /* Creazione socket */
     sd = socket(AF_INET, SOCK_STREAM, 0);
@@ -334,11 +336,18 @@ int main(int argc, char* argv[]) {
                             fflush(stdout);
 
                             //Salvo il session id e lo mando al client
-                            gen_random(users_list.session_id, 10);
+                            gen_random(id_session, 10);
+                            printf("%s",id_session);
 
                             strcpy(msg_signup, "Accesso effettuato, id:");
-                            strcat(msg_signup,users_list.session_id);
-                            strcat(msg_signup,"\n");
+                            printf("%s",msg_signup);
+                            fflush(stdout);
+                            strcat(msg_signup,id_session);
+
+                            printf("%s",msg_signup);
+                            fflush(stdout);
+
+                          //  strcat(msg_signup,"\n");
                             len_msg_signup = strlen(msg_signup) + 1;
                             lmsg_signup = htons(len_msg_signup);
                             ret = send(new_sd, (void *) &lmsg_signup, sizeof(uint16_t), 0);
@@ -378,8 +387,8 @@ int main(int argc, char* argv[]) {
 
                             f3 = fopen("/home/giuseppe/Scrivania/tentativi.txt","a+");
                             inet_ntop(AF_INET, &cl_addr.sin_addr,try,len);
-                           // fprintf(f3,"%s %d:%d-%d/%d/%d\n",try,timeptr->tm_hour, timeptr->tm_min, timeptr->tm_mday, timeptr->tm_mon + 1, timeptr->tm_year + 1900);
-                           fprintf(f3, "%s %s\n",try,buf);
+                            // fprintf(f3,"%s %d:%d-%d/%d/%d\n",try,timeptr->tm_hour, timeptr->tm_min, timeptr->tm_mday, timeptr->tm_mon + 1, timeptr->tm_year + 1900);
+                            fprintf(f3, "%s %s\n",try,buf);
                             fclose(f3);
 
 

@@ -59,8 +59,7 @@ void help_cmd(char string[])
     char password[N];
     char session_id[10];
 };
- */
-
+*/
 
 int main(int argc, char* argv[]) {
     int ret, sd, len;
@@ -70,8 +69,9 @@ int main(int argc, char* argv[]) {
     char buffer[BUFFER_SIZE];
     const char st[2] = ":";
     char* tok;
+   // struct users users_list;
     int attempt = 0;
-    char session_id[10];
+    char *id_session = malloc(sizeof(char)*10);
 
 
     /* Creazione socket */
@@ -86,7 +86,7 @@ int main(int argc, char* argv[]) {
 
     ret = connect(sd, (struct sockaddr*)&srv_addr, sizeof(srv_addr));
 
-   if(ret < 0){
+    if(ret < 0){
         perror("Errore in fase di connessione: \n");
         exit(-1);
     }
@@ -203,21 +203,27 @@ int main(int argc, char* argv[]) {
 
             }
 
-           /* printf("%s",buffer);
-            fflush(stdout);
-            continue;
-            */
+            /* printf("%s",buffer);
+             fflush(stdout);
+             continue;
+             */
 
 
 
 
             if(strncmp(buffer, "A",1) ==0)
             {
-                printf("%s",buffer);
-                tok = strtok(buffer,st);
+                printf("%s\n", buffer);
+
+                id_session = strtok(buffer, ":");
+                id_session = strtok(NULL, ":");
+
+                printf("%s",id_session);
+             /*   tok = strtok(buffer,st);
                 tok = strtok(NULL,st);
-                strcpy(session_id,tok);
-             //   printf("%s",session_id);
+                strcpy(users_list.username,tok);
+                printf("%s", users_list.username);
+                */
 
 
                 continue;
@@ -232,7 +238,7 @@ int main(int argc, char* argv[]) {
                 {
                     perror("Numero massimo di tentativi provati. Può effettuare altri 3 tentativi tra 30 minuti");
                     close(sd);
-                   // break;
+                    // break;
                     exit(-1);
                 }
 
