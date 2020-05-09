@@ -85,10 +85,26 @@ int main(int argc, char* argv[]) {
 
     ret = connect(sd, (struct sockaddr*)&srv_addr, sizeof(srv_addr));
 
-    if(ret < 0){
+   if(ret < 0){
         perror("Errore in fase di connessione: \n");
         exit(-1);
     }
+
+    ret = recv(sd,(void*) &lmsg, sizeof(uint16_t),0 );
+    len = ntohs(lmsg); // Rinconverto in formato host
+    //Ricevo il messaggio di risposta
+    ret = recv(sd, (void*)buffer, len, 0);
+
+    if (strncmp(buffer,"Non",3)==0)
+    {
+        perror(buffer);
+        exit(-1);
+        close(sd);
+    } else{
+        printf("Connessione effettuata");
+    }
+
+
 
     printf("Benvenuto nel gioco del lotto, digitare un comando o digitare '!help' per conoscere i comandi disponibili\n");
 
