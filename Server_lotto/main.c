@@ -109,6 +109,9 @@ int main(int argc, char* argv[]) {
     ssize_t read2;
     size_t lenght2;
 
+    FILE *f_utente;
+    char nomefile[N];
+
     /* Creazione socket */
     sd = socket(AF_INET, SOCK_STREAM, 0);
     printf("Socket creato\n");
@@ -300,6 +303,7 @@ int main(int argc, char* argv[]) {
                         //fprintf(f1,"\n");
                         fprintf(f1,"%s ", us);
                         fprintf(f1,"%s", pwd);
+                        fclose(f1);
 
                         strcpy(msg_signup, "Registazione avvenuta con successo\n");
                         len_msg_signup = strlen(msg_signup) + 1;
@@ -307,9 +311,20 @@ int main(int argc, char* argv[]) {
                         ret = send(new_sd, (void *) &lmsg_signup, sizeof(uint16_t), 0);
                         ret = send(new_sd, (void *) msg_signup, len_msg_signup, 0);
 
-                        f2 = fopen("/home/giuseppe/Scrivania/utenti2.txt","a");
+                      /*  f2 = fopen("/home/giuseppe/Scrivania/utenti.txt","a");
                         fprintf(f2,"$%s\n",us);
-                        fclose(f2);
+                        fclose(f2); */
+
+                        strcpy(nomefile,"/home/giuseppe/Scrivania/");
+                        printf("%s",nomefile);
+                        fflush(stdout);
+                        strcat(nomefile,us);
+                        strcat(nomefile,".txt");
+                        printf("%s",nomefile);
+                        fflush(stdout);
+                        f_utente = fopen(nomefile,"a+");
+                        fclose(f_utente);
+
                     }
 
 
@@ -395,7 +410,7 @@ int main(int argc, char* argv[]) {
                             f3 = fopen("/home/giuseppe/Scrivania/tentativi.txt","a+");
                             inet_ntop(AF_INET, &cl_addr.sin_addr,try,len);
                            // fprintf(f3,"%s %d:%d-%d/%d/%d\n",try,timeptr->tm_hour, timeptr->tm_min, timeptr->tm_mday, timeptr->tm_mon + 1, timeptr->tm_year + 1900);
-                           fprintf(f3, "%s %s",try,buf);
+                           fprintf(f3, "%s %s\n",try,buf);
                             fclose(f3);
 
 
