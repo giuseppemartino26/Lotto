@@ -72,6 +72,7 @@ int main(int argc, char* argv[]) {
    // struct users users_list;
     int attempt = 0;
     char *id_session = malloc(sizeof(char)*10);
+    id_session = "1111111111";
 
 
     /* Creazione socket */
@@ -248,6 +249,32 @@ int main(int argc, char* argv[]) {
 
 
         }
+
+        if (strncmp(str_cmd, "!invia_giocata",14)==0)
+        {
+            len = strlen(str_cmd) + 1;
+            lmsg = htons(len);
+            ret = send(sd, (void*) &lmsg, sizeof(uint16_t), 0);
+            ret = send(sd, (void*) str_cmd, len, 0);
+
+           // Mando l'ID
+            len = strlen(id_session) + 1;
+            lmsg = htons(len);
+            ret = send(sd, (void*) &lmsg, sizeof(uint16_t), 0);
+            ret = send(sd, (void*) id_session, len, 0);
+            //Ricevo l'ID
+            ret = recv(sd,(void*) &lmsg, sizeof(uint16_t),0 );
+            len = ntohs(lmsg);
+            ret = recv(sd, (void*)buffer, len, 0);
+            //Se l'ID non è valido
+            if (strncmp(buffer,"ERROR_ID",8)==0)
+            {
+                perror(buffer);
+            }
+        }
+
+
+
 
 
 

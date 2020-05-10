@@ -235,15 +235,19 @@ int main(int argc, char* argv[]) {
 
                 // ricevo il messaggio effettivo di lunghezza len
                 ret = recv(new_sd, (void *) buffer, len,0);
-                printf("Buffer ricevuto");
+                printf("Buffer ricevuto\n");
 
                 if (ret < 0) {
                     perror("Errore in fase di ricezione: \n");
                     continue;
                 }
 
+                printf("%c",buffer[0]);
+                fflush(stdout);
+
                 /* !signup */
-                if (strncmp(buffer, "!signup", 7) == 0) {
+                if (strncmp(buffer, "!signup", 7) == 0)
+                {
                     printf("Sono dentro\n");
                     printf("Il buffer ricevuto è %s",buffer);
 
@@ -405,6 +409,46 @@ int main(int argc, char* argv[]) {
                     }
                 }
 
+                if (strncmp(buffer, "!invia_giocata",14 ) == 0)
+                {
+                    printf("Giocata ricevuta\n");
+                    fflush(stdout);
+
+                    // Attendo dimensione dell'ID
+                    ret = recv(new_sd, (void *) &lmsg, sizeof(uint16_t), 0);
+                    // Rinconverto in formato host
+                    len = ntohs(lmsg);
+                    // ricevo l'ID
+                    ret = recv(new_sd, (void *) buffer, len, 0);
+
+                    // ID CORRETTO:
+                    if (strcmp(buffer,id_session)== 0)
+                    {
+                        printf("ID valido");
+                        fflush(stdout);
+                        strcpy(msg_signup, "ID valido\n");
+                        len_msg_signup = strlen(msg_signup) + 1;
+                        lmsg_signup = htons(len_msg_signup);
+                        ret = send(new_sd, (void *) &lmsg_signup, sizeof(uint16_t), 0);
+                        ret = send(new_sd, (void *) msg_signup, len_msg_signup, 0);
+
+
+
+
+
+
+                    } else{
+                        printf("ID non valido");
+                        strcpy(msg_signup, "ERROR_ID: Effettuare il LOGIN prima di poter cominciare a giocare\n");
+                        len_msg_signup = strlen(msg_signup) + 1;
+                        lmsg_signup = htons(len_msg_signup);
+                        ret = send(new_sd, (void *) &lmsg_signup, sizeof(uint16_t), 0);
+                        ret = send(new_sd, (void *) msg_signup, len_msg_signup, 0);
+                    }
+                    /* printf("%s",id_session);
+                    fflush(stdout);
+                     */
+                }
 
 
 
