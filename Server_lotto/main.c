@@ -18,8 +18,8 @@ struct Schedina
 {
     struct tm timestamp_giocata;
     char ruote_giocate[150];
-    int numeri_giocati[90];
-    double importo[5];
+    char numeri_giocati[90];
+    char importo[5];
     char* puntate[5];
 };
 
@@ -78,7 +78,7 @@ int main(int argc, char* argv[]) {
   //  char buffer_ID[BUFFER_SIZE];
     char* buffer_ID = malloc(sizeof(char)*11);
     char *us;
-    char *ustmp;
+    char *temp;
     char *us_log;
     char *pwd_log;
     char *pwd;
@@ -439,13 +439,33 @@ int main(int argc, char* argv[]) {
                     // ID CORRETTO:
                     if (strcmp(buffer_ID,id_session)== 0)
                     {
-                        printf("ID valido");
+                        printf("ID valido\n");
                         fflush(stdout);
                         strcpy(msg_signup, "ID valido\n");
                         len_msg_signup = strlen(msg_signup) + 1;
                         lmsg_signup = htons(len_msg_signup);
                         ret = send(new_sd, (void *) &lmsg_signup, sizeof(uint16_t), 0);
                         ret = send(new_sd, (void *) msg_signup, len_msg_signup, 0);
+
+                        temp = &buffer[20];
+                       // printf("%s",temp);
+                        tokl = strtok(temp,"–");
+                        strncpy(sched.ruote_giocate,tokl,strlen(tokl) -1);
+                        printf("%s\n", sched.ruote_giocate);
+                        fflush(stdout);
+
+                        tokl = strtok(NULL," ");
+                        tokl = strtok(NULL,"–");
+                        strncpy(sched.numeri_giocati,tokl,strlen(tokl) -1);
+                        printf("%s\n", sched.numeri_giocati);
+
+                        tokl = strtok(NULL," ");
+                        tokl = strtok(NULL,"\0");
+                        strncpy(sched.importo,tokl,strlen(tokl) -1);
+                        printf("%s\n", sched.importo);
+
+
+
 
 
 
