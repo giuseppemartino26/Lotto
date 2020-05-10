@@ -12,8 +12,16 @@
 #include <time.h>
 #define BUFFER_SIZE 1024
 #define N 100
+//enum puntate {estratto,ambo,terno,quaterna,cinquina};
 
-
+struct Schedina
+{
+    struct tm timestamp_giocata;
+    char ruote_giocate[150];
+    int numeri_giocati[90];
+    double importo[5];
+    char* puntate[5];
+};
 
 struct users
 {
@@ -67,7 +75,8 @@ int main(int argc, char* argv[]) {
     pid_t pid;
     uint16_t lmsg, lmsg_signup;
     char buffer[BUFFER_SIZE];
-    char buffer_ID[BUFFER_SIZE];
+  //  char buffer_ID[BUFFER_SIZE];
+    char* buffer_ID = malloc(sizeof(char)*11);
     char *us;
     char *ustmp;
     char *us_log;
@@ -81,9 +90,6 @@ int main(int argc, char* argv[]) {
     FILE* f1; //file contenente tutti gli username con le relative password
     FILE* f2;
     FILE* f3;
-    char* temp;
-    char* temp_word;
-    int len_word;
     int flag = 0;
     const size_t line_size = 300;
     char * lline = NULL;
@@ -113,7 +119,15 @@ int main(int argc, char* argv[]) {
     FILE *f_utente;
     char nomefile[N];
 
-    char *id_session = malloc(sizeof(char)*10);
+    char *id_session = malloc(sizeof(char)*11);
+
+    struct Schedina sched;
+
+    sched.puntate[0] = "Estratto";
+    sched.puntate[1] = "Ambo";
+    sched.puntate[2] = "Terno";
+    sched.puntate[3] = "Quaterna";
+    sched.puntate[4] = "Cinquina";
 
     /* Creazione socket */
     sd = socket(AF_INET, SOCK_STREAM, 0);
@@ -432,6 +446,8 @@ int main(int argc, char* argv[]) {
                         lmsg_signup = htons(len_msg_signup);
                         ret = send(new_sd, (void *) &lmsg_signup, sizeof(uint16_t), 0);
                         ret = send(new_sd, (void *) msg_signup, len_msg_signup, 0);
+
+
 
 
 
