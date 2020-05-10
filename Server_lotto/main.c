@@ -67,6 +67,7 @@ int main(int argc, char* argv[]) {
     pid_t pid;
     uint16_t lmsg, lmsg_signup;
     char buffer[BUFFER_SIZE];
+    char buffer_ID[BUFFER_SIZE];
     char *us;
     char *ustmp;
     char *us_log;
@@ -419,10 +420,10 @@ int main(int argc, char* argv[]) {
                     // Rinconverto in formato host
                     len = ntohs(lmsg);
                     // ricevo l'ID
-                    ret = recv(new_sd, (void *) buffer, len, 0);
+                    ret = recv(new_sd, (void *) buffer_ID, len, 0);
 
                     // ID CORRETTO:
-                    if (strcmp(buffer,id_session)== 0)
+                    if (strcmp(buffer_ID,id_session)== 0)
                     {
                         printf("ID valido");
                         fflush(stdout);
