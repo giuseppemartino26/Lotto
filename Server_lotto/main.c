@@ -18,7 +18,7 @@ struct Schedina
 {
     struct tm timestamp_giocata;
     char ruote_giocate[150];
-    char numeri_giocati[90];
+    long numeri_giocati[N];
     float importo_giocato[10];
     char* puntate[5];
 };
@@ -131,6 +131,7 @@ int main(int argc, char* argv[]) {
 
     long ciao;
     char importo[25];
+    char numeri[N];
 
     sched.puntate[0] = "Estratto";
     sched.puntate[1] = "Ambo";
@@ -464,23 +465,36 @@ int main(int argc, char* argv[]) {
 
                         tokl = strtok(NULL," ");
                         tokl = strtok(NULL,"-");
-                        strncpy(sched.numeri_giocati,tokl,strlen(tokl) -1);
-                        printf("%s\n", sched.numeri_giocati);
+                        strncpy(numeri,tokl,strlen(tokl) -1);
+                        printf("%s\n",numeri);
+                        strcat(numeri,"$");
+                        sched.numeri_giocati[0] = strtol(numeri,&eptr,10);
+                        a = 1;
+                        while (*eptr != '$' )
+                      // while (eptr !=NULL)
+                        {
+                            sched.numeri_giocati[a] = strtol(eptr,&eptr,10);
+                            a++;
+                        }
+                        for (int j = 0; j < 5; ++j) {
+                            printf("%.ld ",sched.numeri_giocati[j]);
+                        }
+
 
                         /* IMPORTO: Salvo la parte del buffer ricevuto relativo agli importi puntati nella stringa "importo", per poi convertire in float ogni singolo importo e salvarlo in sched.importo_giocato */
                         tokl = strtok(NULL," ");
-                        tokl = strtok(NULL,"0");
+                        tokl = strtok(NULL,"\0");
                         strncpy(importo,tokl,strlen(tokl) - 1) ;
-
                         strcat(importo,"$");
-                        sched.importo_giocato[0] = strtof(importo,&eptr);   //ATTENZIONE: se non va bene usare la strtof, provare con tokl = strtok(importo, " ") + sched.importo_giocato[a] = atof(tokl)
+
+                        sched.importo_giocato[0] = strtof(importo, &eptr);
+                        //ATTENZIONE: se non va bene usare la strtof, provare con tokl = strtok(importo, " ") + sched.importo_giocato[a] = atof(tokl)
                         a = 1;
                         while (*eptr != '$' )
                         {
                             sched.importo_giocato[a] = strtof(eptr,&eptr);
                             a++;
                         }
-
                         for (int j = 0; j < 5; ++j) {
                             printf("%.2f ",sched.importo_giocato[j]);
                         }
