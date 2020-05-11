@@ -19,7 +19,8 @@ struct Schedina
     struct tm timestamp_giocata;
     char ruote_giocate[150];
     char numeri_giocati[90];
-    char importo[5];
+    char importo[25];
+    float importo_giocato[10];
     char* puntate[5];
 };
 
@@ -85,6 +86,7 @@ int main(int argc, char* argv[]) {
     const char s[2] = " ";
     struct users users_list;
     int i;
+    int k=0;
     int cont = 0;
     char msg_signup[N];
     FILE* f1; //file contenente tutti gli username con le relative password
@@ -105,7 +107,7 @@ int main(int argc, char* argv[]) {
     char lline2[N];
     FILE *f4;
     struct tm tmm2;
-    unsigned long int a;
+    int a;
     int b;
 
     char *tokl = NULL;
@@ -120,8 +122,15 @@ int main(int argc, char* argv[]) {
     char nomefile[N];
 
     char *id_session = malloc(sizeof(char)*11);
+    int importo_int;
 
     struct Schedina sched;
+    long numero;
+    char* eptr;
+
+    float vector[10];
+
+    long ciao;
 
     sched.puntate[0] = "Estratto";
     sched.puntate[1] = "Ambo";
@@ -447,22 +456,40 @@ int main(int argc, char* argv[]) {
                         ret = send(new_sd, (void *) &lmsg_signup, sizeof(uint16_t), 0);
                         ret = send(new_sd, (void *) msg_signup, len_msg_signup, 0);
 
-                        temp = &buffer[20];
-                       // printf("%s",temp);
-                        tokl = strtok(temp,"–");
+                        temp = &buffer[18];
+                        tokl = strtok(temp,"-");
                         strncpy(sched.ruote_giocate,tokl,strlen(tokl) -1);
                         printf("%s\n", sched.ruote_giocate);
                         fflush(stdout);
 
                         tokl = strtok(NULL," ");
-                        tokl = strtok(NULL,"–");
+                        tokl = strtok(NULL,"-");
                         strncpy(sched.numeri_giocati,tokl,strlen(tokl) -1);
                         printf("%s\n", sched.numeri_giocati);
 
                         tokl = strtok(NULL," ");
-                        tokl = strtok(NULL,"\0");
-                        strncpy(sched.importo,tokl,strlen(tokl) -1);
+                        tokl = strtok(NULL,"0");
+                        strncpy(sched.importo,tokl,strlen(tokl) - 1) ;
                         printf("%s\n", sched.importo);
+                        strcat(sched.importo,"$");
+                        printf("%s\n",sched.importo);
+
+
+                        sched.importo_giocato[0] = strtof(sched.importo,&eptr);
+                        printf("%.2f\n",vector[0]);
+                        printf("%s\n",eptr);
+
+                        a = 1;
+                        while (*eptr != '$' )
+                        {
+                            sched.importo_giocato[a] = strtof(eptr,&eptr);
+                            a++;
+                        }
+
+                        for (int j = 0; j < 5; ++j) {
+                            printf("%.2f ",sched.importo_giocato[j]);
+                        }
+
 
 
 
