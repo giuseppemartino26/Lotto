@@ -19,7 +19,6 @@ struct Schedina
     struct tm timestamp_giocata;
     char ruote_giocate[150];
     char numeri_giocati[90];
-    char importo[25];
     float importo_giocato[10];
     char* puntate[5];
 };
@@ -131,6 +130,7 @@ int main(int argc, char* argv[]) {
     float vector[10];
 
     long ciao;
+    char importo[25];
 
     sched.puntate[0] = "Estratto";
     sched.puntate[1] = "Ambo";
@@ -467,18 +467,13 @@ int main(int argc, char* argv[]) {
                         strncpy(sched.numeri_giocati,tokl,strlen(tokl) -1);
                         printf("%s\n", sched.numeri_giocati);
 
+                        /* IMPORTO: Salvo la parte del buffer ricevuto relativo agli importi puntati nella stringa "importo", per poi convertire in float ogni singolo importo e salvarlo in sched.importo_giocato */
                         tokl = strtok(NULL," ");
                         tokl = strtok(NULL,"0");
-                        strncpy(sched.importo,tokl,strlen(tokl) - 1) ;
-                        printf("%s\n", sched.importo);
-                        strcat(sched.importo,"$");
-                        printf("%s\n",sched.importo);
+                        strncpy(importo,tokl,strlen(tokl) - 1) ;
 
-
-                        sched.importo_giocato[0] = strtof(sched.importo,&eptr);
-                        printf("%.2f\n",vector[0]);
-                        printf("%s\n",eptr);
-
+                        strcat(importo,"$");
+                        sched.importo_giocato[0] = strtof(importo,&eptr);   //ATTENZIONE: se non va bene usare la strtof, provare con tokl = strtok(importo, " ") + sched.importo_giocato[a] = atof(tokl)
                         a = 1;
                         while (*eptr != '$' )
                         {
