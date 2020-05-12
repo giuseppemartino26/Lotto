@@ -271,6 +271,11 @@ int main(int argc, char* argv[]) {
             {
                 perror(buffer);
             }
+            ret = recv(sd,(void*) &lmsg, sizeof(uint16_t),0 );
+            len = ntohs(lmsg);
+            ret = recv(sd, (void*)buffer, len, 0);
+            printf("%s\n",buffer);
+
         }
 
 
