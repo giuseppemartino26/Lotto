@@ -481,8 +481,6 @@ int main(int argc, char* argv[]) {
                         fprintf(f5,"%s ",buf);
                         fclose(f5);
 
-
-
                         temp = &buffer[18];
                         tokl = strtok(temp,"-");
                         strncpy(sched.ruote_giocate,tokl,strlen(tokl) -1);
@@ -544,6 +542,12 @@ int main(int argc, char* argv[]) {
                         }
                         fprintf(f5,"%c",'\n');
                         fclose(f5);
+
+                        strcpy(msg_signup, "Giocata effettuata\n");
+                        len_msg_signup = strlen(msg_signup) + 1;
+                        lmsg_signup = htons(len_msg_signup);
+                        ret = send(new_sd, (void *) &lmsg_signup, sizeof(uint16_t), 0);
+                        ret = send(new_sd, (void *) msg_signup, len_msg_signup, 0);
 
 
 
