@@ -75,7 +75,7 @@ int main(int argc, char* argv[]) {
     pid_t pid;
     uint16_t lmsg, lmsg_signup;
     char buffer[BUFFER_SIZE];
-  //  char buffer_ID[BUFFER_SIZE];
+    //  char buffer_ID[BUFFER_SIZE];
     char* buffer_ID = malloc(sizeof(char)*11);
     char *us;
     char *temp;
@@ -91,6 +91,7 @@ int main(int argc, char* argv[]) {
     FILE* f1; //file contenente tutti gli username con le relative password
     FILE* f2;
     FILE* f3;
+    FILE* f5;
     int flag = 0;
     const size_t line_size = 300;
     char * lline = NULL;
@@ -132,6 +133,8 @@ int main(int argc, char* argv[]) {
     long ciao;
     char importo[25];
     char numeri[N];
+
+    int dimensione = 0;
 
     sched.puntate[0] = "Estratto";
     sched.puntate[1] = "Ambo";
@@ -360,6 +363,16 @@ int main(int argc, char* argv[]) {
                         //DATI LOGIN CORRETTI
                         if (strcmp(us_log,us) == 0 && strcmp(pwd_log,pwd)==0)
                         {
+                            strcpy(nomefile,"/home/giuseppe/Scrivania/giocate_");
+                            printf("%s",nomefile);
+                            fflush(stdout);
+                            strcat(nomefile,us);
+                            strcat(nomefile,".txt");
+                            printf("%s",nomefile);
+                            fflush(stdout);
+                            /*f_utente = fopen(nomefile,"a+");
+                            fclose(f_utente); */
+
                             flag = 1;
                             printf("Entrato nel blocco, setto flag a %d\n",flag);
                             fflush(stdout);
@@ -376,7 +389,7 @@ int main(int argc, char* argv[]) {
                             printf("%s",msg_signup);
                             fflush(stdout);
 
-                          //  strcat(msg_signup,"\n");
+                            //  strcat(msg_signup,"\n");
                             len_msg_signup = strlen(msg_signup) + 1;
                             lmsg_signup = htons(len_msg_signup);
                             ret = send(new_sd, (void *) &lmsg_signup, sizeof(uint16_t), 0);
@@ -451,6 +464,9 @@ int main(int argc, char* argv[]) {
                     {
                         printf("ID valido\n");
                         fflush(stdout);
+
+                        printf("%s\n",nomefile);
+
                         strcpy(msg_signup, "ID valido\n");
                         len_msg_signup = strlen(msg_signup) + 1;
                         lmsg_signup = htons(len_msg_signup);
@@ -462,6 +478,9 @@ int main(int argc, char* argv[]) {
                         strncpy(sched.ruote_giocate,tokl,strlen(tokl) -1);
                         printf("%s\n", sched.ruote_giocate);
                         fflush(stdout);
+                        f5 = fopen(nomefile,"a+");
+                        fprintf(f5,"%s ",sched.ruote_giocate);
+                        fclose(f5);
 
                         tokl = strtok(NULL," ");
                         tokl = strtok(NULL,"-");
@@ -471,14 +490,22 @@ int main(int argc, char* argv[]) {
                         sched.numeri_giocati[0] = strtol(numeri,&eptr,10);
                         a = 1;
                         while (*eptr != '$' )
-                      // while (eptr !=NULL)
+                            // while (eptr !=NULL)
                         {
                             sched.numeri_giocati[a] = strtol(eptr,&eptr,10);
                             a++;
                         }
-                        for (int j = 0; j < 5; ++j) {
-                            printf("%.ld ",sched.numeri_giocati[j]);
+                        dimensione = a;
+                        printf("%d\n",dimensione);
+                        for (int j = 0; j < dimensione; ++j) {
+                            printf("%ld ",sched.numeri_giocati[j]);
+                            f5 = fopen(nomefile,"a+");
+                            fprintf(f5,"%ld ",sched.numeri_giocati[j]);
+                            fclose(f5);
+
                         }
+                        memset(numeri,0,100);
+                        printf("%s\n",numeri);
 
 
                         /* IMPORTO: Salvo la parte del buffer ricevuto relativo agli importi puntati nella stringa "importo", per poi convertire in float ogni singolo importo e salvarlo in sched.importo_giocato */
@@ -488,6 +515,28 @@ int main(int argc, char* argv[]) {
                         strcat(importo,"$");
 
                         sched.importo_giocato[0] = strtof(importo, &eptr);
+                        printf("%.2f ",sched.importo_giocato[0]);
+                        f5 = fopen(nomefile,"a+");
+                        if (sched.importo_giocato[0] != 0)
+                        {
+                            fprintf(f5, "* %.2f Estratto ", sched.importo_giocato[0]);
+                        }
+
+                        for (i = 1; i < dimensione ; i++)
+                        {
+                            sched.importo_giocato[i] = strtof(eptr,&eptr);
+                            printf("%.2f ",sched.importo_giocato[i]);
+                            if (sched.importo_giocato[i] != 0)
+                            {
+                                fprintf(f5, "* %.2f ", sched.importo_giocato[i]);
+                                fprintf(f5, "%s ", sched.puntate[i]);
+                            }
+
+                        }
+                        fprintf(f5,"%c",'\n');
+                        fclose(f5);
+
+                       /* sched.importo_giocato[0] = strtof(importo, &eptr);
                         //ATTENZIONE: se non va bene usare la strtof, provare con tokl = strtok(importo, " ") + sched.importo_giocato[a] = atof(tokl)
                         a = 1;
                         while (*eptr != '$' )
@@ -498,6 +547,7 @@ int main(int argc, char* argv[]) {
                         for (int j = 0; j < 5; ++j) {
                             printf("%.2f ",sched.importo_giocato[j]);
                         }
+                        */
 
 
 
