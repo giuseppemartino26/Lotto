@@ -473,6 +473,16 @@ int main(int argc, char* argv[]) {
                         ret = send(new_sd, (void *) &lmsg_signup, sizeof(uint16_t), 0);
                         ret = send(new_sd, (void *) msg_signup, len_msg_signup, 0);
 
+                        t = time(NULL);
+                        timeptr = localtime(&t);
+                        strftime(buf,sizeof(buf), "%d/%m/%Y-%H:%M", timeptr);
+
+                        f5 = fopen(nomefile,"a+");
+                        fprintf(f5,"%s ",buf);
+                        fclose(f5);
+
+
+
                         temp = &buffer[18];
                         tokl = strtok(temp,"-");
                         strncpy(sched.ruote_giocate,tokl,strlen(tokl) -1);
@@ -490,7 +500,6 @@ int main(int argc, char* argv[]) {
                         sched.numeri_giocati[0] = strtol(numeri,&eptr,10);
                         a = 1;
                         while (*eptr != '$' )
-                            // while (eptr !=NULL)
                         {
                             sched.numeri_giocati[a] = strtol(eptr,&eptr,10);
                             a++;
@@ -536,18 +545,7 @@ int main(int argc, char* argv[]) {
                         fprintf(f5,"%c",'\n');
                         fclose(f5);
 
-                       /* sched.importo_giocato[0] = strtof(importo, &eptr);
-                        //ATTENZIONE: se non va bene usare la strtof, provare con tokl = strtok(importo, " ") + sched.importo_giocato[a] = atof(tokl)
-                        a = 1;
-                        while (*eptr != '$' )
-                        {
-                            sched.importo_giocato[a] = strtof(eptr,&eptr);
-                            a++;
-                        }
-                        for (int j = 0; j < 5; ++j) {
-                            printf("%.2f ",sched.importo_giocato[j]);
-                        }
-                        */
+
 
 
 
