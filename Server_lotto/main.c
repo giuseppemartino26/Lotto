@@ -44,6 +44,13 @@ void gen_random(char *s, const int len) {
     s[len] = 0;
 }
 
+int Diff (struct tm t1, struct tm t2)
+{
+    int diff;
+    diff = (t1.tm_min - t2.tm_min) + (t1.tm_hour - t2.tm_hour)*60 + (t1.tm_mday - t2.tm_mday)*1440;
+    return diff;
+}
+
 /* Funzione che ritorna la differenza in minuti tra un orario passato come parametro e l'ora attuale */  // NON MI PIACE, TROPPO COMPLESSA, PROVARE A ELIMINARE STRFTIME E STRPTIME
 int Differenza(struct tm t1)
 {
@@ -94,6 +101,8 @@ int main(int argc, char* argv[]) {
     FILE *f3;
     FILE *f5;
     FILE *f_estr;
+    FILE * f6;
+    FILE *f7;
     int flag = 0;
     const size_t line_size = 300;
     char *lline = NULL;
@@ -116,6 +125,7 @@ int main(int argc, char* argv[]) {
     char *tokl = NULL;
     char *tokl2 = NULL;
     char tokl22[N];
+    char tokl23[N];
 
     char *lline3 = NULL;
     ssize_t read2;
@@ -151,7 +161,9 @@ int main(int argc, char* argv[]) {
     char *spazi[] = {"      ", "  ", "   ", "    ", "    ", "    ", "   ", "      ", "    ", "   ", " "};
 
     struct tm tmvg;
-    struct tm* next_estr; //orario della prossima estrazione
+    struct tm* next_estr_p; //puntatore a orario della prossima estrazione
+    struct tm next_estr; //orario della prossima estrazione
+
 
 
     pid_estr = fork();
@@ -161,9 +173,15 @@ int main(int argc, char* argv[]) {
             f_estr = fopen("/home/giuseppe/Scrivania/estrazione.txt", "a+");
             fprintf(f_estr, "%d ", numero_estr);
             t = time(NULL);
+
             next_t =time(NULL) + 300; //in next_t ho l'orario della prossima estrazione
-            next_estr = localtime(&next_t); // salvo l'orario della prossima estrazione in una istanza di struct tm che userò per controllare se una estrazione è attiva o meno
-            fprintf(f_estr,"%d:%d\n",next_estr->tm_hour,next_estr->tm_min);
+            next_estr_p = localtime(&next_t); // salvo l'orario della prossima estrazione in una istanza di struct tm che userò per controllare se una estrazione è attiva o meno
+            f7 = fopen("/home/giuseppe/Scrivania/prossima_estrazione.txt","w");
+            strftime(buf, sizeof(buf), "%d/%m/%Y-%H:%M", next_estr_p);
+            fprintf(f7, "%s ", buf);
+            //fprintf(f7,"%d/%d/%d-%d:%d",next_estr_p->tm_mday,next_estr_p->tm_mon,next_estr_p->tm_year + 1900,next_estr_p->tm_hour,next_estr_p->tm_min);
+            fclose(f7);
+            fprintf(f_estr,"%d:%d\n",next_estr_p->tm_hour,next_estr_p->tm_min);
 
             timeptr = localtime(&t);
 
@@ -541,6 +559,7 @@ int main(int argc, char* argv[]) {
                             }
                             memset(numeri, 0, 100);
                             printf("%s\n", numeri);
+                            memset(importo,0,25);
 
 
                             /* IMPORTO: Salvo la parte del buffer ricevuto relativo agli importi puntati nella stringa "importo", per poi convertire in float ogni singolo importo e salvarlo in sched.importo_giocato */
@@ -609,24 +628,55 @@ int main(int argc, char* argv[]) {
                             ret = send(new_sd, (void *) &lmsg_signup, sizeof(uint16_t), 0);
                             ret = send(new_sd, (void *) msg_signup, len_msg_signup, 0);
 
-                            f5 = fopen(nomefile, "r");
+
 
                             if (buffer[14] == '0')
                             {
-                                while (fgets(lline2, 100, f5) != NULL)
+                                f7 = fopen("/home/giuseppe/Scrivania/prossima_estrazione.txt","r");
+                                fgets(lline2,17,f7);
+                                strptime(lline2, "%d/%m/%Y-%H:%M", &next_estr);
+                                fclose(f7);
+                               // printf("%s\n",lline2);
+
+
+
+                                f6 = fopen(nomefile, "a+");
+                                memset(&tmvg, 0, sizeof(struct tm));
+                                while ( fgets(lline2, 100, f6) != NULL)
+                               // while ((read = getline(&lline, &length, f6)) != -1)
                                 {
+
                                     tokl = strtok(lline2, " ");
-                                    strncpy(tokl22, tokl, 16);
+                                    tokl2 = strtok(NULL,"\n");
+                                 //   printf("%s\n",tokl);
+                                    strcpy(tokl23, tokl);
+                                 //   printf("%s\n",tokl23);
 
 
-                                    strptime(tokl22, "%d/%m/%Y-%H:%M", &tmvg);
+                                    strptime(tokl23, "%d/%m/%Y-%H:%M", &tmvg);
+                                   // printf("\n%d", Differenza(tmvg));
+
+
+
+
+                                 //   strftime(buf,sizeof(buf), "%d/%m/%Y-%H:%M", next_estr_p);
+                                    //strptime(buf,"%d/%m/%Y-%H:%M",&next_estr);
+
+
+                                    printf("%d\n",Diff(tmvg,next_estr));
+
+                                    if (Diff(tmvg,next_estr) < 0)
+                                    {
+                                        printf("%s\n",tokl2);
+                                    }
+
 
                                    // if (Differenza(tmvg))
 
-                                   // printf("\n%d", Differenza(tmvg));
+                                  //  printf("\n%d", Differenza(tmvg));
 
                                 }
-                                fclose(f5);
+                                fclose(f6);
 
 
 
