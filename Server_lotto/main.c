@@ -12,6 +12,7 @@
 #include <time.h>
 #define BUFFER_SIZE 1024
 #define N 100
+//enum puntate {estratto,ambo,terno,quaterna,cinquina};
 
 struct Schedina
 {
@@ -43,7 +44,7 @@ void gen_random(char *s, const int len) {
     s[len] = 0;
 }
 
-int Differenza(struct tm t1) //ritorna la differenza in minuti tra l'orario attuale e uno passato come parametro
+int Differenza(struct tm t1)
 {
     int diff;
     time_t tt;
@@ -53,27 +54,16 @@ int Differenza(struct tm t1) //ritorna la differenza in minuti tra l'orario attu
 
     tt = time(NULL);
     tmm = localtime(&tt);
-    strftime(buf,sizeof(buf), "%d/%m/%Y-%H:%M", tmm); //forse potrei passare direttamente tmm
+    strftime(buf,sizeof(buf), "%d/%m/%Y-%H:%M", tmm);
     strptime(buf,"%d/%m/%Y-%H:%M",&tmmn);
+    //  printf("%d\n",tmmn.tm_hour);
+    //  printf("%d\n",t1.tm_hour);
+
 
     diff = (tmmn.tm_min - t1.tm_min) + (tmmn.tm_hour - t1.tm_hour)*60 + (tmmn.tm_mday - t1.tm_mday)*1440;
     return diff;
 }
 
-int Differenza2(struct tm* t1) //ritorna la differenza in minuti tra l'orario attuale e uno passato come parametro
-{
-    int diff;
-    time_t tt;
-    struct tm* tmm;
-
-
-    tt = time(NULL);
-    tmm = localtime(&tt);
-
-
-    diff = (tmm->tm_min - t1->tm_min) + (tmm->tm_hour - t1->tm_hour)*60 + (tmm->tm_mday - t1->tm_mday)*1440;
-    return diff;
-}
 
 int main(int argc, char* argv[]) {
     //  printf("Ci sei?\n");
@@ -86,7 +76,7 @@ int main(int argc, char* argv[]) {
     uint16_t lmsg, lmsg_signup;
     char buffer[BUFFER_SIZE];
     //  char buffer_ID[BUFFER_SIZE];
-    char* buffer_ID = malloc(sizeof(char)*11);
+    char *buffer_ID = malloc(sizeof(char) * 11);
     char *us;
     char *temp;
     char *us_log;
@@ -94,24 +84,24 @@ int main(int argc, char* argv[]) {
     char *pwd;
     const char s[2] = " ";
     struct users users_list;
-    int i,j;
-    int k=0;
+    int i;
+    int k = 0;
     int cont = 0;
     char msg_signup[N];
-    FILE* f1; //file contenente tutti gli username con le relative password
-    FILE* f2;
-    FILE* f3;
-    FILE* f5;
-    FILE * last_estr;
-    FILE * estr;
+    FILE *f1; //file contenente tutti gli username con le relative password
+    FILE *f2;
+    FILE *f3;
+    FILE *f5;
+    FILE *f_estr;
     int flag = 0;
     const size_t line_size = 300;
-    char * lline = NULL;
+    char *lline = NULL;
     size_t length = 0;
     ssize_t read;
     char try[len];
 
     char buf[100];
+    char newbuf[N];
     time_t t;
     struct tm *timeptr;
 
@@ -119,26 +109,26 @@ int main(int argc, char* argv[]) {
     char lline2[N];
     FILE *f4;
     struct tm tmm2;
-    int a;
+    int a, l, j;
     int b;
 
     char *tokl = NULL;
     char *tokl2 = NULL;
     char tokl22[N];
 
-    char * lline3 = NULL;
+    char *lline3 = NULL;
     ssize_t read2;
     size_t lenght2;
 
     FILE *f_utente;
     char nomefile[N];
 
-    char *id_session = malloc(sizeof(char)*11);
+    char *id_session = malloc(sizeof(char) * 11);
     int importo_int;
 
     struct Schedina sched;
     long numero;
-    char* eptr;
+    char *eptr;
 
     float vector[10];
 
@@ -147,19 +137,7 @@ int main(int argc, char* argv[]) {
     char numeri[N];
 
     int dimensione = 0;
-
-    struct tm* time_estr;
-    struct tm tme;
-    struct tm* tme2;
-    time_t t_estr;
-    FILE *f_estr;
-    FILE *f_last_estr;
-    char last [N];
-
     int numero_estr = -1;
-    int l;
-
-    char* ruote[] = {"Bari","Cagliari","Firenze","Genova","Milano","Napoli","Palermo","Roma","Torino","Venezia","Nazionale"};
 
     sched.puntate[0] = "Estratto";
     sched.puntate[1] = "Ambo";
@@ -167,48 +145,53 @@ int main(int argc, char* argv[]) {
     sched.puntate[3] = "Quaterna";
     sched.puntate[4] = "Cinquina";
 
+    char *ruote[] = {"Bari", "Cagliari", "Firenze", "Genova", "Milano", "Napoli", "Palermo", "Roma", "Torino",
+                     "Venezia", "Nazionale"};
+    char *spazi[] = {"      ","  ","   ","    ","    ","    ","   ","      ","    ","   "," "};
+
 
     pid_estr = fork();
 
-    if (pid_estr == 0)
-    {
-        while (1)
-        {
-            f_estr = fopen("/home/giuseppe/Scrivania/estrazione.txt","a+");
-            fprintf(f_estr,"%d ",numero_estr);
+    if (pid_estr == 0) {
+        while (1) {
+            f_estr = fopen("/home/giuseppe/Scrivania/estrazione.txt", "a+");
+            fprintf(f_estr, "%d ", numero_estr);
             t = time(NULL);
             timeptr = localtime(&t);
-            strftime(buf,sizeof(buf), "%d/%m/%Y-%H:%M", timeptr);
-            fprintf(f_estr,"%s ",buf);
-            fprintf(f_estr,"**************************\n");
-
-            for ( i = 0; i < 11 ; i++)
-            {
-                fprintf(f_estr,"%d ",numero_estr);
+            strftime(buf, sizeof(buf), "%d/%m/%Y-%H:%M", timeptr);
+            fprintf(f_estr, "%s ", buf);
+            fprintf(f_estr, "**************************\n");
 
 
 
-                fprintf(f_estr,"%s %s",buf,ruote[i]);
-                for ( l = 0; l < (9 - strlen(ruote[i] + 1)); l++) {
-                    fprintf(f_estr," ");                      //aggiungo spazi per allineare i numeri
-                }
-                for ( j = 0; j < 5 ; j++)
-                {
-                    fprintf(f_estr,"%d ",rand()%90 +1);
-                }
+            for (i = 0; i < 11; i++) {
+                fprintf(f_estr, "%d ", numero_estr);
 
-                fprintf(f_estr,"\n");
+
+                fprintf(f_estr, "%s %s%s", buf, ruote[i],spazi[i]);
+                  /* for (l = 0; l < 10 - strlen(ruote[i]); l++) {
+                       fprintf(f_estr, " ");                      //aggiungo spazi per allineare i numeri <-- DA PROBLEMI ALLA invia_giocata
+                   }*/
+                   for (j = 0; j < 5; j++) {
+                       fprintf(f_estr, "%d ", rand() % 90 + 1);
+                   }
+
+                   fprintf(f_estr, "\n");
+
             }
+
 
             fclose(f_estr);
 
             sleep(300);
-            numero_estr --;
+            numero_estr--;
 
         }
 
 
+
     } else {
+
 
         /* Creazione socket */
         sd = socket(AF_INET, SOCK_STREAM, 0);
@@ -237,9 +220,21 @@ int main(int argc, char* argv[]) {
             len = sizeof(cl_addr);
 
 
+
+
+
+
+
+
+
+
+
+
+
             // Accetto nuove connessioni
             new_sd = accept(sd, (struct sockaddr *) &cl_addr, &len);
             printf("Connessione accettata");
+
 
             pid = fork();
 
@@ -253,12 +248,20 @@ int main(int argc, char* argv[]) {
                 f4 = fopen("/home/giuseppe/Scrivania/tentativi.txt", "r");
 
                 memset(&tmm2, 0, sizeof(struct tm));
-                while (fgets(lline2, 100, f4) != NULL) {
+                while (fgets(lline2, 100, f4) != NULL)
+                    //  while ((read2 = getline(&lline3, &lenght2, f1)) != -1)
+                {
+
 
                     tokl = strtok(lline2, " ");
                     tokl2 = strtok(NULL, " ");
 
+
+
+
+                    //a = strlen(tokl2);
                     strncpy(tokl22, tokl2, 16);
+
 
                     strptime(tokl22, "%d/%m/%Y-%H:%M", &tmm2);
 
@@ -591,20 +594,19 @@ int main(int argc, char* argv[]) {
                          */
                     }
 
+
                 }
             } else {
 
                 printf("Ciao sono il padre");
                 fflush(stdout);
-
                 close(new_sd);
             }
 
 
         }
 
+
     }
-
-
 
 }
