@@ -47,7 +47,7 @@ void gen_random(char *s, const int len) {
 int Diff (struct tm t1, struct tm t2)
 {
     int diff;
-    diff = (t1.tm_min - t2.tm_min) + (t1.tm_hour - t2.tm_hour)*60 + (t1.tm_mday - t2.tm_mday)*1440;
+    diff = (t2.tm_min - t1.tm_min) + (t2.tm_hour - t1.tm_hour)*60 + (t2.tm_mday - t1.tm_mday)*1440;
     return diff;
 }
 
@@ -665,7 +665,7 @@ int main(int argc, char* argv[]) {
 
                                     printf("%d\n",Diff(tmvg,next_estr));
 
-                                    if (Diff(tmvg,next_estr) < 0)
+                                    if (Diff(tmvg,next_estr) > 5 || Diff(tmvg,next_estr) == 5)
                                     {
                                         printf("%s\n",tokl2);
                                     }
