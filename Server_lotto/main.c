@@ -44,6 +44,7 @@ void gen_random(char *s, const int len) {
     s[len] = 0;
 }
 
+/* Funzione che ritorna la differenza in minuti tra un orario passato come parametro e l'ora attuale */  // NON MI PIACE, TROPPO COMPLESSA, PROVARE A ELIMINARE STRFTIME E STRPTIME
 int Differenza(struct tm t1)
 {
     int diff;
@@ -102,7 +103,7 @@ int main(int argc, char* argv[]) {
 
     char buf[100];
     char newbuf[N];
-    time_t t;
+    time_t t, next_t;
     struct tm *timeptr;
 
 
@@ -137,9 +138,9 @@ int main(int argc, char* argv[]) {
     char numeri[N];
 
     int dimensione = 0;
-    int numero_estr = -1;
+    int numero_estr = -1; //intero utile per trovare le ultime n estrazioni
 
-    sched.puntate[0] = "Estratto";
+    sched.puntate[0] = "Estratto"; //non mi piace così, cambiare e farlo come fatto con "ruote"
     sched.puntate[1] = "Ambo";
     sched.puntate[2] = "Terno";
     sched.puntate[3] = "Quaterna";
@@ -147,7 +148,10 @@ int main(int argc, char* argv[]) {
 
     char *ruote[] = {"Bari", "Cagliari", "Firenze", "Genova", "Milano", "Napoli", "Palermo", "Roma", "Torino",
                      "Venezia", "Nazionale"};
-    char *spazi[] = {"      ","  ","   ","    ","    ","    ","   ","      ","    ","   "," "};
+    char *spazi[] = {"      ", "  ", "   ", "    ", "    ", "    ", "   ", "      ", "    ", "   ", " "};
+
+    struct tm tmvg;
+    struct tm* next_estr; //orario della prossima estrazione
 
 
     pid_estr = fork();
@@ -157,26 +161,30 @@ int main(int argc, char* argv[]) {
             f_estr = fopen("/home/giuseppe/Scrivania/estrazione.txt", "a+");
             fprintf(f_estr, "%d ", numero_estr);
             t = time(NULL);
+            next_t =time(NULL) + 300; //in next_t ho l'orario della prossima estrazione
+            next_estr = localtime(&next_t); // salvo l'orario della prossima estrazione in una istanza di struct tm che userò per controllare se una estrazione è attiva o meno
+            fprintf(f_estr,"%d:%d\n",next_estr->tm_hour,next_estr->tm_min);
+
             timeptr = localtime(&t);
+
             strftime(buf, sizeof(buf), "%d/%m/%Y-%H:%M", timeptr);
             fprintf(f_estr, "%s ", buf);
             fprintf(f_estr, "**************************\n");
-
 
 
             for (i = 0; i < 11; i++) {
                 fprintf(f_estr, "%d ", numero_estr);
 
 
-                fprintf(f_estr, "%s %s%s", buf, ruote[i],spazi[i]);
-                  /* for (l = 0; l < 10 - strlen(ruote[i]); l++) {
-                       fprintf(f_estr, " ");                      //aggiungo spazi per allineare i numeri <-- DA PROBLEMI ALLA invia_giocata
-                   }*/
-                   for (j = 0; j < 5; j++) {
-                       fprintf(f_estr, "%d ", rand() % 90 + 1);
-                   }
+                fprintf(f_estr, "%s %s%s", buf, ruote[i], spazi[i]);
+                /* for (l = 0; l < 10 - strlen(ruote[i]); l++) {
+                     fprintf(f_estr, " ");                      //aggiungo spazi per allineare i numeri <-- DA PROBLEMI ALLA invia_giocata
+                 }*/
+                for (j = 0; j < 5; j++) {
+                    fprintf(f_estr, "%d ", rand() % 90 + 1);
+                }
 
-                   fprintf(f_estr, "\n");
+                fprintf(f_estr, "\n");
 
             }
 
@@ -187,7 +195,6 @@ int main(int argc, char* argv[]) {
             numero_estr--;
 
         }
-
 
 
     } else {
@@ -219,18 +226,6 @@ int main(int argc, char* argv[]) {
 
             len = sizeof(cl_addr);
 
-
-
-
-
-
-
-
-
-
-
-
-
             // Accetto nuove connessioni
             new_sd = accept(sd, (struct sockaddr *) &cl_addr, &len);
             printf("Connessione accettata");
@@ -249,7 +244,6 @@ int main(int argc, char* argv[]) {
 
                 memset(&tmm2, 0, sizeof(struct tm));
                 while (fgets(lline2, 100, f4) != NULL)
-                    //  while ((read2 = getline(&lline3, &lenght2, f1)) != -1)
                 {
 
 
@@ -538,7 +532,7 @@ int main(int argc, char* argv[]) {
                             }
                             dimensione = a;
                             printf("%d\n", dimensione);
-                            for (int j = 0; j < dimensione; ++j) {
+                            for ( j = 0; j < dimensione; ++j) {
                                 printf("%ld ", sched.numeri_giocati[j]);
                                 f5 = fopen(nomefile, "a+");
                                 fprintf(f5, "%ld ", sched.numeri_giocati[j]);
@@ -594,19 +588,82 @@ int main(int argc, char* argv[]) {
                          */
                     }
 
+                    if (strncmp(buffer, "!vedi_giocate", 13) == 0)
+                    {
+                        // Attendo dimensione dell'ID
+                        ret = recv(new_sd, (void *) &lmsg, sizeof(uint16_t), 0);
+                        // Rinconverto in formato host
+                        len = ntohs(lmsg);
+                        // ricevo l'ID
+                        ret = recv(new_sd, (void *) buffer_ID, len, 0);
 
+                        // ID CORRETTO:
+                        if (strcmp(buffer_ID, id_session) == 0)
+                        {
+                            printf("ID valido\n");
+                            fflush(stdout);
+
+                            strcpy(msg_signup, "ID valido\n");
+                            len_msg_signup = strlen(msg_signup) + 1;
+                            lmsg_signup = htons(len_msg_signup);
+                            ret = send(new_sd, (void *) &lmsg_signup, sizeof(uint16_t), 0);
+                            ret = send(new_sd, (void *) msg_signup, len_msg_signup, 0);
+
+                            f5 = fopen(nomefile, "r");
+
+                            if (buffer[14] == '0')
+                            {
+                                while (fgets(lline2, 100, f5) != NULL)
+                                {
+                                    tokl = strtok(lline2, " ");
+                                    strncpy(tokl22, tokl, 16);
+
+
+                                    strptime(tokl22, "%d/%m/%Y-%H:%M", &tmvg);
+
+                                   // if (Differenza(tmvg))
+
+                                   // printf("\n%d", Differenza(tmvg));
+
+                                }
+                                fclose(f5);
+
+
+
+
+
+
+
+
+                            }
+
+
+
+                        } else
+                            {
+                            printf("ID non valido");
+                            strcpy(msg_signup, "ERROR_ID: Effettuare il LOGIN prima di poter cominciare a giocare\n");
+                            len_msg_signup = strlen(msg_signup) + 1;
+                            lmsg_signup = htons(len_msg_signup);
+                            ret = send(new_sd, (void *) &lmsg_signup, sizeof(uint16_t), 0);
+                            ret = send(new_sd, (void *) msg_signup, len_msg_signup, 0);
+                            }
+
+
+                    }
                 }
-            } else {
-
+            }
+            else {
                 printf("Ciao sono il padre");
-                fflush(stdout);
-                close(new_sd);
+                    fflush(stdout);
+                    close(new_sd);
+                 }
+
+
             }
 
 
         }
 
-
     }
 
-}
