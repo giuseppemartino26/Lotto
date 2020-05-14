@@ -126,6 +126,7 @@ int main(int argc, char* argv[]) {
     char *tokl2 = NULL;
     char tokl22[N];
     char tokl23[N];
+    char tokl24[N];
 
     char *lline3 = NULL;
     ssize_t read2;
@@ -149,6 +150,7 @@ int main(int argc, char* argv[]) {
 
     int dimensione = 0;
     int numero_estr = -1; //intero utile per trovare le ultime n estrazioni
+    char appoggio[N];
 
     sched.puntate[0] = "Estratto"; //non mi piace così, cambiare e farlo come fatto con "ruote"
     sched.puntate[1] = "Ambo";
@@ -163,6 +165,8 @@ int main(int argc, char* argv[]) {
     struct tm tmvg;
     struct tm* next_estr_p; //puntatore a orario della prossima estrazione
     struct tm next_estr; //orario della prossima estrazione
+
+    char* superbuffer = malloc(sizeof(char )* N); // serve per memorizzare le giocate da mandare al client
 
 
 
@@ -529,8 +533,9 @@ int main(int argc, char* argv[]) {
                             fclose(f5);
 
                             temp = &buffer[18];
+                            //memset(&tokl,0,8);
                             tokl = strtok(temp, "-");
-                            strncpy(sched.ruote_giocate, tokl, strlen(tokl) - 1);
+                            strcpy(sched.ruote_giocate, tokl);
                             printf("%s\n", sched.ruote_giocate);
                             fflush(stdout);
                             f5 = fopen(nomefile, "a+");
@@ -642,6 +647,7 @@ int main(int argc, char* argv[]) {
 
                                 f6 = fopen(nomefile, "a+");
                                 memset(&tmvg, 0, sizeof(struct tm));
+                                memset(&lline2,0,sizeof(lline2 ));
                                 while ( fgets(lline2, 100, f6) != NULL)
                                // while ((read = getline(&lline, &length, f6)) != -1)
                                 {
@@ -649,11 +655,12 @@ int main(int argc, char* argv[]) {
                                     tokl = strtok(lline2, " ");
                                     tokl2 = strtok(NULL,"\n");
                                  //   printf("%s\n",tokl);
-                                    strcpy(tokl23, tokl);
+                                    strcpy(tokl24, tokl);
+                                    strcpy(tokl23,tokl2);
                                  //   printf("%s\n",tokl23);
 
 
-                                    strptime(tokl23, "%d/%m/%Y-%H:%M", &tmvg);
+                                    strptime(tokl24, "%d/%m/%Y-%H:%M", &tmvg);
                                    // printf("\n%d", Differenza(tmvg));
 
 
@@ -667,8 +674,13 @@ int main(int argc, char* argv[]) {
 
                                     if (Diff(tmvg,next_estr) > 5 || Diff(tmvg,next_estr) == 5)
                                     {
-                                        printf("%s\n",tokl2);
+                                      //  strcpy(appoggio,tokl2);
+                                       // printf("%s\n",tokl23);
+                                        strcat(superbuffer,tokl23);
+                                        strcat(superbuffer,"\n");
+                                       // strncat(superbuffer,tokl2,strlen(tokl2));
                                     }
+
 
 
                                    // if (Differenza(tmvg))
@@ -676,7 +688,16 @@ int main(int argc, char* argv[]) {
                                   //  printf("\n%d", Differenza(tmvg));
 
                                 }
+                                printf("%s",superbuffer);
                                 fclose(f6);
+
+                                //Mando le giocate non più attive
+                                len_msg_signup = strlen(superbuffer) + 1;
+                                lmsg_signup = htons(len_msg_signup);
+                                ret = send(new_sd, (void *) &lmsg_signup, sizeof(uint16_t), 0);
+                                ret = send(new_sd, (void *) superbuffer, len_msg_signup, 0);
+
+
 
 
 

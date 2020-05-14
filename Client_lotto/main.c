@@ -271,10 +271,42 @@ int main(int argc, char* argv[]) {
             {
                 perror(buffer);
             }
+            //Ricevo il messaggio di giocata effettuata
             ret = recv(sd,(void*) &lmsg, sizeof(uint16_t),0 );
             len = ntohs(lmsg);
             ret = recv(sd, (void*)buffer, len, 0);
             printf("%s\n",buffer);
+
+        }
+
+        if (strncmp(str_cmd, "!vedi_giocate",13)==0)
+        {
+            len = strlen(str_cmd) + 1;
+            lmsg = htons(len);
+            ret = send(sd, (void*) &lmsg, sizeof(uint16_t), 0);
+            ret = send(sd, (void*) str_cmd, len, 0);
+
+            // Mando l'ID
+            len = strlen(id_session) + 1;
+            lmsg = htons(len);
+            ret = send(sd, (void*) &lmsg, sizeof(uint16_t), 0);
+            ret = send(sd, (void*) id_session, len, 0);
+            //Ricevo l'ID
+            ret = recv(sd,(void*) &lmsg, sizeof(uint16_t),0 );
+            len = ntohs(lmsg);
+            ret = recv(sd, (void*)buffer, len, 0);
+            //Se l'ID non è valido
+            if (strncmp(buffer,"ERROR_ID",8)==0)
+            {
+                perror(buffer);
+            }
+
+            ret = recv(sd,(void*) &lmsg, sizeof(uint16_t),0 );
+            len = ntohs(lmsg);
+            ret = recv(sd, (void*)buffer, len, 0);
+            printf("%s",buffer);
+
+
 
         }
 
