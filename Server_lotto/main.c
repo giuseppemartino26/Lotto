@@ -641,34 +641,19 @@ int main(int argc, char* argv[]) {
                                 fgets(lline2,17,f7);
                                 strptime(lline2, "%d/%m/%Y-%H:%M", &next_estr);
                                 fclose(f7);
-                               // printf("%s\n",lline2);
-
-
 
                                 f6 = fopen(nomefile, "a+");
                                 memset(&tmvg, 0, sizeof(struct tm));
                                 memset(&lline2,0,sizeof(lline2 ));
                                 while ( fgets(lline2, 100, f6) != NULL)
-                               // while ((read = getline(&lline, &length, f6)) != -1)
                                 {
 
                                     tokl = strtok(lline2, " ");
                                     tokl2 = strtok(NULL,"\n");
-                                 //   printf("%s\n",tokl);
                                     strcpy(tokl24, tokl);
                                     strcpy(tokl23,tokl2);
-                                 //   printf("%s\n",tokl23);
-
 
                                     strptime(tokl24, "%d/%m/%Y-%H:%M", &tmvg);
-                                   // printf("\n%d", Differenza(tmvg));
-
-
-
-
-                                 //   strftime(buf,sizeof(buf), "%d/%m/%Y-%H:%M", next_estr_p);
-                                    //strptime(buf,"%d/%m/%Y-%H:%M",&next_estr);
-
 
                                     printf("%d\n",Diff(tmvg,next_estr));
 
@@ -680,13 +665,6 @@ int main(int argc, char* argv[]) {
                                         strcat(superbuffer,"\n");
                                        // strncat(superbuffer,tokl2,strlen(tokl2));
                                     }
-
-
-
-                                   // if (Differenza(tmvg))
-
-                                  //  printf("\n%d", Differenza(tmvg));
-
                                 }
                                 printf("%s",superbuffer);
                                 fclose(f6);
@@ -696,16 +674,47 @@ int main(int argc, char* argv[]) {
                                 lmsg_signup = htons(len_msg_signup);
                                 ret = send(new_sd, (void *) &lmsg_signup, sizeof(uint16_t), 0);
                                 ret = send(new_sd, (void *) superbuffer, len_msg_signup, 0);
+                            }
 
+                            if (buffer[14] == '1')
+                            {
+                                f7 = fopen("/home/giuseppe/Scrivania/prossima_estrazione.txt","r");
+                                fgets(lline2,17,f7);
+                                strptime(lline2, "%d/%m/%Y-%H:%M", &next_estr);
+                                fclose(f7);
 
+                                f6 = fopen(nomefile, "a+");
+                                memset(&tmvg, 0, sizeof(struct tm));
+                                memset(&lline2,0,sizeof(lline2 ));
+                                while ( fgets(lline2, 100, f6) != NULL)
+                                {
 
+                                    tokl = strtok(lline2, " ");
+                                    tokl2 = strtok(NULL,"\n");
+                                    strcpy(tokl24, tokl);
+                                    strcpy(tokl23,tokl2);
 
+                                    strptime(tokl24, "%d/%m/%Y-%H:%M", &tmvg);
 
+                                    printf("%d\n",Diff(tmvg,next_estr));
 
+                                    if (Diff(tmvg,next_estr) < 5)
+                                    {
+                                        //  strcpy(appoggio,tokl2);
+                                        // printf("%s\n",tokl23);
+                                        strcat(superbuffer,tokl23);
+                                        strcat(superbuffer,"\n");
+                                        // strncat(superbuffer,tokl2,strlen(tokl2));
+                                    }
+                                }
+                                printf("%s",superbuffer);
+                                fclose(f6);
 
-
-
-
+                                //Mando le giocate ancora attive
+                                len_msg_signup = strlen(superbuffer) + 1;
+                                lmsg_signup = htons(len_msg_signup);
+                                ret = send(new_sd, (void *) &lmsg_signup, sizeof(uint16_t), 0);
+                                ret = send(new_sd, (void *) superbuffer, len_msg_signup, 0);
                             }
 
 

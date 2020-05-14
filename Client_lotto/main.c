@@ -112,6 +112,8 @@ int main(int argc, char* argv[]) {
 
     while (1)
     {
+        printf("Comincio");
+
         fgets(str_cmd, BUFFER_SIZE, stdin); //Attendo input da tastiera
 
         /* help senza specificare il comando */
@@ -270,6 +272,7 @@ int main(int argc, char* argv[]) {
             if (strncmp(buffer,"ERROR_ID",8)==0)
             {
                 perror(buffer);
+                continue;
             }
             //Ricevo il messaggio di giocata effettuata
             ret = recv(sd,(void*) &lmsg, sizeof(uint16_t),0 );
@@ -299,18 +302,21 @@ int main(int argc, char* argv[]) {
             if (strncmp(buffer,"ERROR_ID",8)==0)
             {
                 perror(buffer);
+                continue;
             }
-
+            //Ricevo le giocate e stampo a video
             ret = recv(sd,(void*) &lmsg, sizeof(uint16_t),0 );
             len = ntohs(lmsg);
             ret = recv(sd, (void*)buffer, len, 0);
             printf("%s",buffer);
 
+            continue;
+
 
 
         }
 
-
+        printf("Sono qui");
 
 
 
