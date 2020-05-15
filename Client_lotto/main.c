@@ -62,11 +62,15 @@ void help_cmd(char string[])
 */
 
 int main(int argc, char* argv[]) {
-    int ret, sd, len;
+    int ret, sd;
+    u_long len;
     uint16_t lmsg;
+    uint32_t mssg;
     struct sockaddr_in srv_addr; //indirizzo server
     char str_cmd[BUFFER_SIZE];   // stringa per salvare il comando inserito da tastiera dall'utente
     char buffer[BUFFER_SIZE];
+    char buffer2[BUFFER_SIZE];
+    char buffer3[BUFFER_SIZE];
     const char st[2] = ":";
     char* tok;
    // struct users users_list;
@@ -112,7 +116,8 @@ int main(int argc, char* argv[]) {
 
     while (1)
     {
-        printf("Comincio");
+        printf("Comincio con ");
+        printf("%s\n",id_session);
 
         fgets(str_cmd, BUFFER_SIZE, stdin); //Attendo input da tastiera
 
@@ -221,7 +226,7 @@ int main(int argc, char* argv[]) {
                 id_session = strtok(buffer, ":");
                 id_session = strtok(NULL, ":");
 
-                printf("%s",id_session);
+                printf("%s\n",id_session);
              /*   tok = strtok(buffer,st);
                 tok = strtok(NULL,st);
                 strcpy(users_list.username,tok);
@@ -307,16 +312,82 @@ int main(int argc, char* argv[]) {
             //Ricevo le giocate e stampo a video
             ret = recv(sd,(void*) &lmsg, sizeof(uint16_t),0 );
             len = ntohs(lmsg);
-            ret = recv(sd, (void*)buffer, len, 0);
-            printf("%s",buffer);
+            ret = recv(sd, (void*)buffer2, len, 0);
+            printf("%s",buffer2);
+            printf("ciao");
 
-            continue;
+
+
 
 
 
         }
 
-        printf("Sono qui");
+        if (strncmp(str_cmd, "!vedi_estrazione",16)==0)
+        {
+            len = strlen(str_cmd) + 1;
+            lmsg = htons(len);
+            ret = send(sd, (void*) &lmsg, sizeof(uint16_t), 0);
+            ret = send(sd, (void*) str_cmd, len, 0);
+
+            // Mando l'ID
+            len = strlen(id_session) + 1;
+            lmsg = htons(len);
+            ret = send(sd, (void*) &lmsg, sizeof(uint16_t), 0);
+            ret = send(sd, (void*) id_session, len, 0);
+            //Ricevo l'ID
+            ret = recv(sd,(void*) &lmsg, sizeof(uint16_t),0 );
+            len = ntohs(lmsg);
+            ret = recv(sd, (void*)buffer, len, 0);
+            //Se l'ID non è valido
+            if (strncmp(buffer,"ERROR_ID",8)==0)
+            {
+                perror(buffer);
+                continue;
+            }
+
+            //Ricevo le giocate e stampo a video
+            ret = recv(sd,(void*) &lmsg, sizeof(uint16_t),0 );
+            len = ntohs(lmsg);
+            ret = recv(sd, (void*)buffer3, len, 0);
+            printf("%s",buffer3);
+
+        }
+
+
+
+       /* if (strncmp(str_cmd, "!vedi_estrazione",16)==0) {
+            len = strlen(str_cmd) + 1;
+            lmsg = htons(len);
+            ret = send(sd, (void *) &lmsg, sizeof(uint16_t), 0);
+            ret = send(sd, (void *) str_cmd, len, 0);
+
+            // Mando l'ID
+            len = strlen(id_session) + 1;
+            lmsg = htons(len);
+            ret = send(sd, (void *) &lmsg, sizeof(uint16_t), 0);
+            ret = send(sd, (void *) id_session, len, 0);
+            //Ricevo l'ID
+            ret = recv(sd, (void *) &lmsg, sizeof(uint16_t), 0);
+            len = ntohs(lmsg);
+            ret = recv(sd, (void *) buffer, len, 0);
+            //Se l'ID non è valido
+            if (strncmp(buffer, "ERROR_ID", 8) == 0) {
+                perror(buffer);
+                continue;
+            }
+
+            //Ricevo le estrazioni e stampo a video
+            ret = recv(sd, (void *) &mssg, sizeof(uint16_t), 0);
+            len = ntohs(mssg);
+            ret = recv(sd, (void *) buffer, len, 0);
+            printf("%s", buffer);
+
+            continue;
+        }
+        */
+
+
 
 
 
