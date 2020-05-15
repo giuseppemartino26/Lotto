@@ -170,7 +170,7 @@ int main(int argc, char* argv[]) {
     struct tm* next_estr_p; //puntatore a orario della prossima estrazione
     struct tm next_estr; //orario della prossima estrazione
 
-    char* superbuffer;
+    char superbuffer[N];
 
     //char superbuffer[BUFFER_SIZE];
     char superbuffer2[N];
@@ -181,6 +181,8 @@ int main(int argc, char* argv[]) {
 
     int contatore;
     int contatore2 = 0;
+
+    int flag2 = 1;
 
 
 
@@ -671,7 +673,7 @@ int main(int argc, char* argv[]) {
                                 memset(&lline2,0,sizeof(lline2 ));
 
                                 printf("%s",superbuffer2);
-                                contatore = 1;
+                                contatore = 0;
                                 while ( fgets(lline2, 100, f6) != NULL)
                                 {
 
@@ -694,6 +696,8 @@ int main(int argc, char* argv[]) {
 
                                     if (Diff(tmvg,next_estr) > 5 || Diff(tmvg,next_estr) == 5)
                                     {
+                                        contatore++;
+
                                         if (contatore == 1)
                                         {
                                             strcpy(superbuffer2,tokl26);
@@ -707,7 +711,7 @@ int main(int argc, char* argv[]) {
                                             strcat(superbuffer2, "\n");
                                             // strncat(superbuffer,tokl2,strlen(tokl2));
                                         }
-                                        contatore++;
+
                                     }
 
                                 }
@@ -715,7 +719,10 @@ int main(int argc, char* argv[]) {
                                 fclose(f6);
 
 
-
+                                if (contatore == 0)
+                                {
+                                    strcpy(superbuffer2,"Nessuna giocata attiva");
+                                }
 
                                 //Mando le giocate non più attive
                                 //  free(superbuffer);
@@ -741,7 +748,7 @@ int main(int argc, char* argv[]) {
                                 //    memset(superbuffer,0,BUFFER_SIZE);
                                 //superbuffer = malloc(sizeof(char )* N); // serve per memorizzare le giocate da mandare al client
                                 //printf("%s",superbuffer3);
-                                contatore2 = 1;
+                                contatore2 = 0;
                                 while ( fgets(lline2, 100, f6) != NULL)
                                 {
 
@@ -758,12 +765,13 @@ int main(int argc, char* argv[]) {
 
                                     strptime(tokl24, "%d/%m/%Y-%H:%M", &tmvg);
 
-                                      // printf("%d\n",Diff(tmvg,next_estr));
+                                       printf("%d\n",Diff(tmvg,next_estr));
 
                                     //free(superbuffer);
 
                                     if (Diff(tmvg,next_estr) < 5)
                                     {
+                                        contatore2++;
 
                                         printf("Il contatore2 è: %d",contatore2);
                                         if (contatore2 == 1)
@@ -782,7 +790,7 @@ int main(int argc, char* argv[]) {
                                             strcat(superbuffer3, "\n");
                                             // strncat(superbuffer,tokl2,strlen(tokl2));
                                         }
-                                        contatore2++;
+
 
 
                                     }
@@ -800,67 +808,17 @@ int main(int argc, char* argv[]) {
 
                                 //Mando le giocate non più attive
                                 //  free(superbuffer);
+                                if (contatore2 == 0)
+                                {
+                                    strcpy(superbuffer3,"Nessuna giocata attiva");
+                                }
                                 len_msg_signup = strlen(superbuffer3) + 1;
                                 lmsg_signup = htons(len_msg_signup);
                                 ret = send(new_sd, (void *) &lmsg_signup, sizeof(uint16_t), 0);
                                 ret = send(new_sd, (void *) superbuffer3, len_msg_signup, 0);
                                 // free(superbuffer);
+
                             }
-
-                            /*
-                            if (buffer[14] == '1')
-                            {
-
-                                f7 = fopen("/home/giuseppe/Scrivania/prossima_estrazione.txt","r");
-                                fgets(lline2,17,f7);
-                                strptime(lline2, "%d/%m/%Y-%H:%M", &next_estr);
-                                fclose(f7);
-
-                                f6 = fopen(nomefile, "a+");
-                                memset(&tmvg, 0, sizeof(struct tm));
-                                memset(&lline2,0,sizeof(lline2 ));
-                                //    memset(superbuffer,0,BUFFER_SIZE);
-                               // superbuffer = malloc(sizeof(char )* N); // serve per memorizzare le giocate da mandare al client
-
-                                while ( fgets(lline2, 100, f6) != NULL)
-                                {
-
-                                    tokl = strtok(lline2, " ");
-                                    tokl2 = strtok(NULL,"\n");
-                                    strcpy(tokl24, tokl);
-                                    strcpy(tokl23,tokl2);
-
-                                    strptime(tokl24, "%d/%m/%Y-%H:%M", &tmvg);
-
-                                    printf("%d\n",Diff(tmvg,next_estr));
-
-                                    //free(superbuffer);
-
-                                    if (Diff(tmvg,next_estr) < 5)
-                                    {
-                                        //  strcpy(appoggio,tokl2);
-                                        // printf("%s\n",tokl23);
-                                        //  memset(superbuffer,0,BUFFER_SIZE);
-
-                                        strcat(superbuffer2,tokl23);
-                                        strcat(superbuffer2,"\n");
-                                        // strncat(superbuffer,tokl2,strlen(tokl2));
-                                    }
-                                }
-                                printf("%s",superbuffer2);
-                                fclose(f6);
-
-
-
-
-                                //Mando le giocate non più attive
-                                //  free(superbuffer);
-                                len_msg_signup = strlen(superbuffer2) + 1;
-                                lmsg_signup = htons(len_msg_signup);
-                                ret = send(new_sd, (void *) &lmsg_signup, sizeof(uint16_t), 0);
-                                ret = send(new_sd, (void *) superbuffer2, len_msg_signup, 0);
-                                //free(superbuffer);
-                            } */
 
 
                         } else
@@ -876,92 +834,84 @@ int main(int argc, char* argv[]) {
 
                     }
 
-                    /*   if (strncmp(buffer, "!vedi_estrazione", 16) == 0)
-                       {
-                           // Attendo dimensione dell'ID
-                           ret = recv(new_sd, (void *) &lmsg, sizeof(uint16_t), 0);
-                           // Rinconverto in formato host
-                           len = ntohs(lmsg);
-                           // ricevo l'ID
-                           ret = recv(new_sd, (void *) buffer_ID, len, 0);
+                    if (strncmp(buffer, "!vedi_estrazione", 16) == 0)
+                    {
+                        // Attendo dimensione dell'ID
+                        ret = recv(new_sd, (void *) &lmsg, sizeof(uint16_t), 0);
+                        // Rinconverto in formato host
+                        len = ntohs(lmsg);
+                        // ricevo l'ID
+                        ret = recv(new_sd, (void *) buffer_ID, len, 0);
 
-                           // ID CORRETTO:
-                           if (strcmp(buffer_ID, id_session) == 0)
-                           {
-                               printf("ID valido\n");
-                               fflush(stdout);
+                        // ID CORRETTO:
+                        if (strcmp(buffer_ID, id_session) == 0)
+                        {
+                            printf("ID valido\n");
+                            fflush(stdout);
 
-                               strcpy(msg_signup, "ID valido\n");
-                               len_msg_signup = strlen(msg_signup) + 1;
-                               lmsg_signup = htons(len_msg_signup);
-                               ret = send(new_sd, (void *) &lmsg_signup, sizeof(uint16_t), 0);
-                               ret = send(new_sd, (void *) msg_signup, len_msg_signup, 0);
+                            strcpy(msg_signup, "ID valido\n");
+                            len_msg_signup = strlen(msg_signup) + 1;
+                            lmsg_signup = htons(len_msg_signup);
+                            ret = send(new_sd, (void *) &lmsg_signup, sizeof(uint16_t), 0);
+                            ret = send(new_sd, (void *) msg_signup, len_msg_signup, 0);
 
-                               tokl = strtok(buffer," ");
-                               tokl2 = strtok(NULL, " ");
-                               tokl = strtok(NULL," ");
+                            tokl = strtok(buffer," ");
+                            tokl2 = strtok(NULL, " ");
+                            tokl = strtok(NULL," ");
 
-                               n = strtol(tokl2, &eptr, 10);
+                            n = strtol(tokl2, &eptr, 10);
 
-                               if (tokl == NULL)
-                               {
-                                   printf("Tutte le ruote\n");
-                                   fflush(stdout);
+                            if (tokl == NULL)
+                            {
+                                printf("Tutte le ruote");
+                                fflush(stdout);
 
-                                   f_estr = fopen("/home/giuseppe/Scrivania/estrazione.txt","r");
+                                f_estr = fopen("/home/giuseppe/Scrivania/estrazione.txt","r");
 
-                                   n_righe_f_estr = 0;
+                                n_righe_f_estr = 0;
 
-                                   while ( fgets(lline2, 100, f_estr) != NULL)
-                                   {
-                                       n_righe_f_estr++;
-                                   }
-                                   numero_estrazioni = n_righe_f_estr/12;
-                                   printf("Ci sono %d estrazioni",numero_estrazioni);
-                                   fflush(stdout);
+                                while ( fgets(lline2, 100, f_estr) != NULL)
+                                {
+                                    n_righe_f_estr++;
+                                }
+                                numero_estrazioni = n_righe_f_estr/12;
 
-                                   fclose(f_estr);
+                                printf("%d",numero_estrazioni);
 
-                                   f_estr = fopen("/home/giuseppe/Scrivania/estrazione.txt","r");
+                                fclose(f_estr);
 
-                                   //memset(superbuffer,0,N);
-                                   superbuffer = malloc(sizeof(char )* N);
+                                f_estr = fopen("/home/giuseppe/Scrivania/estrazione.txt","r");
 
-                                   while ( fgets(lline4, 100, f_estr) != NULL)
-                                   {
-                                       strcpy(lline2,lline4);
-                                       tokl3 = strtok(lline4, " ");
-                                       n2 = strtol(tokl3, &eptr2,10);
+                                memset(superbuffer,0,N);
 
-
-                                       if (n2 > (numero_estrazioni -n))
-                                       {
-                                           tokl = strtok(lline2," ");
-                                           tokl = strtok(NULL," ");
-                                           tokl = strtok(NULL, "^");
-                                          // printf("%s",lline2);
-                                           strcat(superbuffer,tokl);
-                                           //strcat(superbuffer,"\n");
-
-                                       }
+                                while ( fgets(lline4, 100, f_estr) != NULL)
+                                {
+                                    strcpy(lline2,lline4);
+                                    tokl3 = strtok(lline4, " ");
+                                    n2 = strtol(tokl3, &eptr2,10);
 
 
-                                   }
-                                   fclose(f_estr);
-                                  // printf("%s",superbuffer);
+                                    if (n2 > (numero_estrazioni -n) && flag2 % 2 != 0)
+                                    {
+                                        // printf("%s",lline2);
+                                        strcat(superbuffer,lline2 + 19);
+                                        //strcat(superbuffer,"\n");
 
-                                  // strcpy(superbuffer2,superbuffer);
+                                    }
 
+                                }
+                                fclose(f_estr);
 
+                                printf("%s",superbuffer);
 
-                                   //Mando le giocate ancora attive
-                                   len_msg_signup = strlen(superbuffer) + 1;
-                                   lmsg_signup = htons(len_msg_signup);
-                                   ret = send(new_sd, (void *) &lmsg_signup, sizeof(uint16_t), 0);
-                                   ret = send(new_sd, (void *) superbuffer, len_msg_signup, 0);
-                                   free(superbuffer);
+                                //Mando le giocate ancora attive
+                                len_msg_signup = strlen(superbuffer) + 1;
+                                lmsg_signup = htons(len_msg_signup);
+                                ret = send(new_sd, (void *) &lmsg_signup, sizeof(uint16_t), 0);
+                                ret = send(new_sd, (void *) superbuffer, len_msg_signup, 0);
+                                flag2 ++;
 
-                               }
+                            }
 
 
 
@@ -975,15 +925,142 @@ int main(int argc, char* argv[]) {
 
 
 
-                           } else {
-                               printf("ID non valido");
-                               strcpy(msg_signup, "ERROR_ID: Effettuare il LOGIN prima di poter cominciare a giocare\n");
-                               len_msg_signup = strlen(msg_signup) + 1;
-                               lmsg_signup = htons(len_msg_signup);
-                               ret = send(new_sd, (void *) &lmsg_signup, sizeof(uint16_t), 0);
-                               ret = send(new_sd, (void *) msg_signup, len_msg_signup, 0);
-                           }
-                       } */
+
+
+                        } else {
+                            printf("ID non valido");
+                            strcpy(msg_signup, "ERROR_ID: Effettuare il LOGIN prima di poter cominciare a giocare\n");
+                            len_msg_signup = strlen(msg_signup) + 1;
+                            lmsg_signup = htons(len_msg_signup);
+                            ret = send(new_sd, (void *) &lmsg_signup, sizeof(uint16_t), 0);
+                            ret = send(new_sd, (void *) msg_signup, len_msg_signup, 0);
+                        }
+                    }
+
+
+
+                    /*    if (strncmp(buffer, "!vedi_estrazione", 16) == 0)
+                        {
+                                // Attendo dimensione dell'ID
+                                ret = recv(new_sd, (void *) &lmsg, sizeof(uint16_t), 0);
+                                // Rinconverto in formato host
+                                len = ntohs(lmsg);
+                                // ricevo l'ID
+                                ret = recv(new_sd, (void *) buffer_ID, len, 0);
+
+                                // ID CORRETTO:
+                                if (strcmp(buffer_ID, id_session) == 0)
+                                {
+                                    printf("ID valido\n");
+                                    fflush(stdout);
+
+                                    strcpy(msg_signup, "ID valido\n");
+                                    len_msg_signup = strlen(msg_signup) + 1;
+                                    lmsg_signup = htons(len_msg_signup);
+                                    ret = send(new_sd, (void *) &lmsg_signup, sizeof(uint16_t), 0);
+                                    ret = send(new_sd, (void *) msg_signup, len_msg_signup, 0);
+
+                                    tokl = strtok(buffer," ");
+                                    tokl2 = strtok(NULL, " ");
+                                    tokl = strtok(NULL," ");
+
+                                    n = strtol(tokl2, &eptr, 10);
+
+                                    if (tokl == NULL)
+                                    {
+                                        printf("Tutte le ruote\n");
+                                        fflush(stdout);
+
+                                        printf("n = a %ld",n);
+
+                                        f_estr = fopen("/home/giuseppe/Scrivania/estrazione.txt","r");
+
+                                        n_righe_f_estr = 0;
+
+                                        while ( fgets(lline2, 100, f_estr) != NULL)
+                                        {
+                                            n_righe_f_estr++;
+                                        }
+                                        numero_estrazioni = n_righe_f_estr/12;
+                                        printf("Ci sono %d estrazioni",numero_estrazioni);
+                                        fflush(stdout);
+
+                                        fclose(f_estr);
+
+                                        f_estr = fopen("/home/giuseppe/Scrivania/estrazione.txt","r");
+
+                                        //memset(superbuffer,0,N);
+
+
+                                        while ( fgets(lline4, 100, f_estr) != NULL)
+                                        {
+                                            strcpy(lline2,lline4);
+                                            tokl3 = strtok(lline4, " ");
+                                            n2 = strtol(tokl3, &eptr2,10);
+                                         //   printf("%ld\n",n2);
+
+
+                                            if (n2 > (numero_estrazioni -n))
+                                            {
+                                                if (n == 1)
+                                                {
+                                                    tokl = strtok(lline2," ");
+                                                  //  printf("%s",tokl);
+                                                    tokl = strtok(NULL," ");
+                                                    tokl = strtok(NULL, "^");
+                                                  //  printf("%s\n",tokl);
+                                                    // printf("%s",lline2);
+                                                    strcpy(superbuffer,tokl);
+                                                    printf("%s",superbuffer);
+
+
+                                                } else {
+
+                                                    tokl = strtok(lline2, " ");
+                                                    tokl = strtok(NULL, " ");
+                                                    tokl = strtok(NULL, "^");
+                                                    // printf("%s",lline2);
+                                                    strcat(superbuffer, tokl);
+                                                    //strcat(superbuffer,"\n");
+
+
+                                            }
+
+
+                                        }
+                                        fclose(f_estr);
+                                        printf("%s",superbuffer);
+
+                                       // strcpy(superbuffer2,superbuffer);
+
+
+
+                                        //Mando le giocate ancora attive
+                                        len_msg_signup = strlen(superbuffer) + 1;
+                                        lmsg_signup = htons(len_msg_signup);
+                                        ret = send(new_sd, (void *) &lmsg_signup, sizeof(uint16_t), 0);
+                                        ret = send(new_sd, (void *) superbuffer, len_msg_signup, 0);
+
+                                    }
+
+
+
+
+
+
+
+
+
+
+                                } else {
+                                    printf("ID non valido");
+                                    strcpy(msg_signup, "ERROR_ID: Effettuare il LOGIN prima di poter cominciare a giocare\n");
+                                    len_msg_signup = strlen(msg_signup) + 1;
+                                    lmsg_signup = htons(len_msg_signup);
+                                    ret = send(new_sd, (void *) &lmsg_signup, sizeof(uint16_t), 0);
+                                    ret = send(new_sd, (void *) msg_signup, len_msg_signup, 0);
+                                }
+                        } */
 
 
 
