@@ -911,6 +911,68 @@ int main(int argc, char* argv[]) {
                                 ret = send(new_sd, (void *) superbuffer, len_msg_signup, 0);
                                 flag2 ++;
 
+                            } else{
+                                printf("%s",tokl);
+
+                                f_estr = fopen("/home/giuseppe/Scrivania/estrazione.txt","r");
+
+                                n_righe_f_estr = 0;
+
+                                while ( fgets(lline2, 100, f_estr) != NULL)
+                                {
+                                    n_righe_f_estr++;
+                                }
+                                numero_estrazioni = n_righe_f_estr/12;
+
+                                printf("%d",numero_estrazioni);
+
+                                fclose(f_estr);
+
+                                f_estr = fopen("/home/giuseppe/Scrivania/estrazione.txt","r");
+
+                                memset(superbuffer,0,N);
+
+                                while ( fgets(lline4, 100, f_estr) != NULL)
+                                {
+                                    strcpy(lline2,lline4);
+                                    tokl3 = strtok(lline4, " ");
+                                    tokl26 = strtok(NULL," ");
+                                    tokl26 = strtok(NULL, " ");
+                                    n2 = strtol(tokl3, &eptr2,10);
+
+                                    printf("%s\n", tokl26);
+
+
+                                    if (n2 > (numero_estrazioni -n) && flag2 % 2 != 0 && strncmp(tokl,tokl26, strlen(tokl)-1)==0 )
+                                    {
+                                        // printf("%s",lline2);
+                                        strcat(superbuffer,lline2 + 2);
+                                        //strcat(superbuffer,"\n");
+
+                                    }
+
+                                }
+                                fclose(f_estr);
+
+                                printf("%s",superbuffer);
+
+                                //Mando le giocate ancora attive
+                                len_msg_signup = strlen(superbuffer) + 1;
+                                lmsg_signup = htons(len_msg_signup);
+                                ret = send(new_sd, (void *) &lmsg_signup, sizeof(uint16_t), 0);
+                                ret = send(new_sd, (void *) superbuffer, len_msg_signup, 0);
+                                flag2 ++;
+
+
+
+
+
+
+
+
+
+
+
                             }
 
 
