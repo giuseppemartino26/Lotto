@@ -168,6 +168,8 @@ int main(int argc, char* argv[]) {
     int numero_estrazioni;
     int n_righe_f_estr = 1;
 
+    float imp_temp;
+
     sched.puntate[0] = "Estratto"; //non mi piace così, cambiare e farlo come fatto con "ruote"
     sched.puntate[1] = "Ambo";
     sched.puntate[2] = "Terno";
@@ -570,7 +572,7 @@ int main(int argc, char* argv[]) {
                             printf("%s\n", sched.ruote_giocate);
                             fflush(stdout);
                             f5 = fopen(nomefile, "a+");
-                            fprintf(f5, " %s ", sched.ruote_giocate);
+                            fprintf(f5, " %s* ", sched.ruote_giocate);
                             fclose(f5);
 
                             tokl = strtok(NULL, " ");
@@ -1046,6 +1048,43 @@ int main(int argc, char* argv[]) {
                                    i++;
                                 } 
                                 ver_giocata.dim_num = i;
+                                printf("Lunghezza %d\n",i - 1);
+
+                               while (*tokl != '\n')
+                               {
+                                   tokl = strtok(NULL," ,*");
+                                   
+                                   
+                                   if (strcmp(tokl,"Estratto") == 0)
+                                   {
+                                       ver_giocata.importi[0] = imp_temp;
+                                       
+                                   }
+                                   if (strcmp(tokl,"Ambo") == 0)
+                                   {
+                                       ver_giocata.importi[1] = imp_temp; 
+                                       
+                                   }
+                                   if (strcmp(tokl,"Terno") == 0)
+                                   {
+                                       ver_giocata.importi[2] = imp_temp;
+                                       
+                                   }
+                                   if (strcmp(tokl,"Quaterna") == 0)
+                                   {
+                                       ver_giocata.importi[3] = imp_temp;
+                                       
+                                   }
+                                   if (strcmp(tokl,"Cinquina") == 0)
+                                   {
+                                       ver_giocata.importi[4] = imp_temp;
+                                       
+                                   }
+
+
+                                   imp_temp = strtof(tokl,&eptr);     
+                               }
+                               
 
                     
 
@@ -1099,4 +1138,3 @@ int main(int argc, char* argv[]) {
     }
 
 }
-
