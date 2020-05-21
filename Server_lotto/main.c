@@ -116,6 +116,7 @@ int main(int argc, char* argv[]) {
     FILE * f6;
     FILE *f7;
     FILE *f8;
+    FILE *f9;
     int flag = 0;
     const size_t line_size = 300;
     char *lline = NULL;
@@ -169,6 +170,7 @@ int main(int argc, char* argv[]) {
     int n_righe_f_estr = 1;
 
     float imp_temp;
+    int vett_num_v[5];
 
     sched.puntate[0] = "Estratto"; //non mi piace così, cambiare e farlo come fatto con "ruote"
     sched.puntate[1] = "Ambo";
@@ -184,6 +186,9 @@ int main(int argc, char* argv[]) {
     struct tm* next_estr_p; //puntatore a orario della prossima estrazione
     struct tm next_estr; //orario della prossima estrazione
     struct Giocata_V ver_giocata;
+    struct tm estr_v;
+    
+    
    
 
     char superbuffer[N];
@@ -199,6 +204,8 @@ int main(int argc, char* argv[]) {
     int contatore2 = 0;
 
     int flag2 = 1;
+
+    char ruota_v[N];
 
 
 
@@ -1031,6 +1038,7 @@ int main(int argc, char* argv[]) {
 
                                 }
                                 ver_giocata.num_ruote = i;
+                                printf("%d\n", ver_giocata.num_ruote);
                              
 
                                 tokl = strtok(NULL," "); 
@@ -1048,7 +1056,7 @@ int main(int argc, char* argv[]) {
                                    i++;
                                 } 
                                 ver_giocata.dim_num = i;
-                                printf("Lunghezza %d\n",i - 1);
+                                printf("Quanti numeri? %d\n",i - 1);
 
                                while (*tokl != '\n')
                                {
@@ -1084,6 +1092,52 @@ int main(int argc, char* argv[]) {
 
                                    imp_temp = strtof(tokl,&eptr);     
                                }
+
+                               
+                                
+                                printf("Numero ruote: %d\n",ver_giocata.num_ruote -1);
+
+                               for ( i = 0; i < ver_giocata.num_ruote - 1; i++)
+                               {
+                                   f9 = fopen("/home/giuseppe/Scrivania/estrazione.txt", "a+");
+                                   while (fgets(lline5, 100, f9) != NULL)
+                                   {
+                                       tokl = strtok(lline5," ");
+                                       tokl = strtok(NULL," ");
+                                       printf("%s\n",tokl);
+
+                                       if (strncmp(tokl, "0",1)!= 0)
+                                       {
+                                       strptime(tokl, "%d/%m/%Y-%H:%M", &estr_v);
+                                      // printf("%d/%d/%d- %d:%d\n",estr_v.tm_mday,estr_v.tm_mon,estr_v.tm_year,estr_v.tm_hour,estr_v.tm_min);
+                                       //printf("Differenza minuti: %d\n", Diff(ver_giocata.timestamp_giocata_v,estr_v));
+                                       }
+
+                                       strcpy(ruota_v,strtok(NULL," "));
+                                       //printf("%s\n",ruota_v);
+                                       
+
+                                       if (Diff(ver_giocata.timestamp_giocata_v,estr_v) < 5  && strcmp(ver_giocata.ruote_v[i],ruota_v)== 0)
+                                       {
+                                           j = 0;
+                                           while (*tokl != '\n' && j < 5)
+                                           {
+                                               tokl = strtok(NULL," ");
+                                               vett_num_v[j] = strtol(tokl, &eptr, 10);
+                                               printf("%d\n", vett_num_v[j]);
+                                               j++;
+
+                                           }
+
+                                           //printf("%s\n",ruota_v);
+                                       }
+                                       
+
+                                   }
+                                   fclose(f9);
+                               }
+                               
+                               
                                
 
                     
@@ -1138,3 +1192,4 @@ int main(int argc, char* argv[]) {
     }
 
 }
+
