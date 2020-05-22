@@ -22,6 +22,7 @@ struct Giocata_V
     long numeri_giocati_v[5]; // numeri giocati
     int dim_num; //quanti numeri sono stati giocati
     float importi[5]; 
+    int numeri_indovinati[5];
 };
 
 
@@ -104,7 +105,7 @@ int main(int argc, char* argv[]) {
     char *pwd;
     const char s[2] = " ";
     struct users users_list;
-    int i;
+    int i,y,z,q;
     int k = 0;
     int cont = 0;
     char msg_signup[N];
@@ -196,6 +197,7 @@ int main(int argc, char* argv[]) {
     //char superbuffer[BUFFER_SIZE];
     char superbuffer2[N];
     char superbuffer3[N];
+    char superbuffer5[BUFFER_SIZE];
 
     long n , n2;
     char* tokl3;
@@ -206,6 +208,7 @@ int main(int argc, char* argv[]) {
     int flag2 = 1;
 
     char ruota_v[N];
+    char data_estr_vincente[N];
 
 
 
@@ -243,7 +246,7 @@ int main(int argc, char* argv[]) {
                      fprintf(f_estr, " ");                      //aggiungo spazi per allineare i numeri <-- DA PROBLEMI ALLA invia_giocata
                  }*/
                 for (j = 0; j < 5; j++) {
-                    fprintf(f_estr, "%d ", rand() % 90 + 1);
+                    fprintf(f_estr, "%d ", (rand() + j) % 90 + 1);
                 }
 
                 fprintf(f_estr, "\n");
@@ -1109,6 +1112,7 @@ int main(int argc, char* argv[]) {
                                        if (strncmp(tokl, "0",1)!= 0)
                                        {
                                        strptime(tokl, "%d/%m/%Y-%H:%M", &estr_v);
+                                       strcpy(data_estr_vincente,tokl);
                                       // printf("%d/%d/%d- %d:%d\n",estr_v.tm_mday,estr_v.tm_mon,estr_v.tm_year,estr_v.tm_hour,estr_v.tm_min);
                                        //printf("Differenza minuti: %d\n", Diff(ver_giocata.timestamp_giocata_v,estr_v));
                                        }
@@ -1117,8 +1121,10 @@ int main(int argc, char* argv[]) {
                                        //printf("%s\n",ruota_v);
                                        
 
-                                       if (Diff(ver_giocata.timestamp_giocata_v,estr_v) < 5  && strcmp(ver_giocata.ruote_v[i],ruota_v)== 0)
+                                       if (Diff(estr_v, ver_giocata.timestamp_giocata_v) < 0 && Diff(estr_v, ver_giocata.timestamp_giocata_v) > -5  && strcmp(ver_giocata.ruote_v[i],ruota_v)== 0)
                                        {
+                                           printf("Differenza %d\n",Diff(estr_v, ver_giocata.timestamp_giocata_v));
+
                                            j = 0;
                                            while (*tokl != '\n' && j < 5)
                                            {
@@ -1129,7 +1135,29 @@ int main(int argc, char* argv[]) {
 
                                            }
 
-                                           //printf("%s\n",ruota_v);
+                                            z = 0;
+                                            memset(superbuffer5,0,BUFFER_SIZE);
+                                           for (k = 0; k < 5; k++)
+                                           {
+                                               for (y = 0; y < 5; y++)
+                                               {
+                                                   if (vett_num_v[k] == ver_giocata.numeri_giocati_v[y] )
+                                                   {
+                                                       z++;
+                                                       ver_giocata.numeri_indovinati[z] = vett_num_v[k];
+                                                     
+                                                   }
+                                                   
+                                               }
+                                               
+                                           }
+                                          
+
+                                           for (q = 0; q < z; q++)
+                                           {
+                                               printf("Estrazione del %s: %s %d\n ",data_estr_vincente, ruota_v, ver_giocata.numeri_indovinati[q + 1]);
+                                           }
+                                           
                                        }
                                        
 
