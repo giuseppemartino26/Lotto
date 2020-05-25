@@ -13,6 +13,8 @@
 #define BUFFER_SIZE 1024
 #define N 100
 
+
+
 //Struttura di appoggio utile per salvare temporaneamente la giocata e calcolare eventuali vincite
 struct Giocata_V
 {
@@ -22,6 +24,7 @@ struct Giocata_V
     long numeri_giocati_v[5]; // numeri giocati
     int dim_num; //quanti numeri sono stati giocati
     float importi[5]; 
+    float importi_vinti[5];
     int numeri_indovinati[5];
 };
 
@@ -41,6 +44,50 @@ struct users
     //char password[N];
     char session_id[10];
 };
+
+ int Fattoriale(int val)
+{
+  int i;
+  int fatt = 1;
+  for (i = 1; i <= val; i++)
+    fatt = fatt * i;
+  return fatt;
+}
+
+float calcola_vincita (int ng, int nr, int x, float soldi, int n_i)
+{
+    float vincita = 0;
+     int k = Fattoriale(ng)/(Fattoriale(ng - (x + 1)) * Fattoriale(x + 1));
+     int w = Fattoriale(n_i)/(Fattoriale(n_i - (x + 1))* Fattoriale(x + 1));
+    
+   if (x == 0)
+   {
+       vincita = w * 11.23 * soldi / (nr * k);
+   }
+
+   if (x == 1)
+   {
+       vincita = w * 250 * soldi / (nr * k);
+   }
+
+   if (x == 2)
+   {
+       vincita = w * 4500 * soldi / (nr * k);
+   }
+
+   if (x == 3)
+   {
+       vincita = w * 120000 * soldi / (nr * k);
+   }
+
+   if (x == 4)
+   {
+       vincita = w * 6000000 * soldi / (nr * k);
+   }
+   
+   return vincita; 
+   
+}
 
 void gen_random(char *s, const int len) {
     int i;
@@ -209,6 +256,11 @@ int main(int argc, char* argv[]) {
 
     char ruota_v[N];
     char data_estr_vincente[N];
+    int quanti_num;
+
+    int array[5];
+    int temprn, randomIndex;
+    int ni; // quantità di numeri indovinati
 
 
 
@@ -245,8 +297,21 @@ int main(int argc, char* argv[]) {
                 /* for (l = 0; l < 10 - strlen(ruote[i]); l++) {
                      fprintf(f_estr, " ");                      //aggiungo spazi per allineare i numeri <-- DA PROBLEMI ALLA invia_giocata
                  }*/
-                for (j = 0; j < 5; j++) {
-                    fprintf(f_estr, "%d ", (rand() + j) % 90 + 1);
+                for (j = 0; j < 90; j++) {
+                    array[j] = j;
+                }
+
+                for (j = 0; j < 90; j++) {
+                    temprn = array[j];
+                    randomIndex = rand() % 90 + 1;
+                    array[j] = array[randomIndex];
+                    array[randomIndex] = temprn;
+                }
+
+                for (j = 0; j < 5; j++)
+                {
+
+                    fprintf(f_estr, "%d ", (array[j]));
                 }
 
                 fprintf(f_estr, "\n");
@@ -1041,13 +1106,13 @@ int main(int argc, char* argv[]) {
 
                                 }
                                 ver_giocata.num_ruote = i;
-                                printf("%d\n", ver_giocata.num_ruote);
+                              //  printf("%d\n", ver_giocata.num_ruote);
                              
 
                                 tokl = strtok(NULL," "); 
                                // printf("%s\n",tokl);
                                ver_giocata.numeri_giocati_v[0] =strtol(tokl,&eptr,10);
-                               printf("%ld\n",ver_giocata.numeri_giocati_v[0]);
+                              // printf("%ld\n",ver_giocata.numeri_giocati_v[0]);
                                
                                i = 1;
                                 while (strncmp(tokl ,"*",1)!=0 )
@@ -1055,11 +1120,17 @@ int main(int argc, char* argv[]) {
                                     tokl = strtok(NULL," ");
                                     ver_giocata.numeri_giocati_v[i] =strtol(tokl,&eptr,10);
                                    // printf("%s\n",tokl);
-                                   printf("%ld\n",ver_giocata.numeri_giocati_v[i]);
+                                  // printf("%ld\n",ver_giocata.numeri_giocati_v[i]);
                                    i++;
                                 } 
                                 ver_giocata.dim_num = i;
-                                printf("Quanti numeri? %d\n",i - 1);
+                               // printf("Quanti numeri? %d\n",i - 1);
+
+                                for (q = 0; q < 5; q++)
+                                {
+                                    ver_giocata.importi[q] = 0;
+                                }
+                                
 
                                while (*tokl != '\n')
                                {
@@ -1098,7 +1169,7 @@ int main(int argc, char* argv[]) {
 
                                
                                 
-                                printf("Numero ruote: %d\n",ver_giocata.num_ruote -1);
+                               // printf("Numero ruote: %d\n",ver_giocata.num_ruote -1);
 
                                for ( i = 0; i < ver_giocata.num_ruote - 1; i++)
                                {
@@ -1107,7 +1178,7 @@ int main(int argc, char* argv[]) {
                                    {
                                        tokl = strtok(lline5," ");
                                        tokl = strtok(NULL," ");
-                                       printf("%s\n",tokl);
+                                      // printf("%s\n",tokl);
 
                                        if (strncmp(tokl, "0",1)!= 0)
                                        {
@@ -1123,14 +1194,14 @@ int main(int argc, char* argv[]) {
 
                                        if (Diff(estr_v, ver_giocata.timestamp_giocata_v) < 0 && Diff(estr_v, ver_giocata.timestamp_giocata_v) > -5  && strcmp(ver_giocata.ruote_v[i],ruota_v)== 0)
                                        {
-                                           printf("Differenza %d\n",Diff(estr_v, ver_giocata.timestamp_giocata_v));
+                                           //printf("Differenza %d\n",Diff(estr_v, ver_giocata.timestamp_giocata_v));
 
                                            j = 0;
                                            while (*tokl != '\n' && j < 5)
                                            {
                                                tokl = strtok(NULL," ");
                                                vett_num_v[j] = strtol(tokl, &eptr, 10);
-                                               printf("%d\n", vett_num_v[j]);
+                                              // printf("%d\n", vett_num_v[j]);
                                                j++;
 
                                            }
@@ -1151,12 +1222,33 @@ int main(int argc, char* argv[]) {
                                                }
                                                
                                            }
-                                          
+                                           ni = z;
+                                           printf("%s\n", "************************************");
+                                          printf("Estrazione del %s:\n ",data_estr_vincente);
+                                          printf("%s : ",ruota_v);
 
                                            for (q = 0; q < z; q++)
                                            {
-                                               printf("Estrazione del %s: %s %d\n ",data_estr_vincente, ruota_v, ver_giocata.numeri_indovinati[q + 1]);
+                                               printf("%d ",ver_giocata.numeri_indovinati[q + 1]);
                                            }
+                                           printf("%s",">> ");
+
+                                           for (q = 0; q < 5; q++)
+                                           {
+                                               if (ver_giocata.importi[q] != 0 && (z == (q + 1) || z > (q + 1)))
+                                               {
+                                                   quanti_num = ver_giocata.dim_num - 1;
+                                                  // printf("\n%d\n%d\n%d\n%.2f\n",quanti_num,ver_giocata.num_ruote,q,ver_giocata.importi[q]);
+                                                  // printf("%s %.2f ", sched.puntate[q],ver_giocata.importi[q]);
+                                                  
+                                                 printf("%s %.2f ", sched.puntate[q], calcola_vincita(quanti_num,ver_giocata.num_ruote - 1,q,ver_giocata.importi[q],ni));
+                                                 //printf("Fattoriale di 3 è %d\n", Fattoriale(3));
+
+                                               }
+                                               
+                                           }
+                                           printf("%c",'\n');
+                                           
                                            
                                        }
                                        
