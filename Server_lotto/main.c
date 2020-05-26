@@ -245,6 +245,7 @@ int main(int argc, char* argv[]) {
     char superbuffer2[N];
     char superbuffer3[N];
     char superbuffer5[BUFFER_SIZE];
+    char superbuffer6[BUFFER_SIZE];
 
     long n , n2;
     char* tokl3;
@@ -1223,15 +1224,26 @@ int main(int argc, char* argv[]) {
                                                
                                            }
                                            ni = z;
-                                           printf("%s\n", "************************************");
-                                          printf("Estrazione del %s:\n ",data_estr_vincente);
-                                          printf("%s : ",ruota_v);
+                                           //printf("%s\n", "************************************");
+                                           strcat(superbuffer6, "*******************************\n");
+                                           strcat(superbuffer6,"Estrazione del ");
+                                           strcat(superbuffer6,data_estr_vincente);
+                                           strcat(superbuffer6,"\n");
+                                           strcat(superbuffer6,ruota_v);
+                                           strcat(superbuffer6," : ");
+                                           
+                                         // printf("Estrazione del %s:\n ",data_estr_vincente);
+                                         // printf("%s : ",ruota_v);
 
                                            for (q = 0; q < z; q++)
                                            {
-                                               printf("%d ",ver_giocata.numeri_indovinati[q + 1]);
+                                             //  printf("%d ",ver_giocata.numeri_indovinati[q + 1]);
+                                               sprintf(superbuffer6 + strlen(superbuffer6),"%d ",ver_giocata.numeri_indovinati[q + 1]);
                                            }
-                                           printf("%s",">> ");
+                                          
+                                         //  printf("%s",">> ");
+                                         strcat(superbuffer6,">> ");
+                                         
 
                                            for (q = 0; q < 5; q++)
                                            {
@@ -1241,13 +1253,20 @@ int main(int argc, char* argv[]) {
                                                   // printf("\n%d\n%d\n%d\n%.2f\n",quanti_num,ver_giocata.num_ruote,q,ver_giocata.importi[q]);
                                                   // printf("%s %.2f ", sched.puntate[q],ver_giocata.importi[q]);
                                                   
-                                                 printf("%s %.2f ", sched.puntate[q], calcola_vincita(quanti_num,ver_giocata.num_ruote - 1,q,ver_giocata.importi[q],ni));
+                                                 //printf("%s %.2f ", sched.puntate[q], calcola_vincita(quanti_num,ver_giocata.num_ruote - 1,q,ver_giocata.importi[q],ni));
+                                                 strcat(superbuffer6,sched.puntate[q]);
+                                                 strcat(superbuffer6, " ");
+                                                 
+                                                 sprintf(superbuffer6 + strlen(superbuffer6),"%.2f ", calcola_vincita(quanti_num,ver_giocata.num_ruote - 1,q,ver_giocata.importi[q],ni));
                                                  //printf("Fattoriale di 3 è %d\n", Fattoriale(3));
 
                                                }
                                                
                                            }
-                                           printf("%c",'\n');
+                                          // printf("%c",'\n');
+                                          strcat(superbuffer6,"\n");
+
+                                         // printf("%s",superbuffer6);
                                            
                                            
                                        }
@@ -1255,6 +1274,7 @@ int main(int argc, char* argv[]) {
 
                                    }
                                    fclose(f9);
+                                   
                                }
                                
                                
@@ -1267,6 +1287,11 @@ int main(int argc, char* argv[]) {
 
                             }
                             fclose(f8); 
+                            printf("\n%s\n",superbuffer6);
+                            len_msg_signup = strlen(superbuffer6) + 1;
+                            lmsg_signup = htons(len_msg_signup);
+                            ret = send(new_sd, (void *) &lmsg_signup, sizeof(uint16_t), 0);
+                            ret = send(new_sd, (void *) superbuffer6, len_msg_signup, 0);
 
 
 
