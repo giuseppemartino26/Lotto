@@ -263,6 +263,8 @@ int main(int argc, char* argv[]) {
     int temprn, randomIndex;
     int ni; // quantità di numeri indovinati
 
+    float riepilogo[5];
+
 
 
     pid_estr = fork();
@@ -1259,6 +1261,7 @@ int main(int argc, char* argv[]) {
                                                  
                                                  sprintf(superbuffer6 + strlen(superbuffer6),"%.2f ", calcola_vincita(quanti_num,ver_giocata.num_ruote - 1,q,ver_giocata.importi[q],ni));
                                                  //printf("Fattoriale di 3 è %d\n", Fattoriale(3));
+                                                 riepilogo[q] += calcola_vincita(quanti_num,ver_giocata.num_ruote - 1,q,ver_giocata.importi[q],ni);
 
                                                }
                                                
@@ -1287,7 +1290,22 @@ int main(int argc, char* argv[]) {
 
                             }
                             fclose(f8); 
-                            printf("\n%s\n",superbuffer6);
+                            //printf("\n%s\n",superbuffer6);
+
+                            strcat(superbuffer6, "\nRiepilogo vincite:\n");
+
+
+                            for ( q = 0; q < 5; q++)
+                            {
+                               // strcat(superbuffer6,"Vincite su ");
+                               sprintf(superbuffer6 + strlen(superbuffer6), "Vincite su %s %.2f\n",sched.puntate[q],riepilogo[q]);
+
+                              //  printf("Vincite su %s %.2f\n",sched.puntate[q],riepilogo[q]);
+                            }
+                            
+
+
+
                             len_msg_signup = strlen(superbuffer6) + 1;
                             lmsg_signup = htons(len_msg_signup);
                             ret = send(new_sd, (void *) &lmsg_signup, sizeof(uint16_t), 0);
