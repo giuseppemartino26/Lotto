@@ -73,6 +73,7 @@ int main(int argc, char* argv[]) {
     char buffer3[BUFFER_SIZE];
     char buffer4[BUFFER_SIZE];
     char buffer5[BUFFER_SIZE];
+    char buffer6[BUFFER_SIZE];
     const char st[2] = ":";
     char* tok;
    // struct users users_list;
@@ -284,8 +285,8 @@ int main(int argc, char* argv[]) {
             //Ricevo il messaggio di giocata effettuata
             ret = recv(sd,(void*) &lmsg, sizeof(uint16_t),0 );
             len = ntohs(lmsg);
-            ret = recv(sd, (void*)buffer, len, 0);
-            printf("%s\n",buffer);
+            ret = recv(sd, (void*)buffer6, len, 0);
+            printf("%s\n",buffer6);
 
         }
 

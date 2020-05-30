@@ -261,7 +261,7 @@ int main(int argc, char* argv[]) {
 
     int array[5];
     int temprn, randomIndex;
-    int ni; // quantità di numeri indovinati
+    int ni = 0; // quantità di numeri indovinati
 
     float riepilogo[5];
 
@@ -644,7 +644,6 @@ int main(int argc, char* argv[]) {
                             fclose(f5);
 
                             temp = &buffer[18];
-                            //memset(&tokl,0,8);
                             tokl = strtok(temp, "-");
                             strcpy(sched.ruote_giocate, tokl);
                             printf("%s\n", sched.ruote_giocate);
@@ -673,7 +672,24 @@ int main(int argc, char* argv[]) {
                                 printf("%d\n",a);
                             }
                             dimensione = a;
-                            printf("%d\n", dimensione);
+                            printf("La dimensione è %d\n", dimensione);
+                            
+                            if (dimensione > 10)
+                            {
+                            strcpy(msg_signup, "ERRORE: puoi giocare un massimo di 10 numeri\n");
+                            len_msg_signup = strlen(msg_signup) + 1;
+                            lmsg_signup = htons(len_msg_signup);
+                            ret = send(new_sd, (void *) &lmsg_signup, sizeof(uint16_t), 0);
+                            ret = send(new_sd, (void *) msg_signup, len_msg_signup, 0);
+                            
+                                
+                            }else
+                            {
+
+                            
+                            
+
+
                             for ( j = 0; j < dimensione; ++j) {
                                 printf("%ld ", sched.numeri_giocati[j]);
                                 f5 = fopen(nomefile, "a+");
@@ -716,6 +732,7 @@ int main(int argc, char* argv[]) {
                             lmsg_signup = htons(len_msg_signup);
                             ret = send(new_sd, (void *) &lmsg_signup, sizeof(uint16_t), 0);
                             ret = send(new_sd, (void *) msg_signup, len_msg_signup, 0);
+                            }
 
 
                         } else {
@@ -1113,6 +1130,10 @@ int main(int argc, char* argv[]) {
                              
 
                                 tokl = strtok(NULL," "); 
+                                for (y = 0; y < 5; y++)
+                                {
+                                    ver_giocata.numeri_giocati_v[y] = 0;
+                                }
                                // printf("%s\n",tokl);
                                ver_giocata.numeri_giocati_v[0] =strtol(tokl,&eptr,10);
                               // printf("%ld\n",ver_giocata.numeri_giocati_v[0]);
@@ -1172,7 +1193,8 @@ int main(int argc, char* argv[]) {
 
                                
                                 
-                               // printf("Numero ruote: %d\n",ver_giocata.num_ruote -1);
+                                printf("Numero ruote: %d\n",ver_giocata.num_ruote -1);
+                                
 
                                for ( i = 0; i < ver_giocata.num_ruote - 1; i++)
                                {
@@ -1192,7 +1214,103 @@ int main(int argc, char* argv[]) {
                                        }
 
                                        strcpy(ruota_v,strtok(NULL," "));
-                                       //printf("%s\n",ruota_v);
+                                       
+
+
+
+                                        if (Diff(estr_v, ver_giocata.timestamp_giocata_v) < 0 && Diff(estr_v, ver_giocata.timestamp_giocata_v) > -5  && strcmp(ver_giocata.ruote_v[i],"Tutte")== 0 && strcmp(ruota_v,"Estrazione") != 0)
+                                       {
+                                           printf("%s\n","Hai giocato tutte le ruote");
+                                           //printf("Differenza %d\n",Diff(estr_v, ver_giocata.timestamp_giocata_v));
+
+                                           j = 0;
+                                           while (*tokl != '\n' && j < 5)
+                                           {
+                                               tokl = strtok(NULL," ");
+                                               vett_num_v[j] = strtol(tokl, &eptr, 10);
+                                               printf("%d\n", vett_num_v[j]);
+                                               j++;
+
+                                           }
+
+                                            z = 0;
+                                            //memset(superbuffer6,0,BUFFER_SIZE);
+                                           for (k = 0; k < 5; k++)
+                                           {
+                                               for (y = 0; y < 5; y++)
+                                               {
+                                                   printf("Numero giocato %d è %ld\n", y, ver_giocata.numeri_giocati_v[y]);
+                                                   if (vett_num_v[k] == ver_giocata.numeri_giocati_v[y] )
+                                                   {
+                                                       z++;
+                                                       printf("Ho indovinato %d numeri\n",z);
+                                                       ver_giocata.numeri_indovinati[z] = vett_num_v[k];
+                                                       printf("%d\n",ver_giocata.numeri_indovinati[z]);
+                                                     
+                                                   }
+                                                   //ver_giocata.numeri_giocati_v[y] = 0;
+                                                   
+                                               }
+                                               
+                                           }
+                                           
+                                           
+                                           ni = z;
+                                           
+                                           if (ni > 0)
+                                           {
+                                            
+                                           
+                                           
+
+                                           strcat(superbuffer6, "*******************************\n");
+                                           strcat(superbuffer6,"Estrazione del ");
+                                           strcat(superbuffer6,data_estr_vincente);
+                                           strcat(superbuffer6,"\n");
+                                           strcat(superbuffer6,ruota_v);
+                                           strcat(superbuffer6," : ");
+                                           
+                                         // printf("Estrazione del %s:\n ",data_estr_vincente);
+                                         // printf("%s : ",ruota_v);
+
+                                           for (q = 0; q < z; q++)
+                                           {
+                                             //  printf("%d ",ver_giocata.numeri_indovinati[q + 1]);
+                                               sprintf(superbuffer6 + strlen(superbuffer6),"%d ",ver_giocata.numeri_indovinati[q + 1]);
+                                           }
+                                          
+                                         //  printf("%s",">> ");
+                                         strcat(superbuffer6,">> ");
+                                         
+
+                                           for (q = 0; q < 5; q++)
+                                           {
+                                               if (ver_giocata.importi[q] != 0 && (z == (q + 1) || z > (q + 1)))
+                                               {
+                                                   quanti_num = ver_giocata.dim_num - 1;
+                                                  // printf("\n%d\n%d\n%d\n%.2f\n",quanti_num,ver_giocata.num_ruote,q,ver_giocata.importi[q]);
+                                                  // printf("%s %.2f ", sched.puntate[q],ver_giocata.importi[q]);
+                                                  
+                                                 //printf("%s %.2f ", sched.puntate[q], calcola_vincita(quanti_num,ver_giocata.num_ruote - 1,q,ver_giocata.importi[q],ni));
+                                                 strcat(superbuffer6,sched.puntate[q]);
+                                                 strcat(superbuffer6, " ");
+                                                 
+                                                 sprintf(superbuffer6 + strlen(superbuffer6),"%.2f ", calcola_vincita(quanti_num,10,q,ver_giocata.importi[q],ni));
+                                                 //printf("Fattoriale di 3 è %d\n", Fattoriale(3));
+                                                 riepilogo[q] += calcola_vincita(quanti_num,10,q,ver_giocata.importi[q],ni);
+
+                                               }
+                                               
+                                           }
+                                          // printf("%c",'\n');
+                                          strcat(superbuffer6,"\n");
+
+                                           }
+                                           
+                                           
+                                       }
+                                       
+
                                        
 
                                        if (Diff(estr_v, ver_giocata.timestamp_giocata_v) < 0 && Diff(estr_v, ver_giocata.timestamp_giocata_v) > -5  && strcmp(ver_giocata.ruote_v[i],ruota_v)== 0)
@@ -1299,6 +1417,7 @@ int main(int argc, char* argv[]) {
                             {
                                // strcat(superbuffer6,"Vincite su ");
                                sprintf(superbuffer6 + strlen(superbuffer6), "Vincite su %s %.2f\n",sched.puntate[q],riepilogo[q]);
+                               riepilogo[q] = 0; 
 
                               //  printf("Vincite su %s %.2f\n",sched.puntate[q],riepilogo[q]);
                             }
@@ -1310,6 +1429,7 @@ int main(int argc, char* argv[]) {
                             lmsg_signup = htons(len_msg_signup);
                             ret = send(new_sd, (void *) &lmsg_signup, sizeof(uint16_t), 0);
                             ret = send(new_sd, (void *) superbuffer6, len_msg_signup, 0);
+                            strcpy(superbuffer6,"\n");
 
 
 
