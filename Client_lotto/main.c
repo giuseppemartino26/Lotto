@@ -17,8 +17,6 @@ void help_cmd(char string[])
     token = strtok(string, s);
     token = strtok(NULL, s); // in token ho il comando che deve essere descritto
 
-
-
     if (strncmp(token,"!signup",7)==0)
     {
         printf("!signup <username> <password> --> crea un nuovo utente");
@@ -49,17 +47,8 @@ void help_cmd(char string[])
     {
         printf("!esci --> termina il client\n");
     }
-
-
 }
 
-/*struct users
-{
-    char username[N];
-    char password[N];
-    char session_id[10];
-};
-*/
 
 int main(int argc, char* argv[]) {
     int ret, sd;
@@ -68,6 +57,8 @@ int main(int argc, char* argv[]) {
     uint32_t mssg;
     struct sockaddr_in srv_addr; //indirizzo server
     char str_cmd[BUFFER_SIZE];   // stringa per salvare il comando inserito da tastiera dall'utente
+
+    /* buffer che uso per ricevere i messaggi dal server */
     char buffer[BUFFER_SIZE];
     char buffer2[BUFFER_SIZE];
     char buffer3[BUFFER_SIZE];
@@ -75,6 +66,7 @@ int main(int argc, char* argv[]) {
     char buffer5[BUFFER_SIZE];
     char buffer6[BUFFER_SIZE];
     char buffer7[BUFFER_SIZE];
+
     const char st[2] = ":";
     char* tok;
    // struct users users_list;
@@ -101,7 +93,8 @@ int main(int argc, char* argv[]) {
     }
 
     ret = recv(sd,(void*) &lmsg, sizeof(uint16_t),0 );
-    len = ntohs(lmsg); // Rinconverto in formato host
+    // Rinconverto in formato host
+    len = ntohs(lmsg); 
     //Ricevo il messaggio di risposta
     ret = recv(sd, (void*)buffer, len, 0);
 
@@ -111,7 +104,7 @@ int main(int argc, char* argv[]) {
         exit(-1);
         close(sd);
     } else{
-        printf("Connessione effettuata");
+        printf("Connessione effettuata\n");
     }
 
 
@@ -120,9 +113,7 @@ int main(int argc, char* argv[]) {
 
     while (1)
     {
-        printf("Comincio con ");
-        printf("%s\n",id_session);
-
+       
         fgets(str_cmd, BUFFER_SIZE, stdin); //Attendo input da tastiera
 
         /* help senza specificare il comando */
@@ -132,7 +123,7 @@ int main(int argc, char* argv[]) {
         }
 
         /* !help  */
-        if (strncmp(str_cmd, "!help", 5) == 0 && strlen(str_cmd) == 6)
+        else if (strncmp(str_cmd, "!help", 5) == 0 && strlen(str_cmd) == 6)
         {
             printf("Sono disponibili i seguenti comandi:\n"
                    "1) !help <comando> --> mostra i dettagli di un comando\n"
@@ -148,7 +139,7 @@ int main(int argc, char* argv[]) {
         }
 
         /* !signup */
-        if (strncmp(str_cmd, "!signup",7)==0)
+       else if (strncmp(str_cmd, "!signup",7)==0)
         {
             printf("okk\n");
             // Invio al server la quantita di dati
@@ -189,7 +180,7 @@ int main(int argc, char* argv[]) {
         }
 
         /*login*/
-        if (strncmp(str_cmd, "!login",6)==0){
+        else if (strncmp(str_cmd, "!login",6)==0){
             // Invio al server la quantita di dati
             len = strlen(str_cmd) + 1; // Voglio inviare anche il carattere di fine stringa
             lmsg = htons(len); // Per passarlo al server lo converto in formato big endian
@@ -261,7 +252,7 @@ int main(int argc, char* argv[]) {
 
         }
 
-        if (strncmp(str_cmd, "!invia_giocata",14)==0)
+        else if (strncmp(str_cmd, "!invia_giocata",14)==0)
         {
             len = strlen(str_cmd) + 1;
             lmsg = htons(len);
@@ -291,7 +282,7 @@ int main(int argc, char* argv[]) {
 
         }
 
-        if (strncmp(str_cmd, "!vedi_giocate",13)==0)
+        else if (strncmp(str_cmd, "!vedi_giocate",13)==0)
         {
             len = strlen(str_cmd) + 1;
             lmsg = htons(len);
@@ -327,7 +318,7 @@ int main(int argc, char* argv[]) {
 
         }
 
-        if (strncmp(str_cmd, "!vedi_estrazione",16)==0)
+        else if (strncmp(str_cmd, "!vedi_estrazione",16)==0)
         {
             len = strlen(str_cmd) + 1;
             lmsg = htons(len);
@@ -360,7 +351,7 @@ int main(int argc, char* argv[]) {
 
 
 
-        if (strncmp(str_cmd, "!vedi_estrazione",16)==0) {
+        else if (strncmp(str_cmd, "!vedi_estrazione",16)==0) {
             len = strlen(str_cmd) + 1;
             lmsg = htons(len);
             ret = send(sd, (void *) &lmsg, sizeof(uint16_t), 0);
@@ -390,7 +381,7 @@ int main(int argc, char* argv[]) {
 
         }
 
-        if (strncmp(str_cmd, "!vedi_vincite",13)==0) {
+        else if (strncmp(str_cmd, "!vedi_vincite",13)==0) {
             len = strlen(str_cmd) + 1;
             lmsg = htons(len);
             ret = send(sd, (void *) &lmsg, sizeof(uint16_t), 0);
@@ -421,7 +412,7 @@ int main(int argc, char* argv[]) {
         }
 
 
-        if (strncmp(str_cmd, "!esci",5)==0) {
+        else if (strncmp(str_cmd, "!esci",5)==0) {
             len = strlen(str_cmd) + 1;
             lmsg = htons(len);
             ret = send(sd, (void *) &lmsg, sizeof(uint16_t), 0);
@@ -457,6 +448,11 @@ int main(int argc, char* argv[]) {
 
         }
 
+        else
+        {
+            printf("Formato del comando non valido. Riprovare\n");
+        }
+        
 
 
 
