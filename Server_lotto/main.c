@@ -106,7 +106,7 @@ void gen_random(char *s, const int len) {
 int Diff (struct tm t1, struct tm t2)
 {
     int diff;
-    diff = (t2.tm_min - t1.tm_min) + (t2.tm_hour - t1.tm_hour)*60 + (t2.tm_mday - t1.tm_mday)*1440;
+    diff = (t2.tm_min - t1.tm_min) + (t2.tm_hour - t1.tm_hour)*60 + (t2.tm_mday - t1.tm_mday)*1440 + (t2.tm_mon - t1.tm_mon )*44640 + (t2.tm_year - t1.tm_year)*525600;
     return diff;
 }
 
@@ -123,11 +123,8 @@ int Differenza(struct tm t1)
     tmm = localtime(&tt);
     strftime(buf,sizeof(buf), "%d/%m/%Y-%H:%M", tmm);
     strptime(buf,"%d/%m/%Y-%H:%M",&tmmn);
-    //  printf("%d\n",tmmn.tm_hour);
-    //  printf("%d\n",t1.tm_hour);
-
-
-    diff = (tmmn.tm_min - t1.tm_min) + (tmmn.tm_hour - t1.tm_hour)*60 + (tmmn.tm_mday - t1.tm_mday)*1440;
+    
+    diff = (tmmn.tm_min - t1.tm_min) + (tmmn.tm_hour - t1.tm_hour)*60 + (tmmn.tm_mday - t1.tm_mday)*1440 + (tmmn.tm_mon - t1.tm_mon)*44640 + (tmmn.tm_year - t1.tm_year)*525600;
     return diff;
 }
 
@@ -151,13 +148,12 @@ int main(int argc, char* argv[]) {
     char *pwd_log;
     char *pwd;
     const char s[2] = " ";
-    struct users users_list;
     int i,y,z,q;
     int k = 0;
-    int cont = 0;
+    
     char msg_signup[N];
     FILE *f1; //file contenente tutti gli username con le relative password
-    FILE *f2;
+
     FILE *f3;
     FILE *f5;
     FILE *f_estr;
@@ -166,14 +162,14 @@ int main(int argc, char* argv[]) {
     FILE *f8;
     FILE *f9;
     int flag = 0;
-    const size_t line_size = 300;
+    
     char *lline = NULL;
     size_t length = 0;
     ssize_t read;
     char try[len];
 
     char buf[100];
-    char newbuf[N];
+    
     time_t t, next_t;
     struct tm *timeptr;
 
@@ -184,28 +180,21 @@ int main(int argc, char* argv[]) {
     FILE *f4;
     struct tm tmm2;
     int a = 0;
-    int l, j;
-    int b;
+    int j;
 
     char *tokl = NULL;
     char *tokl2 = NULL;
     char tokl22[N];
-    char tokl23[N];
     char tokl24[N];
     char *tokl26;
-
-    char *lline3 = NULL;
-    ssize_t read2;
-    size_t lenght2;
 
     FILE *f_utente;
     char nomefile[N];
 
     char *id_session = malloc(sizeof(char) * 11);
-    int importo_int;
-
+    
     struct Schedina sched;
-    long numero;
+    
     char *eptr, *eptr2;
 
     char importo[25];
@@ -246,6 +235,7 @@ int main(int argc, char* argv[]) {
     char superbuffer3[N];
     char superbuffer5[BUFFER_SIZE];
     char superbuffer6[BUFFER_SIZE];
+    char superbuffer7[BUFFER_SIZE];
 
     long n , n2;
     char* tokl3;
@@ -264,6 +254,7 @@ int main(int argc, char* argv[]) {
     int ni = 0; // quantità di numeri indovinati
 
     float riepilogo[5];
+    int vittoria = 0;
 
 
 
@@ -777,6 +768,8 @@ int main(int argc, char* argv[]) {
                                 f7 = fopen("/home/giuseppe/Scrivania/prossima_estrazione.txt","r");
                                 fgets(lline2,17,f7);
                                 strptime(lline2, "%d/%m/%Y-%H:%M", &next_estr);
+                            
+
                                 fclose(f7);
 
                                 f6 = fopen(nomefile, "a+");
@@ -807,6 +800,7 @@ int main(int argc, char* argv[]) {
 
                                     if (Diff(tmvg,next_estr) > 5 || Diff(tmvg,next_estr) == 5)
                                     {
+                                        printf("Differenzaaaaaaaaaa %d\n",Diff(tmvg,next_estr));
                                         contatore++;
 
                                         if (contatore == 1)
@@ -851,6 +845,7 @@ int main(int argc, char* argv[]) {
                                 f7 = fopen("/home/giuseppe/Scrivania/prossima_estrazione.txt","r");
                                 fgets(lline2,17,f7);
                                 strptime(lline2, "%d/%m/%Y-%H:%M", &next_estr);
+                                printf("Il mese della prossima estrazione è %d e il giorno è %d\n",next_estr.tm_mon, next_estr.tm_mday);
                                 fclose(f7);
 
                                 f6 = fopen(nomefile, "a+");
@@ -875,10 +870,13 @@ int main(int argc, char* argv[]) {
 
 
                                     strptime(tokl24, "%d/%m/%Y-%H:%M", &tmvg);
+                                    printf("%d %d %d - %d %d\n",tmvg.tm_mday,tmvg.tm_mon,tmvg.tm_year,tmvg.tm_hour,tmvg.tm_min);
+                                    printf ("%d %d %d - %d %d\n",next_estr.tm_mday,next_estr.tm_mon,next_estr.tm_year,next_estr.tm_hour,next_estr.tm_min);
 
                                        printf("%d\n",Diff(tmvg,next_estr));
 
                                     //free(superbuffer);
+                                    printf("Differenzaaaaaaaaa %d\n",Diff(tmvg,next_estr));
 
                                     if (Diff(tmvg,next_estr) < 5)
                                     {
@@ -1203,21 +1201,20 @@ int main(int argc, char* argv[]) {
                                    {
                                        tokl = strtok(lline5," ");
                                        tokl = strtok(NULL," ");
-                                      // printf("%s\n",tokl);
+                                       printf("%s\n",tokl);
 
-                                       if (strncmp(tokl, "0",1)!= 0)
+                                       if (strncmp(tokl, "0 E",3)!= 0)
                                        {
                                        strptime(tokl, "%d/%m/%Y-%H:%M", &estr_v);
                                        strcpy(data_estr_vincente,tokl);
-                                      // printf("%d/%d/%d- %d:%d\n",estr_v.tm_mday,estr_v.tm_mon,estr_v.tm_year,estr_v.tm_hour,estr_v.tm_min);
-                                       //printf("Differenza minuti: %d\n", Diff(ver_giocata.timestamp_giocata_v,estr_v));
+        
                                        }
 
                                        strcpy(ruota_v,strtok(NULL," "));
                                        
 
 
-
+                                      //  printf("VEDI VINCITA %d %d -- %d %d\n",estr_v.tm_mon,estr_v.tm_year, ver_giocata.timestamp_giocata_v.tm_mon,ver_giocata.timestamp_giocata_v.tm_year);
                                         if (Diff(estr_v, ver_giocata.timestamp_giocata_v) < 0 && Diff(estr_v, ver_giocata.timestamp_giocata_v) > -5  && strcmp(ver_giocata.ruote_v[i],"Tutte")== 0 && strcmp(ruota_v,"Estrazione") != 0)
                                        {
                                            printf("%s\n","Hai giocato tutte le ruote");
@@ -1256,8 +1253,16 @@ int main(int argc, char* argv[]) {
                                            
                                            
                                            ni = z;
+                                              vittoria = 0;
+                                        for (q = 0; q < 5; q++)
+                                        {
+                                            if (calcola_vincita(ver_giocata.dim_num - 1,ver_giocata.num_ruote - 1,q,ver_giocata.importi[q],ni) > 0)
+                                            {
+                                                vittoria ++;
+                                            }
+                                        }
                                            
-                                           if (ni > 0)
+                                           if (ni > 0 && vittoria > 0)
                                            {
                                             
                                            
@@ -1288,14 +1293,11 @@ int main(int argc, char* argv[]) {
                                                if (ver_giocata.importi[q] != 0 && (z == (q + 1) || z > (q + 1)))
                                                {
                                                    quanti_num = ver_giocata.dim_num - 1;
-                                                  // printf("\n%d\n%d\n%d\n%.2f\n",quanti_num,ver_giocata.num_ruote,q,ver_giocata.importi[q]);
-                                                  // printf("%s %.2f ", sched.puntate[q],ver_giocata.importi[q]);
                                                   
-                                                 //printf("%s %.2f ", sched.puntate[q], calcola_vincita(quanti_num,ver_giocata.num_ruote - 1,q,ver_giocata.importi[q],ni));
                                                  strcat(superbuffer6,sched.puntate[q]);
                                                  strcat(superbuffer6, " ");
                                                  
-                                                 sprintf(superbuffer6 + strlen(superbuffer6),"%.2f ", calcola_vincita(quanti_num,10,q,ver_giocata.importi[q],ni));
+                                                 sprintf(superbuffer6 + strlen(superbuffer6),"%.2f EURO ", calcola_vincita(quanti_num,10,q,ver_giocata.importi[q],ni));
                                                  //printf("Fattoriale di 3 è %d\n", Fattoriale(3));
                                                  riepilogo[q] += calcola_vincita(quanti_num,10,q,ver_giocata.importi[q],ni);
 
@@ -1344,7 +1346,38 @@ int main(int argc, char* argv[]) {
                                                
                                            }
                                            ni = z;
-                                           //printf("%s\n", "************************************");
+
+                                           vittoria = 0;
+                                        for (q = 0; q < 5; q++)
+                                        {
+                                            if (calcola_vincita(ver_giocata.dim_num - 1,ver_giocata.num_ruote - 1,q,ver_giocata.importi[q],ni) > 0)
+                                            {
+                                                vittoria ++;
+                                            }
+                                        }
+                                           if (ni > 0 && vittoria > 0)
+                                           {
+                                               /* code */
+                                           
+                                           
+                                          /* vittoria = 0;
+                                            for (h = 0; h < 5; h++)
+                                            {   
+                                            if (ver_giocata.importi[h] > 0)
+                                             {
+                                               vittoria ++;
+                                             }
+                                            }
+                                           
+                                           if (vittoria > 0)
+                                           {
+                                               */
+                                        
+                                        
+
+                                            
+                                           
+                                           
                                            strcat(superbuffer6, "*******************************\n");
                                            strcat(superbuffer6,"Estrazione del ");
                                            strcat(superbuffer6,data_estr_vincente);
@@ -1370,14 +1403,11 @@ int main(int argc, char* argv[]) {
                                                if (ver_giocata.importi[q] != 0 && (z == (q + 1) || z > (q + 1)))
                                                {
                                                    quanti_num = ver_giocata.dim_num - 1;
-                                                  // printf("\n%d\n%d\n%d\n%.2f\n",quanti_num,ver_giocata.num_ruote,q,ver_giocata.importi[q]);
-                                                  // printf("%s %.2f ", sched.puntate[q],ver_giocata.importi[q]);
                                                   
-                                                 //printf("%s %.2f ", sched.puntate[q], calcola_vincita(quanti_num,ver_giocata.num_ruote - 1,q,ver_giocata.importi[q],ni));
                                                  strcat(superbuffer6,sched.puntate[q]);
                                                  strcat(superbuffer6, " ");
                                                  
-                                                 sprintf(superbuffer6 + strlen(superbuffer6),"%.2f ", calcola_vincita(quanti_num,ver_giocata.num_ruote - 1,q,ver_giocata.importi[q],ni));
+                                                 sprintf(superbuffer6 + strlen(superbuffer6),"%.2f EURO ", calcola_vincita(quanti_num,ver_giocata.num_ruote - 1,q,ver_giocata.importi[q],ni));
                                                  //printf("Fattoriale di 3 è %d\n", Fattoriale(3));
                                                  riepilogo[q] += calcola_vincita(quanti_num,ver_giocata.num_ruote - 1,q,ver_giocata.importi[q],ni);
 
@@ -1388,7 +1418,8 @@ int main(int argc, char* argv[]) {
                                           strcat(superbuffer6,"\n");
 
                                          // printf("%s",superbuffer6);
-                                           
+                                            }
+                                        
                                            
                                        }
                                        
@@ -1416,7 +1447,7 @@ int main(int argc, char* argv[]) {
                             for ( q = 0; q < 5; q++)
                             {
                                // strcat(superbuffer6,"Vincite su ");
-                               sprintf(superbuffer6 + strlen(superbuffer6), "Vincite su %s %.2f\n",sched.puntate[q],riepilogo[q]);
+                               sprintf(superbuffer6 + strlen(superbuffer6), "Vincite su %s %.2f EURO\n",sched.puntate[q],riepilogo[q]);
                                riepilogo[q] = 0; 
 
                               //  printf("Vincite su %s %.2f\n",sched.puntate[q],riepilogo[q]);
@@ -1455,6 +1486,57 @@ int main(int argc, char* argv[]) {
                     }
 
 
+                    if (strncmp(buffer, "!esci", 5) == 0)
+                    {
+                        // Attendo dimensione dell'ID
+                        ret = recv(new_sd, (void *) &lmsg, sizeof(uint16_t), 0);
+                        // Rinconverto in formato host
+                        len = ntohs(lmsg);
+                        // ricevo l'ID
+                        ret = recv(new_sd, (void *) buffer_ID, len, 0);
+
+                        // ID CORRETTO:
+                        if (strcmp(buffer_ID, id_session) == 0)
+                        {
+                            printf("ID valido\n");
+                            fflush(stdout);
+
+                            strcpy(msg_signup, "ID valido\n");
+                            len_msg_signup = strlen(msg_signup) + 1;
+                            lmsg_signup = htons(len_msg_signup);
+                            ret = send(new_sd, (void *) &lmsg_signup, sizeof(uint16_t), 0);
+                            ret = send(new_sd, (void *) msg_signup, len_msg_signup, 0);
+
+
+                            strcpy(superbuffer7,"Disconnessione avvenuta\n");
+
+                            printf("%s",superbuffer7);
+
+
+
+
+                            //Mando le giocate ancora attive
+                            len_msg_signup = strlen(superbuffer7) + 1;
+                            lmsg_signup = htons(len_msg_signup);
+                            ret = send(new_sd, (void *) &lmsg_signup, sizeof(uint16_t), 0);
+                            ret = send(new_sd, (void *) superbuffer7, len_msg_signup, 0);
+
+
+
+                            close(new_sd);
+                            exit(0);
+
+
+
+                             } else {
+                            printf("ID non valido");
+                            strcpy(msg_signup, "ERROR_ID: Effettuare il LOGIN prima di poter cominciare a giocare\n");
+                            len_msg_signup = strlen(msg_signup) + 1;
+                            lmsg_signup = htons(len_msg_signup);
+                            ret = send(new_sd, (void *) &lmsg_signup, sizeof(uint16_t), 0);
+                            ret = send(new_sd, (void *) msg_signup, len_msg_signup, 0);
+                        }
+                    }
 
                     
 
