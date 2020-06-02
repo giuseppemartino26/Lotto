@@ -130,7 +130,7 @@ int Differenza(struct tm t1)
 
 
 int main(int argc, char* argv[]) {
-    //  printf("Ci sei?\n");
+   
     int sd, new_sd, ret;
     u_long len_msg_signup;
     int attempt = 0;
@@ -139,39 +139,47 @@ int main(int argc, char* argv[]) {
     struct sockaddr_in cl_addr;
     pid_t pid, pid_estr;
     uint16_t lmsg, lmsg_signup;
+    char msg_signup[N]; // stringa usata per le comunicazioni con il client
     char buffer[BUFFER_SIZE];
-    //  char buffer_ID[BUFFER_SIZE];
     char *buffer_ID = malloc(sizeof(char) * 11);
-    char *us;
+
+    char *us; //username inserito dall'utente nella signup
+    char *pwd; //password inserita dall'utente nella signup
+    int flag = 0; //uso un flag in signup e login per controllare che un username o password siano presenti o meno nel file
+    size_t length = 0; //lunghezza della riga letta dalla getline del file contenente username e password
+
+    char *us_log; //username letto riga per riga dal file degli utenti registrati
+    char *pwd_log; //password letto riga per riga dal file degli utenti registrati
+    struct tm *timeptr; //variabile di appoggio per calcolare il tempo corrente
+    char buf[100]; //orario in formato stringa
+
     char *temp;
-    char *us_log;
-    char *pwd_log;
-    char *pwd;
+    
+    
     const char s[2] = " ";
     int i,y,z,q;
     int k = 0;
     
-    char msg_signup[N];
-    FILE *f1; //file contenente tutti gli username con le relative password
 
-    FILE *f3;
+
+    FILE *f1; // file per salvare utenti e password
+    FILE *f3; //file per salvare i tentativi degli utenti con i relativi host che bisogna bloccare nel caso si facciano 3 tentativi di login errati
     FILE *f5;
     FILE *f_estr;
     FILE * f6;
     FILE *f7;
     FILE *f8;
     FILE *f9;
-    int flag = 0;
     
     char *lline = NULL;
-    size_t length = 0;
+    
     ssize_t read;
     char try[len];
 
-    char buf[100];
+    
     
     time_t t, next_t;
-    struct tm *timeptr;
+    
 
 
     char lline2[N];
@@ -271,9 +279,9 @@ int main(int argc, char* argv[]) {
             f7 = fopen("/home/giuseppe/Scrivania/prossima_estrazione.txt","w");
             strftime(buf, sizeof(buf), "%d/%m/%Y-%H:%M", next_estr_p);
             fprintf(f7, "%s ", buf);
-            //fprintf(f7,"%d/%d/%d-%d:%d",next_estr_p->tm_mday,next_estr_p->tm_mon,next_estr_p->tm_year + 1900,next_estr_p->tm_hour,next_estr_p->tm_min);
+            
             fclose(f7);
-            // fprintf(f_estr,"%d:%d\n",next_estr_p->tm_hour,next_estr_p->tm_min);
+            
 
             timeptr = localtime(&t);
 
@@ -359,43 +367,40 @@ int main(int argc, char* argv[]) {
 
             // Sono nel processo figlio
             if (pid == 0) {
-                close(sd);
+                close(sd); //chiudo il socket di ascolto
                 printf("Ciao sono il figlio\n");
                 fflush(stdout);
 
-
+                //Verifico che l'host non sia bloccato a causa dei tentativi di login errati
+                //controllo nel file "tentativi.txt" se c'è una coppia di valori IP e timestamp ultimo tentativo e controllo che la differenza tra l'orario attuale e quello sul file sia > 30 minuti
                 f4 = fopen("/home/giuseppe/Scrivania/tentativi.txt", "r");
 
                 memset(&tmm2, 0, sizeof(struct tm));
-                while (fgets(lline2, 100, f4) != NULL)
-                {
 
+                //leggo riga per riga il file "tentativi.txt"
+                while (fgets(lline2, 100, f4) != NULL) 
+                {
 
                     tokl = strtok(lline2, " ");
                     tokl2 = strtok(NULL, " ");
 
-
-
-
-                    //a = strlen(tokl2);
+                    //per ogni riga ho una coppia di valori IP e timestamp ultimo terzo tentativo
+                    //converto il timestamp da stringa di caratteri in struct tm
                     strncpy(tokl22, tokl2, 16);
-
-
                     strptime(tokl22, "%d/%m/%Y-%H:%M", &tmm2);
 
-                    printf("giorno: %d, ,mese: %d, ore: %d, minuti: %d\n", tmm2.tm_mday, tmm2.tm_mon + 1, tmm2.tm_hour,
-                           tmm2.tm_min);
-                    printf("La differenza in minuti è: %d\n", Differenza(tmm2));
-
+                    //salvo l'IP dell'host che sta provando a entrare in try 
                     inet_ntop(AF_INET, &cl_addr.sin_addr, try, len);
-                    if (strcmp(try, tokl) == 0 && Differenza(tmm2) < 30) {
-                        strcpy(msg_signup,
-                               "Non sono ancora trascorsi 30 minuti dal suo ultimo tentativo di accesso. Aspettare\n");
+
+                    if (strcmp(try, tokl) == 0 && Differenza(tmm2) < 30)
+                     {
+                        strcpy(msg_signup,"Non sono ancora trascorsi 30 minuti dal suo ultimo tentativo di accesso. Aspettare\n");
                         len_msg_signup = strlen(msg_signup) + 1;
                         lmsg_signup = htons(len_msg_signup);
                         ret = send(new_sd, (void *) &lmsg_signup, sizeof(uint16_t), 0);
                         ret = send(new_sd, (void *) msg_signup, len_msg_signup, 0);
 
+                    // Non sono ancora trascorsi 30 minuti, l'utente non può entrare con questo host: chiudo il file, il socket e termino il processo
                         fclose(f4);
                         close(new_sd);
                         exit(-1);
@@ -419,9 +424,7 @@ int main(int argc, char* argv[]) {
 
                     // Attendo dimensione del mesaggio
                     ret = recv(new_sd, (void *) &lmsg, sizeof(uint16_t), 0);
-                    printf("ok");
-                    fflush(stdout);
-
+                    
                     // Rinconverto in formato host
                     len = ntohs(lmsg);
 
@@ -434,124 +437,98 @@ int main(int argc, char* argv[]) {
                         continue;
                     }
 
-                    printf("%c", buffer[0]);
-                    fflush(stdout);
 
                     /* !signup */
-                    if (strncmp(buffer, "!signup", 7) == 0) {
-                        printf("Sono dentro\n");
-                        printf("Il buffer ricevuto è %s", buffer);
-
+                    if (strncmp(buffer, "!signup", 7) == 0)
+                     {
+                       
+                       // separo username e password inseriti dall'utente 
                         us = strtok(buffer, s);
                         us = strtok(NULL, s);
                         pwd = strtok(NULL, s);
 
-                        printf("us è %s\n", us);
-
-
+                        // controllo se nel file degli utenti registrati c'è già un utente con lo stesso username
                         f1 = fopen("/home/giuseppe/Scrivania/utenti.txt", "a+");
-
 
                         flag = 0;
                         while ((read = getline(&lline, &length, f1)) != -1) {
 
-                            //  if (strncmp(strtok(lline,s),us,strlen(us)) == 0 )
-                            if (strcmp(strtok(lline, s), us) == 0) {
-                                flag = 1;
-                                printf("Entrato nel blocco, setto flag a %d\n", flag);
-                                fflush(stdout);
-
-
+                            if (strcmp(strtok(lline, s), us) == 0)
+                             {
+                                flag = 1; //setto flag a 1 se ho trovato uno username uguale
+                                
+                                // se ho trovato nel file uno username uguale a quello scelto mando al client un messaggio invitandolo a riprovare la regiistrazione
                                 strcpy(msg_signup, "Username non disponibile, riprovare\n");
                                 len_msg_signup = strlen(msg_signup) + 1;
                                 lmsg_signup = htons(len_msg_signup);
                                 ret = send(new_sd, (void *) &lmsg_signup, sizeof(uint16_t), 0);
-                                ret = send(new_sd, (void *) msg_signup, len_msg_signup, 0);
-                                //break;
+                                ret = send(new_sd, (void *) msg_signup, len_msg_signup, 0);          
                             }
                         }
 
-
                         //USERNAME DISPONIBILE
-                        if (flag == 0) {
+                        if (flag == 0)
+                        {
+
+                            //salvo nel file username e password
                             fprintf(f1, "%s ", us);
                             fprintf(f1, "%s", pwd);
                             fclose(f1);
 
+                            //mando al client un messaggio di avvenuta registrazione
                             strcpy(msg_signup, "Registazione avvenuta con successo\n");
                             len_msg_signup = strlen(msg_signup) + 1;
                             lmsg_signup = htons(len_msg_signup);
                             ret = send(new_sd, (void *) &lmsg_signup, sizeof(uint16_t), 0);
                             ret = send(new_sd, (void *) msg_signup, len_msg_signup, 0);
-
-                            strcpy(nomefile, "/home/giuseppe/Scrivania/");
-                            printf("%s", nomefile);
-                            fflush(stdout);
-                            strcat(nomefile, us);
-                            strcat(nomefile, ".txt");
-                            printf("%s", nomefile);
-                            fflush(stdout);
-                            f_utente = fopen(nomefile, "a+");
-                            fclose(f_utente);
-
+                        
                         }
-
-
                         fclose(f1);
-                        if (lline) {
+                       /* if (lline) {
                             free(lline);
-                        }
+                        } */
                     }
+
+
 
                     /* login */
                     if (strncmp(buffer, "!login", 6) == 0) {
+
+                        // separo username e password inseriti dall'utente
                         us = strtok(buffer, s);
                         us = strtok(NULL, s);
                         pwd = strtok(NULL, s);
 
+                        // controllo nel file degli utenti se esiste la coppia username e password e se esiste setto il flag a 1
                         f1 = fopen("/home/giuseppe/Scrivania/utenti.txt", "r");
 
                         flag = 0;
+                        //leggo riga per riga, confronto username e password inseriti dall'utente (us_log e pwd_log) con quelli presenti nel file (us , pwd)
                         while ((read = getline(&lline, &length, f1)) != -1) {
+
                             us_log = strtok(lline, s);
                             pwd_log = strtok(NULL, s);
 
-
                             //DATI LOGIN CORRETTI
-                            if (strcmp(us_log, us) == 0 && strcmp(pwd_log, pwd) == 0) {
+                            if (strcmp(us_log, us) == 0 && strcmp(pwd_log, pwd) == 0)
+                             {
+                                 //creo un file relativo all'utente in cui salverò tutte le sue giocate
                                 strcpy(nomefile, "/home/giuseppe/Scrivania/giocate_");
-                                printf("%s", nomefile);
-                                fflush(stdout);
                                 strcat(nomefile, us);
                                 strcat(nomefile, ".txt");
-                                printf("%s", nomefile);
-                                fflush(stdout);
-                                /*f_utente = fopen(nomefile,"a+");
-                                fclose(f_utente); */
 
                                 flag = 1;
-                                printf("Entrato nel blocco, setto flag a %d\n", flag);
-                                fflush(stdout);
-
-                                //Salvo il session id e lo mando al client
+                                
+                                //Genero il session id e lo mando al client, insieme a un messaggio di accesso effettuato
                                 gen_random(id_session, 10);
-                                printf("%s", id_session);
-
+                                
                                 strcpy(msg_signup, "Accesso effettuato, id:");
-                                printf("%s", msg_signup);
-                                fflush(stdout);
                                 strcat(msg_signup, id_session);
 
-                                printf("%s", msg_signup);
-                                fflush(stdout);
-
-                                //  strcat(msg_signup,"\n");
                                 len_msg_signup = strlen(msg_signup) + 1;
                                 lmsg_signup = htons(len_msg_signup);
                                 ret = send(new_sd, (void *) &lmsg_signup, sizeof(uint16_t), 0);
                                 ret = send(new_sd, (void *) msg_signup, len_msg_signup, 0);
-
-                                // break;
                             }
                         }
 
@@ -568,27 +545,26 @@ int main(int argc, char* argv[]) {
 
                             //Se il client ha sbagliato per la terza volta
                             if (attempt == 3) {
-                                attempt = 0;
+                                attempt = 0; //resetto il numero di tentativi
 
-                                strcpy(msg_signup,
-                                       "EFFETTUATO IL MASSIMO DEI TENTATIVI, può riprovare l'accesso tra 30 minuti\n");
+                            //invio al client un messaggio per informarlo che ha fatto 3 tentativi
+                                strcpy(msg_signup,"EFFETTUATO IL MASSIMO DEI TENTATIVI, può riprovare l'accesso tra 30 minuti\n");
                                 len_msg_signup = strlen(msg_signup) + 1;
                                 lmsg_signup = htons(len_msg_signup);
                                 ret = send(new_sd, (void *) &lmsg_signup, sizeof(uint16_t), 0);
                                 ret = send(new_sd, (void *) msg_signup, len_msg_signup, 0);
 
-                                //Salvo il timestamp in "buf" e nel file "tentativi.txt"
+                                //Salvo l'orario in cui è stato effettuato il terzo tentativo e l'indirizzo IP dell'host dell'utente che ha provato in un file
                                 t = time(NULL);
                                 timeptr = localtime(&t);
-                                strftime(buf, sizeof(buf), "%d/%m/%Y-%H:%M", timeptr);
+                                strftime(buf, sizeof(buf), "%d/%m/%Y-%H:%M", timeptr); //converto l'orario in stringa di caratteri per salvarla nel file "tentativi.txt"
 
                                 f3 = fopen("/home/giuseppe/Scrivania/tentativi.txt", "a+");
-                                inet_ntop(AF_INET, &cl_addr.sin_addr, try, len);
-                                // fprintf(f3,"%s %d:%d-%d/%d/%d\n",try,timeptr->tm_hour, timeptr->tm_min, timeptr->tm_mday, timeptr->tm_mon + 1, timeptr->tm_year + 1900);
+                                inet_ntop(AF_INET, &cl_addr.sin_addr, try, len); 
                                 fprintf(f3, "%s %s\n", try, buf);
                                 fclose(f3);
 
-
+                            //chiudo la connessione e termino il processo
                                 close(new_sd);
                                 exit(-1);
 
@@ -599,7 +575,8 @@ int main(int argc, char* argv[]) {
                         fclose(f1);
                         if (lline) {
                             free(lline);
-                        }
+
+                        } 
                     }
 
                     if (strncmp(buffer, "!invia_giocata", 14) == 0) {

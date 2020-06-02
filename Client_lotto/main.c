@@ -67,10 +67,11 @@ int main(int argc, char* argv[]) {
     char buffer6[BUFFER_SIZE];
     char buffer7[BUFFER_SIZE];
 
+    int attempt = 0; //tentativi di login falliti
+
     const char st[2] = ":";
     char* tok;
-   // struct users users_list;
-    int attempt = 0;
+   
     char *id_session = malloc(sizeof(char)*10);
     id_session = "1111111111";
 
@@ -98,11 +99,12 @@ int main(int argc, char* argv[]) {
     //Ricevo il messaggio di risposta
     ret = recv(sd, (void*)buffer, len, 0);
 
-    if (strncmp(buffer,"Non",3)==0)
+    if (strncmp(buffer,"Non",3)==0) //Ho ricevuto messaggio dal server che dice che sono bloccato per il massimo numero di tentativi effettuatu
     {
         perror(buffer);
-        exit(-1);
         close(sd);
+        exit(-1);
+
     } else{
         printf("Connessione effettuata\n");
     }
@@ -141,20 +143,17 @@ int main(int argc, char* argv[]) {
         /* !signup */
        else if (strncmp(str_cmd, "!signup",7)==0)
         {
-            printf("okk\n");
+            
             // Invio al server la quantita di dati
             len = strlen(str_cmd) + 1; // Voglio inviare anche il carattere di fine stringa
             lmsg = htons(len); // Per passarlo al server lo converto in formato big endian
             ret = send(sd, (void*) &lmsg, sizeof(uint16_t), 0); // mando la dimensione del messaggio
 
             ret = send(sd, (void*) str_cmd, len, 0); // invio il messaggio
-            printf("Messaggio inviato\n");
-
+            
             //Attendo dimensione messaggio di risposta
             ret = recv(sd,(void*) &lmsg, sizeof(uint16_t),0 );
             len = ntohs(lmsg); // Rinconverto in formato host
-
-
 
             //Ricevo il messaggio di risposta
             ret = recv(sd, (void*)buffer, len, 0);
@@ -193,27 +192,17 @@ int main(int argc, char* argv[]) {
             ret = recv(sd,(void*) &lmsg, sizeof(uint16_t),0 );
             len = ntohs(lmsg); // Rinconverto in formato host
 
-
-
             //Ricevo il messaggio di risposta
             ret = recv(sd, (void*)buffer, len, 0);
 
-
-
-            if(ret < 0){
+            if(ret < 0)
+            {
                 perror("Errore in fase di ricezione: \n");
                 continue;
-
             }
 
-            /* printf("%s",buffer);
-             fflush(stdout);
-             continue;
-             */
 
-
-
-
+            //Se ricevo "A" dal server significa accesso effettuato e salvo l'id_session
             if(strncmp(buffer, "A",1) ==0)
             {
                 printf("%s\n", buffer);
@@ -222,33 +211,25 @@ int main(int argc, char* argv[]) {
                 id_session = strtok(NULL, ":");
 
                 printf("%s\n",id_session);
-             /*   tok = strtok(buffer,st);
-                tok = strtok(NULL,st);
-                strcpy(users_list.username,tok);
-                printf("%s", users_list.username);
-                */
-
-
+            
                 continue;
             }
 
+            //Se ricevo "E" significa che ho sbagliato username o password
             if(strncmp(buffer, "E",1) ==0)
             {
-                attempt ++;
+                attempt ++; //conto i tentativi di accesso falliti
                 printf("%s",buffer);
 
                 if (attempt == 3)
                 {
                     perror("Numero massimo di tentativi provati. Può effettuare altri 3 tentativi tra 30 minuti");
+                    //chiudo il socket
                     close(sd);
-                    // break;
                     exit(-1);
                 }
-
                 continue;
             }
-
-
 
         }
 
