@@ -233,6 +233,7 @@ int main(int argc, char* argv[]) {
 
         }
 
+        /* invia giocata */
         else if (strncmp(str_cmd, "!invia_giocata",14)==0)
         {
             len = strlen(str_cmd) + 1;

@@ -28,7 +28,7 @@ struct Giocata_V
     int numeri_indovinati[5];
 };
 
-
+//struttura di una schedina giocata
 struct Schedina
 {
     struct tm timestamp_giocata;
@@ -153,6 +153,9 @@ int main(int argc, char* argv[]) {
     struct tm *timeptr; //variabile di appoggio per calcolare il tempo corrente
     char buf[100]; //orario in formato stringa
 
+    char numeri[N]; //stringa di appoggio per salvare i numeri giocati dall'utente
+    int dimensione = 0; // quantità di numeri giocati dall'utente
+
     char *temp;
     
     
@@ -205,10 +208,10 @@ int main(int argc, char* argv[]) {
     
     char *eptr, *eptr2;
 
-    char importo[25];
-    char numeri[N];
+    char importo[25]; //stringa per salvare gli importi giocati dall'utente
+    
 
-    int dimensione = 0;
+    
     int numero_estr = 1; //intero utile per trovare le ultime n estrazioni
 
     int numero_estrazioni;
@@ -296,9 +299,7 @@ int main(int argc, char* argv[]) {
 
 
                 fprintf(f_estr, "%s %s%s", buf, ruote[i], spazi[i]);
-                /* for (l = 0; l < 10 - strlen(ruote[i]); l++) {
-                     fprintf(f_estr, " ");                      //aggiungo spazi per allineare i numeri <-- DA PROBLEMI ALLA invia_giocata
-                 }*/
+                
                 for (j = 0; j < 90; j++) {
                     array[j] = j;
                 }
@@ -579,6 +580,7 @@ int main(int argc, char* argv[]) {
                         } 
                     }
 
+                   /* invia giocata */
                     if (strncmp(buffer, "!invia_giocata", 14) == 0) {
                         printf("Giocata ricevuta\n");
                         fflush(stdout);
@@ -591,11 +593,10 @@ int main(int argc, char* argv[]) {
                         ret = recv(new_sd, (void *) buffer_ID, len, 0);
 
                         // ID CORRETTO:
-                        if (strcmp(buffer_ID, id_session) == 0) {
+                        if (strcmp(buffer_ID, id_session) == 0)
+                        {
                             printf("ID valido\n");
                             fflush(stdout);
-
-                            printf("%s\n", nomefile);
 
                             strcpy(msg_signup, "ID valido\n");
                             len_msg_signup = strlen(msg_signup) + 1;
@@ -603,105 +604,90 @@ int main(int argc, char* argv[]) {
                             ret = send(new_sd, (void *) &lmsg_signup, sizeof(uint16_t), 0);
                             ret = send(new_sd, (void *) msg_signup, len_msg_signup, 0);
 
+                            //calcolo data e ora della giocata e le salvo in una stringa, buf
                             t = time(NULL);
                             timeptr = localtime(&t);
                             strftime(buf, sizeof(buf), "%d/%m/%Y-%H:%M", timeptr);
 
-                            f5 = fopen(nomefile, "a+");
-                            fprintf(f5, "%s", buf);
-                            fclose(f5);
-
+                            // spezzo il buffer ricevuto dal client salvando nella schedina Sched le ruote giocate
                             temp = &buffer[18];
                             tokl = strtok(temp, "-");
                             strcpy(sched.ruote_giocate, tokl);
-                            printf("%s\n", sched.ruote_giocate);
-                            fflush(stdout);
-                            f5 = fopen(nomefile, "a+");
-                            fprintf(f5, " %s* ", sched.ruote_giocate);
-                            fclose(f5);
-
+                            
+                            //numeri giocati
                             tokl = strtok(NULL, " ");
                             tokl = strtok(NULL, "-");
                             strcpy(numeri, tokl);
-                            printf("%s\n", numeri);
+                            printf("%s\n", numeri); // salvo i numeri giocati in una stringa 
                             strcat(numeri, "$");
-                            //printf("%s",numeri);
-
+                            
+                            //scandisco la stringa, converto i numeri da carattere a long e li salvo in memoria nel campo vettore di long numeri_giocati della schedina Sched
                             sched.numeri_giocati[0] = strtol(numeri, &eptr, 10);
-                            printf("%ld\n",sched.numeri_giocati[0]);
                             a = 0;
-                            printf("%c\n", *eptr+1);
-                            //while (*eptr != '$')
                             while (*eptr != '$')
                             {
                                 a++;
                                 sched.numeri_giocati[a] = strtol(eptr+1, &eptr, 10);
-
-                                printf("%d\n",a);
                             }
-                            dimensione = a;
-                            printf("La dimensione è %d\n", dimensione);
+
+                            dimensione = a; // in dimensione ho quanti numeri l'utente ha digitato
                             
-                            if (dimensione > 10)
+                            if (dimensione > 10) // controllo che l'utente non abbia digitato più di 10 numeri
                             {
                             strcpy(msg_signup, "ERRORE: puoi giocare un massimo di 10 numeri\n");
                             len_msg_signup = strlen(msg_signup) + 1;
                             lmsg_signup = htons(len_msg_signup);
                             ret = send(new_sd, (void *) &lmsg_signup, sizeof(uint16_t), 0);
                             ret = send(new_sd, (void *) msg_signup, len_msg_signup, 0);
-                            
                                 
-                            }else
+                            }else{
+                                // se i numeri inseriti dall'utente sono al massimo 10
+                                f5 = fopen(nomefile, "a+");
+                                fprintf(f5, "%s", buf); // stampa sul file data e ora giocata
+                                fprintf(f5, " %s* ", sched.ruote_giocate); //stampa su file le ruote giocate
+                                fclose(f5); 
+
+                            for ( j = 0; j < dimensione; ++j) //stampo sul file i numeri inseriti dall'utente
                             {
-
-                            
-                            
-
-
-                            for ( j = 0; j < dimensione; ++j) {
-                                printf("%ld ", sched.numeri_giocati[j]);
                                 f5 = fopen(nomefile, "a+");
                                 fprintf(f5, "%ld ", sched.numeri_giocati[j]);
                                 fclose(f5);
-
                             }
                             memset(numeri, 0, 100);
-                            printf("%s\n", numeri);
                             memset(importo,0,25);
 
-
-                            /* IMPORTO: Salvo la parte del buffer ricevuto relativo agli importi puntati nella stringa "importo", per poi convertire in float ogni singolo importo e salvarlo in sched.importo_giocato */
+                            /* IMPORTO: Salvo la parte del buffer ricevuto relativo agli importi puntati nella stringa "importo", per poi convertire in float ogni singolo importo e salvarlo in sched.importo_giocato e poi salvo nel file */
                             tokl = strtok(NULL, " ");
                             tokl = strtok(NULL, "\0");
                             strncpy(importo, tokl, strlen(tokl) - 1);
                             strcat(importo, "$");
 
                             sched.importo_giocato[0] = strtof(importo, &eptr);
-                            printf("%.2f ", sched.importo_giocato[0]);
                             f5 = fopen(nomefile, "a+");
-                            if (sched.importo_giocato[0] != 0) {
+                            if (sched.importo_giocato[0] != 0)
+                            {
                                 fprintf(f5, "* %.2f Estratto ", sched.importo_giocato[0]);
                             }
 
-                            for (i = 1; i < dimensione; i++) {
+                            for (i = 1; i < dimensione; i++)
+                            {
                                 sched.importo_giocato[i] = strtof(eptr, &eptr);
-                                printf("%.2f ", sched.importo_giocato[i]);
-                                if (sched.importo_giocato[i] != 0) {
+                                if (sched.importo_giocato[i] != 0)
+                                {
                                     fprintf(f5, "* %.2f ", sched.importo_giocato[i]);
                                     fprintf(f5, "%s ", sched.puntate[i]);
                                 }
-
                             }
                             fprintf(f5, "%c", '\n');
                             fclose(f5);
 
+                            //mando al client un messaggio informndolo che la giocata è stata correttamente effettuata
                             strcpy(msg_signup, "Giocata effettuata\n");
                             len_msg_signup = strlen(msg_signup) + 1;
                             lmsg_signup = htons(len_msg_signup);
                             ret = send(new_sd, (void *) &lmsg_signup, sizeof(uint16_t), 0);
                             ret = send(new_sd, (void *) msg_signup, len_msg_signup, 0);
                             }
-
 
                         } else {
                             printf("ID non valido");
@@ -711,9 +697,7 @@ int main(int argc, char* argv[]) {
                             ret = send(new_sd, (void *) &lmsg_signup, sizeof(uint16_t), 0);
                             ret = send(new_sd, (void *) msg_signup, len_msg_signup, 0);
                         }
-                        /* printf("%s",id_session);
-                        fflush(stdout);
-                         */
+                        
                     }
 
                     if (strncmp(buffer, "!vedi_giocate", 13) == 0)
