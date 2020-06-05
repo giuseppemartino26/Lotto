@@ -9,7 +9,6 @@
 #define BUFFER_SIZE 1024
 #define N 100
 
-
 void help_cmd(char string[])
 {
     char *token;
@@ -17,40 +16,40 @@ void help_cmd(char string[])
     token = strtok(string, s);
     token = strtok(NULL, s); // in token ho il comando che deve essere descritto
 
-    if (strncmp(token,"!signup",7)==0)
+    if (strncmp(token, "!signup", 7) == 0)
     {
         printf("!signup <username> <password> --> crea un nuovo utente");
     }
-    if (strncmp(token,"!help",5)==0)
+    if (strncmp(token, "!help", 5) == 0)
     {
         printf("!help <comando> --> mostra i dettagli di un comando\n");
     }
-    if (strncmp(token,"!login",6)==0)
+    if (strncmp(token, "!login", 6) == 0)
     {
         printf("!login <username> <password> --> autentica un utente\n");
     }
-    if (strncmp(token,"!invia_giocata",14)==0)
+    if (strncmp(token, "!invia_giocata", 14) == 0)
     {
         printf("!invia_giocata g --> invia una giocata g al server\n");
     }
-    if (strncmp(token,"!vedi_giocate",13)==0)
+    if (strncmp(token, "!vedi_giocate", 13) == 0)
     {
         printf("!vedi_giocate <tipo> --> visualizza le giocate precedenti dove tipo = {0,1}\\n\"\n"
                "               \" e permette di visualizzare le giocate passate ‘0’\\n\"\n"
                "               \"oppure le giocate attive ‘1’ (ancora non estratte)\\n\"");
     }
-    if (strncmp(token,"!vedi_estrazione",15)==0)
+    if (strncmp(token, "!vedi_estrazione", 15) == 0)
     {
         printf("!vedi_estrazione <n> <ruota> --> mostra i numeri delle ultime n estrazioni\nsulla ruota specificata\n");
     }
-    if (strncmp(token,"!esci",5)==0)
+    if (strncmp(token, "!esci", 5) == 0)
     {
         printf("!esci --> termina il client\n");
     }
 }
 
-
-int main(int argc, char* argv[]) {
+int main(int argc, char *argv[])
+{
     int ret, sd;
     u_long len;
     uint16_t lmsg;
@@ -70,11 +69,10 @@ int main(int argc, char* argv[]) {
     int attempt = 0; //tentativi di login falliti
 
     const char st[2] = ":";
-    char* tok;
-   
-    char *id_session = malloc(sizeof(char)*10);
-    id_session = "1111111111";
+    char *tok;
 
+    char *id_session = malloc(sizeof(char) * 10);
+    id_session = "1111111111";
 
     /* Creazione socket */
     sd = socket(AF_INET, SOCK_STREAM, 0);
@@ -86,36 +84,37 @@ int main(int argc, char* argv[]) {
     srv_addr.sin_port = htons(4242);
     inet_pton(AF_INET, "127.0.0.1", &srv_addr.sin_addr);
 
-    ret = connect(sd, (struct sockaddr*)&srv_addr, sizeof(srv_addr));
+    ret = connect(sd, (struct sockaddr *)&srv_addr, sizeof(srv_addr));
 
-    if(ret < 0){
+    if (ret < 0)
+    {
         perror("Errore in fase di connessione: \n");
         exit(-1);
     }
 
-    ret = recv(sd,(void*) &lmsg, sizeof(uint16_t),0 );
+    ret = recv(sd, (void *)&lmsg, sizeof(uint16_t), 0);
     // Rinconverto in formato host
-    len = ntohs(lmsg); 
+    len = ntohs(lmsg);
     //Ricevo il messaggio di risposta
-    ret = recv(sd, (void*)buffer, len, 0);
+    ret = recv(sd, (void *)buffer, len, 0);
 
-    if (strncmp(buffer,"Non",3)==0) //Ho ricevuto messaggio dal server che dice che sono bloccato per il massimo numero di tentativi effettuatu
+    if (strncmp(buffer, "Non", 3) == 0) //Ho ricevuto messaggio dal server che dice che sono bloccato per il massimo numero di tentativi effettuatu
     {
         perror(buffer);
         close(sd);
         exit(-1);
-
-    } else{
+    }
+    else
+    {
         printf("Connessione effettuata\n");
     }
-
-
 
     printf("Benvenuto nel gioco del lotto, digitare un comando o digitare '!help' per conoscere i comandi disponibili\n");
 
     while (1)
     {
-       
+        printf("Mi trovo all'inizio\n");
+
         fgets(str_cmd, BUFFER_SIZE, stdin); //Attendo input da tastiera
 
         /* help senza specificare il comando */
@@ -141,85 +140,85 @@ int main(int argc, char* argv[]) {
         }
 
         /* !signup */
-       else if (strncmp(str_cmd, "!signup",7)==0)
+        else if (strncmp(str_cmd, "!signup", 7) == 0)
         {
-            
-            // Invio al server la quantita di dati
-            len = strlen(str_cmd) + 1; // Voglio inviare anche il carattere di fine stringa
-            lmsg = htons(len); // Per passarlo al server lo converto in formato big endian
-            ret = send(sd, (void*) &lmsg, sizeof(uint16_t), 0); // mando la dimensione del messaggio
 
-            ret = send(sd, (void*) str_cmd, len, 0); // invio il messaggio
-            
+            // Invio al server la quantita di dati
+            len = strlen(str_cmd) + 1;                          // Voglio inviare anche il carattere di fine stringa
+            lmsg = htons(len);                                  // Per passarlo al server lo converto in formato big endian
+            ret = send(sd, (void *)&lmsg, sizeof(uint16_t), 0); // mando la dimensione del messaggio
+
+            ret = send(sd, (void *)str_cmd, len, 0); // invio il messaggio
+
             //Attendo dimensione messaggio di risposta
-            ret = recv(sd,(void*) &lmsg, sizeof(uint16_t),0 );
+            ret = recv(sd, (void *)&lmsg, sizeof(uint16_t), 0);
             len = ntohs(lmsg); // Rinconverto in formato host
 
             //Ricevo il messaggio di risposta
-            ret = recv(sd, (void*)buffer, len, 0);
+            ret = recv(sd, (void *)buffer, len, 0);
 
-            if(ret < 0){
+            if (ret < 0)
+            {
                 perror("Errore in fase di ricezione: \n");
                 continue;
             }
 
             // Ricevo U dal server nel caso in cui ci sia già un username, altrimenti ricevo R
-            if(strncmp(buffer, "U",1) ==0)
+            if (strncmp(buffer, "U", 1) == 0)
             {
                 printf("Username non disponibile, riprovare\n");
                 continue;
             }
 
-            if (strncmp(buffer,"R",1)== 0)
+            if (strncmp(buffer, "R", 1) == 0)
             {
                 printf("Registazione avvenuta con successo\n");
                 continue;
             }
-
         }
 
         /*login*/
-        else if (strncmp(str_cmd, "!login",6)==0){
+        else if (strncmp(str_cmd, "!login", 6) == 0)
+        {
             // Invio al server la quantita di dati
-            len = strlen(str_cmd) + 1; // Voglio inviare anche il carattere di fine stringa
-            lmsg = htons(len); // Per passarlo al server lo converto in formato big endian
-            ret = send(sd, (void*) &lmsg, sizeof(uint16_t), 0); // mando la dimensione del messaggio
+            len = strlen(str_cmd) + 1;                          // Voglio inviare anche il carattere di fine stringa
+            lmsg = htons(len);                                  // Per passarlo al server lo converto in formato big endian
+            ret = send(sd, (void *)&lmsg, sizeof(uint16_t), 0); // mando la dimensione del messaggio
 
-            ret = send(sd, (void*) str_cmd, len, 0); // invio il messaggio
+            ret = send(sd, (void *)str_cmd, len, 0); // invio il messaggio
             printf("Messaggio inviato\n");
 
             //Attendo dimensione messaggio di risposta
-            ret = recv(sd,(void*) &lmsg, sizeof(uint16_t),0 );
+            ret = recv(sd, (void *)&lmsg, sizeof(uint16_t), 0);
             len = ntohs(lmsg); // Rinconverto in formato host
 
             //Ricevo il messaggio di risposta
-            ret = recv(sd, (void*)buffer, len, 0);
+            ret = recv(sd, (void *)buffer, len, 0);
 
-            if(ret < 0)
+            if (ret < 0)
             {
                 perror("Errore in fase di ricezione: \n");
                 continue;
             }
 
-
             //Se ricevo "A" dal server significa accesso effettuato e salvo l'id_session
-            if(strncmp(buffer, "A",1) ==0)
+            if (strncmp(buffer, "A", 1) == 0)
             {
                 printf("%s\n", buffer);
 
                 id_session = strtok(buffer, ":");
                 id_session = strtok(NULL, ":");
 
-                printf("%s\n",id_session);
-            
+                printf("%s\n", id_session);
+
                 continue;
             }
 
             //Se ricevo "E" significa che ho sbagliato username o password
-            if(strncmp(buffer, "E",1) ==0)
+            if (strncmp(buffer, "E", 1) == 0)
             {
-                attempt ++; //conto i tentativi di accesso falliti
-                printf("%s",buffer);
+                attempt++; //conto i tentativi di accesso falliti
+                printf("%s", buffer);
 
                 if (attempt == 3)
                 {
@@ -230,221 +229,170 @@ int main(int argc, char* argv[]) {
                 }
                 continue;
             }
-
         }
 
         /* invia giocata */
-        else if (strncmp(str_cmd, "!invia_giocata",14)==0)
+        else if (strncmp(str_cmd, "!invia_giocata", 14) == 0)
         {
             len = strlen(str_cmd) + 1;
             lmsg = htons(len);
-            ret = send(sd, (void*) &lmsg, sizeof(uint16_t), 0);
-            ret = send(sd, (void*) str_cmd, len, 0);
+            ret = send(sd, (void *)&lmsg, sizeof(uint16_t), 0);
+            ret = send(sd, (void *)str_cmd, len, 0);
 
-           // Mando l'ID
+            // Mando l'ID
             len = strlen(id_session) + 1;
             lmsg = htons(len);
-            ret = send(sd, (void*) &lmsg, sizeof(uint16_t), 0);
-            ret = send(sd, (void*) id_session, len, 0);
+            ret = send(sd, (void *)&lmsg, sizeof(uint16_t), 0);
+            ret = send(sd, (void *)id_session, len, 0);
             //Ricevo l'ID
-            ret = recv(sd,(void*) &lmsg, sizeof(uint16_t),0 );
+            ret = recv(sd, (void *)&lmsg, sizeof(uint16_t), 0);
             len = ntohs(lmsg);
-            ret = recv(sd, (void*)buffer6, len, 0);
+            ret = recv(sd, (void *)buffer6, len, 0);
             //Se l'ID non è valido
-            if (strncmp(buffer6,"ERROR_ID",8)==0)
+            if (strncmp(buffer6, "ERROR_ID", 8) == 0)
             {
                 perror(buffer6);
                 continue;
             }
             //Ricevo il messaggio di giocata effettuata
-            ret = recv(sd,(void*) &lmsg, sizeof(uint16_t),0 );
+            ret = recv(sd, (void *)&lmsg, sizeof(uint16_t), 0);
             len = ntohs(lmsg);
-            ret = recv(sd, (void*)buffer6, len, 0);
-            printf("%s\n",buffer6);
-
+            ret = recv(sd, (void *)buffer6, len, 0);
+            printf("%s\n", buffer6);
         }
 
-        else if (strncmp(str_cmd, "!vedi_giocate",13)==0)
+        /* vedi giocate */
+        else if (strncmp(str_cmd, "!vedi_giocate", 13) == 0)
         {
             len = strlen(str_cmd) + 1;
             lmsg = htons(len);
-            ret = send(sd, (void*) &lmsg, sizeof(uint16_t), 0);
-            ret = send(sd, (void*) str_cmd, len, 0);
+            ret = send(sd, (void *)&lmsg, sizeof(uint16_t), 0);
+            ret = send(sd, (void *)str_cmd, len, 0);
 
             // Mando l'ID
             len = strlen(id_session) + 1;
             lmsg = htons(len);
-            ret = send(sd, (void*) &lmsg, sizeof(uint16_t), 0);
-            ret = send(sd, (void*) id_session, len, 0);
+            ret = send(sd, (void *)&lmsg, sizeof(uint16_t), 0);
+            ret = send(sd, (void *)id_session, len, 0);
             //Ricevo l'ID
-            ret = recv(sd,(void*) &lmsg, sizeof(uint16_t),0 );
+            ret = recv(sd, (void *)&lmsg, sizeof(uint16_t), 0);
             len = ntohs(lmsg);
-            ret = recv(sd, (void*)buffer, len, 0);
+            ret = recv(sd, (void *)buffer, len, 0);
             //Se l'ID non è valido
-            if (strncmp(buffer,"ERROR_ID",8)==0)
+            if (strncmp(buffer, "ERROR_ID", 8) == 0)
             {
                 perror(buffer);
                 continue;
             }
             //Ricevo le giocate e stampo a video
-            ret = recv(sd,(void*) &lmsg, sizeof(uint16_t),0 );
+            ret = recv(sd, (void *)&lmsg, sizeof(uint16_t), 0);
             len = ntohs(lmsg);
-            ret = recv(sd, (void*)buffer2, len, 0);
-            printf("%s",buffer2);
+            ret = recv(sd, (void *)buffer2, len, 0);
+            printf("%s", buffer2);
             printf("ciao");
-
-
-
-
-
-
         }
 
-        else if (strncmp(str_cmd, "!vedi_estrazione",16)==0)
+
+        else if (strncmp(str_cmd, "!vedi_estrazione", 16) == 0)
         {
             len = strlen(str_cmd) + 1;
             lmsg = htons(len);
-            ret = send(sd, (void*) &lmsg, sizeof(uint16_t), 0);
-            ret = send(sd, (void*) str_cmd, len, 0);
+            ret = send(sd, (void *)&lmsg, sizeof(uint16_t), 0);
+            ret = send(sd, (void *)str_cmd, len, 0);
 
             // Mando l'ID
             len = strlen(id_session) + 1;
             lmsg = htons(len);
-            ret = send(sd, (void*) &lmsg, sizeof(uint16_t), 0);
-            ret = send(sd, (void*) id_session, len, 0);
+            ret = send(sd, (void *)&lmsg, sizeof(uint16_t), 0);
+            ret = send(sd, (void *)id_session, len, 0);
             //Ricevo l'ID
-            ret = recv(sd,(void*) &lmsg, sizeof(uint16_t),0 );
+            ret = recv(sd, (void *)&lmsg, sizeof(uint16_t), 0);
             len = ntohs(lmsg);
-            ret = recv(sd, (void*)buffer, len, 0);
+            ret = recv(sd, (void *)buffer, len, 0);
             //Se l'ID non è valido
-            if (strncmp(buffer,"ERROR_ID",8)==0)
+            if (strncmp(buffer, "ERROR_ID", 8) == 0)
             {
                 perror(buffer);
                 continue;
             }
 
-            //Ricevo le giocate e stampo a video
-            ret = recv(sd,(void*) &lmsg, sizeof(uint16_t),0 );
-            len = ntohs(lmsg);
-            ret = recv(sd, (void*)buffer3, len, 0);
-            printf("%s",buffer3);
-
-        }
-
-
-
-        else if (strncmp(str_cmd, "!vedi_estrazione",16)==0) {
-            len = strlen(str_cmd) + 1;
-            lmsg = htons(len);
-            ret = send(sd, (void *) &lmsg, sizeof(uint16_t), 0);
-            ret = send(sd, (void *) str_cmd, len, 0);
-
-            // Mando l'ID
-            len = strlen(id_session) + 1;
-            lmsg = htons(len);
-            ret = send(sd, (void *) &lmsg, sizeof(uint16_t), 0);
-            ret = send(sd, (void *) id_session, len, 0);
-            //Ricevo l'ID
-            ret = recv(sd, (void *) &lmsg, sizeof(uint16_t), 0);
-            len = ntohs(lmsg);
-            ret = recv(sd, (void *) buffer, len, 0);
-            //Se l'ID non è valido
-            if (strncmp(buffer, "ERROR_ID", 8) == 0) {
-                perror(buffer);
-                continue;
-            }
-
             //Ricevo le estrazioni e stampo a video
-            ret = recv(sd, (void *) &mssg, sizeof(uint16_t), 0);
+            ret = recv(sd, (void *)&mssg, sizeof(uint16_t), 0);
             len = ntohs(mssg);
-            ret = recv(sd, (void *) buffer4, len, 0);
+            ret = recv(sd, (void *)buffer4, len, 0);
             printf("%s", buffer4);
-
-
         }
+        
 
-        else if (strncmp(str_cmd, "!vedi_vincite",13)==0) {
+        else if (strncmp(str_cmd, "!vedi_vincite", 13) == 0)
+        {
             len = strlen(str_cmd) + 1;
             lmsg = htons(len);
-            ret = send(sd, (void *) &lmsg, sizeof(uint16_t), 0);
-            ret = send(sd, (void *) str_cmd, len, 0);
+            ret = send(sd, (void *)&lmsg, sizeof(uint16_t), 0);
+            ret = send(sd, (void *)str_cmd, len, 0);
 
             // Mando l'ID
             len = strlen(id_session) + 1;
             lmsg = htons(len);
-            ret = send(sd, (void *) &lmsg, sizeof(uint16_t), 0);
-            ret = send(sd, (void *) id_session, len, 0);
+            ret = send(sd, (void *)&lmsg, sizeof(uint16_t), 0);
+            ret = send(sd, (void *)id_session, len, 0);
             //Ricevo l'ID
-            ret = recv(sd, (void *) &lmsg, sizeof(uint16_t), 0);
+            ret = recv(sd, (void *)&lmsg, sizeof(uint16_t), 0);
             len = ntohs(lmsg);
-            ret = recv(sd, (void *) buffer, len, 0);
+            ret = recv(sd, (void *)buffer, len, 0);
             //Se l'ID non è valido
-            if (strncmp(buffer, "ERROR_ID", 8) == 0) {
+            if (strncmp(buffer, "ERROR_ID", 8) == 0)
+            {
                 perror(buffer);
                 continue;
             }
 
             //Ricevo le estrazioni e stampo a video
-            ret = recv(sd, (void *) &mssg, sizeof(uint16_t), 0);
+            ret = recv(sd, (void *)&mssg, sizeof(uint16_t), 0);
             len = ntohs(mssg);
-            ret = recv(sd, (void *) buffer5, len, 0);
+            ret = recv(sd, (void *)buffer5, len, 0);
             printf("%s", buffer5);
-
-
         }
 
-
-        else if (strncmp(str_cmd, "!esci",5)==0) {
+        else if (strncmp(str_cmd, "!esci", 5) == 0)
+        {
             len = strlen(str_cmd) + 1;
             lmsg = htons(len);
-            ret = send(sd, (void *) &lmsg, sizeof(uint16_t), 0);
-            ret = send(sd, (void *) str_cmd, len, 0);
+            ret = send(sd, (void *)&lmsg, sizeof(uint16_t), 0);
+            ret = send(sd, (void *)str_cmd, len, 0);
 
             // Mando l'ID
             len = strlen(id_session) + 1;
             lmsg = htons(len);
-            ret = send(sd, (void *) &lmsg, sizeof(uint16_t), 0);
-            ret = send(sd, (void *) id_session, len, 0);
+            ret = send(sd, (void *)&lmsg, sizeof(uint16_t), 0);
+            ret = send(sd, (void *)id_session, len, 0);
             //Ricevo l'ID
-            ret = recv(sd, (void *) &lmsg, sizeof(uint16_t), 0);
+            ret = recv(sd, (void *)&lmsg, sizeof(uint16_t), 0);
             len = ntohs(lmsg);
-            ret = recv(sd, (void *) buffer, len, 0);
+            ret = recv(sd, (void *)buffer, len, 0);
             //Se l'ID non è valido
-            if (strncmp(buffer, "ERROR_ID", 8) == 0) {
+            if (strncmp(buffer, "ERROR_ID", 8) == 0)
+            {
                 perror(buffer);
                 continue;
             }
 
             //Ricevo le estrazioni e stampo a video
-            ret = recv(sd, (void *) &mssg, sizeof(uint16_t), 0);
+            ret = recv(sd, (void *)&mssg, sizeof(uint16_t), 0);
             len = ntohs(mssg);
-            ret = recv(sd, (void *) buffer7, len, 0);
+            ret = recv(sd, (void *)buffer7, len, 0);
             printf("%s", buffer7);
-            if (strcmp(buffer7,"Disconnessione avvenuta"))
+            if (strcmp(buffer7, "Disconnessione avvenuta"))
             {
                 close(sd);
                 exit(0);
             }
-            
-
-
         }
 
         else
         {
             printf("Formato del comando non valido. Riprovare\n");
         }
-        
-
-
-
-
-
-
-
-
-
-
     }
 
     return 0;
