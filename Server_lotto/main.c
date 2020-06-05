@@ -255,6 +255,7 @@ int main(int argc, char *argv[])
     float riepilogo[5];
     int vittoria = 0;
 
+//Creo un processo che ogni 5 minuti crei una estrazione, scrivendola in un file e calcoli l'orario della prossima estrazione
     pid_estr = fork();
 
     if (pid_estr == 0)
@@ -266,15 +267,16 @@ int main(int argc, char *argv[])
             t = time(NULL);
 
             next_t = time(NULL) + 300;        //in next_t ho l'orario della prossima estrazione
-            next_estr_p = localtime(&next_t); // salvo l'orario della prossima estrazione in una istanza di struct tm che userò per controllare se una estrazione è attiva o meno
+            next_estr_p = localtime(&next_t);
+
+             // salvo l'orario della prossima estrazione in una istanza di struct tm che userò per controllare se una estrazione è attiva o meno
             f7 = fopen("/home/giuseppe/Scrivania/prossima_estrazione.txt", "w");
             strftime(buf, sizeof(buf), "%d/%m/%Y-%H:%M", next_estr_p);
             fprintf(f7, "%s ", buf);
-
             fclose(f7);
 
-            timeptr = localtime(&t);
-
+            //scrivo l'orario in cui esce l'estrazione
+            timeptr = localtime(&t); 
             fprintf(f_estr, " O Estrazione del ");
             strftime(buf, sizeof(buf), "%d/%m/%Y-%H:%M", timeptr);
             fprintf(f_estr, "%s ", buf);
@@ -283,9 +285,9 @@ int main(int argc, char *argv[])
             for (i = 0; i < 11; i++)
             {
                 fprintf(f_estr, "%d ", numero_estr);
-
                 fprintf(f_estr, "%s %s%s", buf, ruote[i], spazi[i]);
 
+                //riempio i campi di un array con numeri casuali che saranno i numeri dell'estrazione
                 for (j = 0; j < 90; j++)
                 {
                     array[j] = j;
@@ -301,16 +303,14 @@ int main(int argc, char *argv[])
 
                 for (j = 0; j < 5; j++)
                 {
-
                     fprintf(f_estr, "%d ", (array[j]));
                 }
-
                 fprintf(f_estr, "\n");
             }
 
             fclose(f_estr);
-
-            sleep(300);
+            
+            sleep(300); //blocca il processo per 5 minuti e poi riprende per la prossima estrazione
             numero_estr++;
         }
     }
@@ -971,49 +971,47 @@ int main(int argc, char *argv[])
                             ret = send(new_sd, (void *)msg_signup, len_msg_signup, 0);
 
                             f8 = fopen(nomefile, "a+");
+                            //leggo riga per riga il file delle giocate dell'utente: per ogni riga c'è una schedina
+                            //salvo in memoria tutte le informazioni utili per calcolare la vincita di ogni schedina
                             while (fgets(lline2, 100, f8) != NULL)
                             {
                                 tokl = strtok(lline2, " ");
-
-                                strptime(tokl, "%d/%m/%Y-%H:%M", &ver_giocata.timestamp_giocata_v);
+                                strptime(tokl, "%d/%m/%Y-%H:%M", &ver_giocata.timestamp_giocata_v); //leggo e salvo l'orario della schedina
 
                                 i = 0;
                                 while (strncmp(tokl, "*", 1) != 0)
                                 {
                                     tokl = strtok(NULL, " ");
-                                    //printf("%s ", tokl);
                                     ver_giocata.ruote_v[i] = tokl;
                                     i++;
                                 }
-                                ver_giocata.num_ruote = i;
-                                //  printf("%d\n", ver_giocata.num_ruote);
+                                ver_giocata.num_ruote = i; //numero ruote giocate della schedina
+                                
 
                                 tokl = strtok(NULL, " ");
                                 for (y = 0; y < 5; y++)
                                 {
-                                    ver_giocata.numeri_giocati_v[y] = 0;
+                                    ver_giocata.numeri_giocati_v[y] = 0; //setto a 0 il vettore dei numeri giocati
                                 }
-                                // printf("%s\n",tokl);
+                                
+                                //leggo e salvo nel vettore i numeri giocati della schedina
                                 ver_giocata.numeri_giocati_v[0] = strtol(tokl, &eptr, 10);
-                                // printf("%ld\n",ver_giocata.numeri_giocati_v[0]);
-
                                 i = 1;
                                 while (strncmp(tokl, "*", 1) != 0)
                                 {
                                     tokl = strtok(NULL, " ");
                                     ver_giocata.numeri_giocati_v[i] = strtol(tokl, &eptr, 10);
-                                    // printf("%s\n",tokl);
-                                    // printf("%ld\n",ver_giocata.numeri_giocati_v[i]);
                                     i++;
                                 }
-                                ver_giocata.dim_num = i;
-                                // printf("Quanti numeri? %d\n",i - 1);
+                                ver_giocata.dim_num = i; //salvo quanti sono i numeri giocati della schedina
+                                
 
                                 for (q = 0; q < 5; q++)
                                 {
-                                    ver_giocata.importi[q] = 0;
+                                    ver_giocata.importi[q] = 0; //setto a 0 tutti gli elementi del vettore degli importi della schedina
                                 }
 
+                                //salvo gli importi nel vettore degli importi della schedina
                                 while (*tokl != '\n')
                                 {
                                     tokl = strtok(NULL, " ,*");
@@ -1042,59 +1040,54 @@ int main(int argc, char *argv[])
                                     imp_temp = strtof(tokl, &eptr);
                                 }
 
-                                printf("Numero ruote: %d\n", ver_giocata.num_ruote - 1);
-
+                                //per ogni ruota giocata
                                 for (i = 0; i < ver_giocata.num_ruote - 1; i++)
                                 {
+                                    //leggo le estrazioni 
                                     f9 = fopen("/home/giuseppe/Scrivania/estrazione.txt", "a+");
                                     while (fgets(lline5, 100, f9) != NULL)
                                     {
                                         tokl = strtok(lline5, " ");
                                         tokl = strtok(NULL, " ");
-                                        printf("%s\n", tokl);
-
-                                        if (strncmp(tokl, "0 E", 3) != 0)
+                                        
+                                        if (strncmp(tokl, "0 E", 3) != 0) //per saltare il "titolo di apertura"
                                         {
-                                            strptime(tokl, "%d/%m/%Y-%H:%M", &estr_v);
+                                            strptime(tokl, "%d/%m/%Y-%H:%M", &estr_v); //salvo il timestamp dell'estrazione considerata
                                             strcpy(data_estr_vincente, tokl);
                                         }
 
                                         strcpy(ruota_v, strtok(NULL, " "));
 
-                                        //  printf("VEDI VINCITA %d %d -- %d %d\n",estr_v.tm_mon,estr_v.tm_year, ver_giocata.timestamp_giocata_v.tm_mon,ver_giocata.timestamp_giocata_v.tm_year);
-                                        if (Diff(estr_v, ver_giocata.timestamp_giocata_v) < 0 && Diff(estr_v, ver_giocata.timestamp_giocata_v) > -5 && strcmp(ver_giocata.ruote_v[i], "Tutte") == 0 && strcmp(ruota_v, "Estrazione") != 0)
+                                       // se la ruota è "Tutte"
+                                        if (Diff(estr_v, ver_giocata.timestamp_giocata_v) < 0 && Diff(estr_v, ver_giocata.timestamp_giocata_v) > -5 && strcmp(ver_giocata.ruote_v[i], "Tutte") == 0 && strcmp(ruota_v, "Estrazione") != 0) // la schedina è relativa a un'estrazione se la differenza tra gli orari della schedina e dell'estrazione è < 5 minuti
                                         {
                                             printf("%s\n", "Hai giocato tutte le ruote");
-                                            //printf("Differenza %d\n",Diff(estr_v, ver_giocata.timestamp_giocata_v));
 
                                             j = 0;
                                             while (*tokl != '\n' && j < 5)
                                             {
                                                 tokl = strtok(NULL, " ");
-                                                vett_num_v[j] = strtol(tokl, &eptr, 10);
+                                                vett_num_v[j] = strtol(tokl, &eptr, 10); //salvo i numeri dell'estrazione in vett_num_v
                                                 printf("%d\n", vett_num_v[j]);
                                                 j++;
                                             }
 
                                             z = 0;
-                                            //memset(superbuffer6,0,BUFFER_SIZE);
                                             for (k = 0; k < 5; k++)
                                             {
                                                 for (y = 0; y < 5; y++)
                                                 {
-                                                    printf("Numero giocato %d è %ld\n", y, ver_giocata.numeri_giocati_v[y]);
                                                     if (vett_num_v[k] == ver_giocata.numeri_giocati_v[y])
                                                     {
                                                         z++;
-                                                        printf("Ho indovinato %d numeri\n", z);
-                                                        ver_giocata.numeri_indovinati[z] = vett_num_v[k];
-                                                        printf("%d\n", ver_giocata.numeri_indovinati[z]);
+       
+                                                        ver_giocata.numeri_indovinati[z] = vett_num_v[k]; //salvo i numeri indovinati                                                        
                                                     }
-                                                    //ver_giocata.numeri_giocati_v[y] = 0;
+                                            
                                                 }
                                             }
 
-                                            ni = z;
+                                            ni = z; //quanti numeri sono stati indovinati
                                             vittoria = 0;
                                             for (q = 0; q < 5; q++)
                                             {
@@ -1104,8 +1097,9 @@ int main(int argc, char *argv[])
                                                 }
                                             }
 
-                                            if (ni > 0 && vittoria > 0)
+                                            if (ni > 0 && vittoria > 0) //stampo solo se è stato vinto effettivamente qualcosa
                                             {
+                                                //preparo il buffer da mandare al client in cui ci saranno scritte le eventuali vincite
 
                                                 strcat(superbuffer6, "*******************************\n");
                                                 strcat(superbuffer6, "Estrazione del ");
@@ -1114,16 +1108,10 @@ int main(int argc, char *argv[])
                                                 strcat(superbuffer6, ruota_v);
                                                 strcat(superbuffer6, " : ");
 
-                                                // printf("Estrazione del %s:\n ",data_estr_vincente);
-                                                // printf("%s : ",ruota_v);
-
                                                 for (q = 0; q < z; q++)
                                                 {
-                                                    //  printf("%d ",ver_giocata.numeri_indovinati[q + 1]);
                                                     sprintf(superbuffer6 + strlen(superbuffer6), "%d ", ver_giocata.numeri_indovinati[q + 1]);
                                                 }
-
-                                                //  printf("%s",">> ");
                                                 strcat(superbuffer6, ">> ");
 
                                                 for (q = 0; q < 5; q++)
@@ -1131,30 +1119,26 @@ int main(int argc, char *argv[])
                                                     if (ver_giocata.importi[q] != 0 && (z == (q + 1) || z > (q + 1)))
                                                     {
                                                         quanti_num = ver_giocata.dim_num - 1;
-
                                                         strcat(superbuffer6, sched.puntate[q]);
                                                         strcat(superbuffer6, " ");
-
                                                         sprintf(superbuffer6 + strlen(superbuffer6), "%.2f EURO ", calcola_vincita(quanti_num, 11, q, ver_giocata.importi[q], ni));
-                                                        //printf("Fattoriale di 3 è %d\n", Fattoriale(3));
-                                                        riepilogo[q] += calcola_vincita(quanti_num, 11, q, ver_giocata.importi[q], ni);
+                                                        riepilogo[q] += calcola_vincita(quanti_num, 11, q, ver_giocata.importi[q], ni); //mantengo aggiornato il vettore di riepilogo delle vincite
                                                     }
                                                 }
-                                                // printf("%c",'\n');
                                                 strcat(superbuffer6, "\n");
                                             }
                                         }
 
-                                        if (Diff(estr_v, ver_giocata.timestamp_giocata_v) < 0 && Diff(estr_v, ver_giocata.timestamp_giocata_v) > -5 && strcmp(ver_giocata.ruote_v[i], ruota_v) == 0)
-                                        {
-                                            //printf("Differenza %d\n",Diff(estr_v, ver_giocata.timestamp_giocata_v));
 
+                                        //Giocate NON comprendenti la ruota "Tutte"
+                                        if (Diff(estr_v, ver_giocata.timestamp_giocata_v) < 0 && Diff(estr_v, ver_giocata.timestamp_giocata_v) > -5 && strcmp(ver_giocata.ruote_v[i], ruota_v) == 0) // considero solo le corrispondenze tra le ruote giocate della schedina e le ruote dell'estrazione corrispondenti
+                                        //il resto è come per "Tutte"
+                                        {
                                             j = 0;
                                             while (*tokl != '\n' && j < 5)
                                             {
                                                 tokl = strtok(NULL, " ");
                                                 vett_num_v[j] = strtol(tokl, &eptr, 10);
-                                                // printf("%d\n", vett_num_v[j]);
                                                 j++;
                                             }
 
@@ -1183,21 +1167,7 @@ int main(int argc, char *argv[])
                                             }
                                             if (ni > 0 && vittoria > 0)
                                             {
-                                                /* code */
-
-                                                /* vittoria = 0;
-                                            for (h = 0; h < 5; h++)
-                                            {   
-                                            if (ver_giocata.importi[h] > 0)
-                                             {
-                                               vittoria ++;
-                                             }
-                                            }
-                                           
-                                           if (vittoria > 0)
-                                           {
-                                               */
-
+                                                
                                                 strcat(superbuffer6, "*******************************\n");
                                                 strcat(superbuffer6, "Estrazione del ");
                                                 strcat(superbuffer6, data_estr_vincente);
@@ -1205,16 +1175,11 @@ int main(int argc, char *argv[])
                                                 strcat(superbuffer6, ruota_v);
                                                 strcat(superbuffer6, " : ");
 
-                                                // printf("Estrazione del %s:\n ",data_estr_vincente);
-                                                // printf("%s : ",ruota_v);
-
                                                 for (q = 0; q < z; q++)
                                                 {
-                                                    //  printf("%d ",ver_giocata.numeri_indovinati[q + 1]);
                                                     sprintf(superbuffer6 + strlen(superbuffer6), "%d ", ver_giocata.numeri_indovinati[q + 1]);
                                                 }
 
-                                                //  printf("%s",">> ");
                                                 strcat(superbuffer6, ">> ");
 
                                                 for (q = 0; q < 5; q++)
@@ -1227,14 +1192,11 @@ int main(int argc, char *argv[])
                                                         strcat(superbuffer6, " ");
 
                                                         sprintf(superbuffer6 + strlen(superbuffer6), "%.2f EURO ", calcola_vincita(quanti_num, ver_giocata.num_ruote - 1, q, ver_giocata.importi[q], ni));
-                                                        //printf("Fattoriale di 3 è %d\n", Fattoriale(3));
                                                         riepilogo[q] += calcola_vincita(quanti_num, ver_giocata.num_ruote - 1, q, ver_giocata.importi[q], ni);
                                                     }
                                                 }
-                                                // printf("%c",'\n');
+                                                
                                                 strcat(superbuffer6, "\n");
-
-                                                // printf("%s",superbuffer6);
                                             }
                                         }
                                     }
@@ -1242,17 +1204,13 @@ int main(int argc, char *argv[])
                                 }
                             }
                             fclose(f8);
-                            //printf("\n%s\n",superbuffer6);
 
+                            //Stampo il riepilogo delle vincite
                             strcat(superbuffer6, "\nRiepilogo vincite:\n");
-
                             for (q = 0; q < 5; q++)
                             {
-                                // strcat(superbuffer6,"Vincite su ");
                                 sprintf(superbuffer6 + strlen(superbuffer6), "Vincite su %s %.2f EURO\n", sched.puntate[q], riepilogo[q]);
                                 riepilogo[q] = 0;
-
-                                //  printf("Vincite su %s %.2f\n",sched.puntate[q],riepilogo[q]);
                             }
 
                             len_msg_signup = strlen(superbuffer6) + 1;
