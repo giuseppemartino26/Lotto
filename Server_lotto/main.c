@@ -1,5 +1,5 @@
 #define _GNU_SOURCE
-#define _XOPEN_SOURCE #include <stdio.h>
+#define _XOPEN_SOURCE 
 #define __USE_XOPEN
 #include <arpa/inet.h>
 #include <sys/types.h>
@@ -23,7 +23,7 @@ struct Giocata_V
     int dim_num;                   //quanti numeri sono stati giocati
     float importi[5];
     float importi_vinti[5];
-    int numeri_indovinati[5];
+    int numeri_indovinati[5];      //tutti i numeri indovinati
 };
 
 //struttura di una schedina giocata
@@ -36,13 +36,7 @@ struct Schedina
     char *puntate[5];
 };
 
-struct users
-{
-    char username[N];
-    //char password[N];
-    char session_id[10];
-};
-
+//Funzione che calcola il fattoriale di un numero
 int Fattoriale(int val)
 {
     int i;
@@ -52,32 +46,34 @@ int Fattoriale(int val)
     return fatt;
 }
 
+//calcola la vincita per una giocata, prende come parametri: quanti numeri sono stati giocati, il numero di ruote, l'importo giocato e quanti numeri sono stati indovinati
 float calcola_vincita(int ng, int nr, int x, float soldi, int n_i)
 {
     float vincita = 0;
     int k = Fattoriale(ng) / (Fattoriale(ng - (x + 1)) * Fattoriale(x + 1));
     int w = Fattoriale(n_i) / (Fattoriale(n_i - (x + 1)) * Fattoriale(x + 1));
 
+//vincita Estratto
     if (x == 0)
     {
         vincita = w * 11.23 * soldi / (nr * k);
     }
-
+//vincita Ambo
     if (x == 1)
     {
         vincita = w * 250 * soldi / (nr * k);
     }
-
+//vincita Terno
     if (x == 2)
     {
         vincita = w * 4500 * soldi / (nr * k);
     }
-
+//vincita Quaterna
     if (x == 3)
     {
         vincita = w * 120000 * soldi / (nr * k);
     }
-
+//vincita Cinquina
     if (x == 4)
     {
         vincita = w * 6000000 * soldi / (nr * k);
@@ -86,6 +82,7 @@ float calcola_vincita(int ng, int nr, int x, float soldi, int n_i)
     return vincita;
 }
 
+//Funzione per generare la stringa alfanumerica del session id
 void gen_random(char *s, const int len)
 {
     int i;
@@ -102,6 +99,7 @@ void gen_random(char *s, const int len)
     s[len] = 0;
 }
 
+//Funzione che ritorna la differenza in minuti tra due date
 int Diff(struct tm t1, struct tm t2)
 {
     int diff;
@@ -109,7 +107,7 @@ int Diff(struct tm t1, struct tm t2)
     return diff;
 }
 
-/* Funzione che ritorna la differenza in minuti tra un orario passato come parametro e l'ora attuale */ // NON MI PIACE, TROPPO COMPLESSA, PROVARE A ELIMINARE STRFTIME E STRPTIME
+/* Funzione che ritorna la differenza in minuti tra un orario passato come parametro e l'ora attuale */ 
 int Differenza(struct tm t1)
 {
     int diff;
@@ -130,9 +128,9 @@ int Differenza(struct tm t1)
 int main(int argc, char *argv[])
 {
 
-    int sd, new_sd, ret;
+    int sd, new_sd, ret; //socket
     u_long len_msg_signup;
-    int attempt = 0;
+    int attempt = 0; //intero per registrare il numero di tentativi di login falliti
     socklen_t len;
     struct sockaddr_in my_addr;
     struct sockaddr_in cl_addr;
@@ -154,62 +152,50 @@ int main(int argc, char *argv[])
 
     char numeri[N];     //stringa di appoggio per salvare i numeri giocati dall'utente
     int dimensione = 0; // quantità di numeri giocati dall'utente
-
-    char *temp;
-
     const char s[2] = " ";
-    int i, y, z, q;
+
+// interi utilizzati per cicli e contatori
+    int i, y, z, q, j,contatore, temprn;
     int k = 0;
+    int a = 0;
+    int contatore2 = 0;
 
-    FILE *f1; // file per salvare utenti e password
-    FILE *f3; //file per salvare i tentativi degli utenti con i relativi host che bisogna bloccare nel caso si facciano 3 tentativi di login errati
-    FILE *f5;
-    FILE *f_estr;
-    FILE *f6;
-    FILE *f7;
-    FILE *f8;
-    FILE *f9;
-
-    char *lline = NULL;
-
-    ssize_t read;
+    FILE *f1; // file per salvare utenti e password  
+    FILE *f4; //file per salvare i tentativi degli utenti con i relativi host che bisogna bloccare nel caso si facciano 3 tentativi di login errati
+    FILE *f5; //file giocate dell'utente
+    FILE *f_estr; //file estrazioni
+    FILE *f7; //file orario prossima estrazione
+    
     char try [len];
 
-    time_t t, next_t;
+    time_t t, next_t; //orario attuale e quello della prossima estrazione
+    struct tm tmm2; //timestamp terzo tentativo login fallito
 
-    char lline2[N];
-    char lline5[BUFFER_SIZE];
-    char lline4[N];
-    FILE *f4;
-    struct tm tmm2;
-    int a = 0;
-    int j;
-
-// Variabili per spezzare e gestire meglio le stringhe 
+// Variabili per spezzare e gestire le stringhe 
     char *tokl = NULL;
     char *tokl2 = NULL;
+    char *lline = NULL;
+    char *tokl3;
     char tokl22[N];
     char tokl24[N];
     char *tokl26;
+    char *temp;
+    char lline2[BUFFER_SIZE];
+    char lline5[BUFFER_SIZE];
+    char lline4[BUFFER_SIZE];
+    char *eptr, *eptr2;
+    ssize_t read;
 
-    FILE *f_utente;
-    char nomefile[N];
-
-    char *id_session = malloc(sizeof(char) * 11);
+    char nomefile[N]; //stringa contenente il nome del file delle giocate di un utente
+    char *id_session = malloc(sizeof(char) * 11); //puntatore a stringa alfanumerica per la session id
 
     struct Schedina sched;
 
-    char *eptr, *eptr2;
-
     char importo[25]; //stringa per salvare gli importi giocati dall'utente
-
     int numero_estr = 1; //intero utile per trovare le ultime n estrazioni
-
     int numero_estrazioni; //quantità di tutte le estrazioni che sono uscite
     int n_righe_f_estr = 1; // numero righe del file contenente tutte le estrazioni
 
-    float imp_temp;
-    int vett_num_v[5];
 
     sched.puntate[0] = "Estratto"; 
     sched.puntate[1] = "Ambo";
@@ -224,36 +210,34 @@ int main(int argc, char *argv[])
     struct tm tmvg; //per salvare l'orario di una giocata nella "!vedi_giocata"
     struct tm *next_estr_p; //puntatore a orario della prossima estrazione
     struct tm next_estr;    //orario della prossima estrazione
-    struct Giocata_V ver_giocata;
-    struct tm estr_v;
-
+    
 // buffer per i messaggi da mandare ai client
     char buffer_per_c[BUFFER_SIZE];
     char buffer_per_c2[BUFFER_SIZE];
     char buffer_per_c3[ BUFFER_SIZE];
-    char superbuffer5[BUFFER_SIZE];
+    char buffer_per_c4[BUFFER_SIZE];
     char superbuffer6[BUFFER_SIZE];
-    char superbuffer7[BUFFER_SIZE];
+    char sbuffer7[BUFFER_SIZE];
 
     long n; // numero estrazioni da visualizzare nella !vedi_estrazione
     long n2; // n2 è il numero della i-esima estrazione per i = {1,..,numero_estrazioni} nella !vedi_estrazione
-    char *tokl3;
 
-    int contatore;
-    int contatore2 = 0;
+    int array[5]; 
+    int randomIndex; //stringa alfanumerica per il session_id
+    
 
-    int flag2 = 1;
-
-    char ruota_v[N];
-    char data_estr_vincente[N];
-    int quanti_num;
-
-    int array[5];
-    int temprn, randomIndex;
+//Variabili usare in !vedi_vincite
+    char ruota_v[BUFFER_SIZE]; //ruote giocate
+    struct Giocata_V ver_giocata; //salvo le giocate dell'utente in una struttura per fare il confronto con le estrazioni
+    struct tm estr_v; //salvo in estr_v ora e data estrazione per confrontarli con quelle delle giocate
     int ni = 0; // quantità di numeri indovinati
-
+    char data_estr_vincente[N];
+    int quanti_num; //quantità di numeri giocati
+    float imp_temp; //importo puntato 
+    int vett_num_v[5]; //vettore contenente i numeri indovinati
     float riepilogo[5];
     int vittoria = 0;
+
 
 //Creo un processo che ogni 5 minuti crei una estrazione, scrivendola in un file e calcoli l'orario della prossima estrazione
     pid_estr = fork();
@@ -309,7 +293,7 @@ int main(int argc, char *argv[])
             }
 
             fclose(f_estr);
-            
+
             sleep(300); //blocca il processo per 5 minuti e poi riprende per la prossima estrazione
             numero_estr++;
         }
@@ -370,7 +354,7 @@ int main(int argc, char *argv[])
                     tokl = strtok(lline2, " ");
                     tokl2 = strtok(NULL, " ");
 
-                    //per ogni riga ho una coppia di valori IP e timestamp ultimo terzo tentativo
+                    //per ogni riga ho una coppia di valori IP e timestamp dell'ultimo terzo tentativo
                     //converto il timestamp da stringa di caratteri in struct tm
                     strncpy(tokl22, tokl2, 16);
                     strptime(tokl22, "%d/%m/%Y-%H:%M", &tmm2);
@@ -544,10 +528,10 @@ int main(int argc, char *argv[])
                                 timeptr = localtime(&t);
                                 strftime(buf, sizeof(buf), "%d/%m/%Y-%H:%M", timeptr); //converto l'orario in stringa di caratteri per salvarla nel file "tentativi.txt"
 
-                                f3 = fopen("/home/giuseppe/Scrivania/tentativi.txt", "a+");
+                                f4 = fopen("/home/giuseppe/Scrivania/tentativi.txt", "a+");
                                 inet_ntop(AF_INET, &cl_addr.sin_addr, try, len);
-                                fprintf(f3, "%s %s\n", try, buf);
-                                fclose(f3);
+                                fprintf(f4, "%s %s\n", try, buf); //scrivo nel file l'orario e l'indirizzo IP dell'host che ha sbagliato per 3 volte
+                                fclose(f4);
 
                                 //chiudo la connessione e termino il processo
                                 close(new_sd);
@@ -716,12 +700,12 @@ int main(int argc, char *argv[])
                                 fclose(f7);
 
                                 //leggo riga per riga il file delle giocate dell'utente
-                                f6 = fopen(nomefile, "a+");
+                                f5 = fopen(nomefile, "a+");
                                 memset(&tmvg, 0, sizeof(struct tm));
                                 memset(&lline2, 0, sizeof(lline2));
 
                                 contatore = 0;
-                                while (fgets(lline2, 100, f6) != NULL)
+                                while (fgets(lline2, 100, f5) != NULL)
                                 {
                                     tokl = strtok(lline2, " ");
                                     tokl2 = strtok(NULL, "\n"); //giocata
@@ -753,7 +737,7 @@ int main(int argc, char *argv[])
                                     }
                                 }
 
-                                fclose(f6);
+                                fclose(f5);
 
                                 if (contatore == 0)
                                 {
@@ -776,12 +760,12 @@ int main(int argc, char *argv[])
                                 strptime(lline2, "%d/%m/%Y-%H:%M", &next_estr);
                                 fclose(f7);
 
-                                f6 = fopen(nomefile, "a+");
+                                f5 = fopen(nomefile, "a+");
                                 memset(&tmvg, 0, sizeof(struct tm));
                                 memset(&lline2, 0, sizeof(lline2));
                                 
                                 contatore2 = 0;
-                                while (fgets(lline2, 100, f6) != NULL)
+                                while (fgets(lline2, 100, f5) != NULL)
                                 {
 
                                     tokl = strtok(lline2, " ");
@@ -812,7 +796,7 @@ int main(int argc, char *argv[])
                                         }
                                     }
                                 }
-                                fclose(f6);
+                                fclose(f5);
 
                                 //Mando le giocate attive (se ci sono)
                                 if (contatore2 == 0)
@@ -892,8 +876,6 @@ int main(int argc, char *argv[])
                                 }
                                 fclose(f_estr);
 
-                                printf("%s\n",buffer_per_c3);
-
                                 //Mando le estrazioni al client
                                 len_msg_signup = strlen(buffer_per_c3) + 1;
                                 lmsg_signup = htons(len_msg_signup);
@@ -931,7 +913,7 @@ int main(int argc, char *argv[])
                                 }
                                 fclose(f_estr);
 
-                                //Mando le estrazioni
+                                //Mando le estrazioni al client
                                 len_msg_signup = strlen(buffer_per_c3) + 1;
                                 lmsg_signup = htons(len_msg_signup);
                                 ret = send(new_sd, (void *)&lmsg_signup, sizeof(uint16_t), 0);
@@ -949,6 +931,7 @@ int main(int argc, char *argv[])
                         }
                     }
 
+                    /* vedi vincite */
                     if (strncmp(buffer, "!vedi_vincite", 13) == 0)
                     {
                         // Attendo dimensione dell'ID
@@ -970,10 +953,10 @@ int main(int argc, char *argv[])
                             ret = send(new_sd, (void *)&lmsg_signup, sizeof(uint16_t), 0);
                             ret = send(new_sd, (void *)msg_signup, len_msg_signup, 0);
 
-                            f8 = fopen(nomefile, "a+");
+                            f5 = fopen(nomefile, "a+");
                             //leggo riga per riga il file delle giocate dell'utente: per ogni riga c'è una schedina
                             //salvo in memoria tutte le informazioni utili per calcolare la vincita di ogni schedina
-                            while (fgets(lline2, 100, f8) != NULL)
+                            while (fgets(lline2, 100, f5) != NULL)
                             {
                                 tokl = strtok(lline2, " ");
                                 strptime(tokl, "%d/%m/%Y-%H:%M", &ver_giocata.timestamp_giocata_v); //leggo e salvo l'orario della schedina
@@ -1037,15 +1020,15 @@ int main(int argc, char *argv[])
                                         ver_giocata.importi[4] = imp_temp;
                                     }
 
-                                    imp_temp = strtof(tokl, &eptr);
+                                    imp_temp = strtof(tokl, &eptr); //converto la parte di stringa contenente l'importo puntato per la giocata in float 
                                 }
 
                                 //per ogni ruota giocata
                                 for (i = 0; i < ver_giocata.num_ruote - 1; i++)
                                 {
                                     //leggo le estrazioni 
-                                    f9 = fopen("/home/giuseppe/Scrivania/estrazione.txt", "a+");
-                                    while (fgets(lline5, 100, f9) != NULL)
+                                    f_estr = fopen("/home/giuseppe/Scrivania/estrazione.txt", "a+");
+                                    while (fgets(lline5, 100, f_estr) != NULL)
                                     {
                                         tokl = strtok(lline5, " ");
                                         tokl = strtok(NULL, " ");
@@ -1143,7 +1126,7 @@ int main(int argc, char *argv[])
                                             }
 
                                             z = 0;
-                                            memset(superbuffer5, 0, BUFFER_SIZE);
+                                            
                                             for (k = 0; k < 5; k++)
                                             {
                                                 for (y = 0; y < 5; y++)
@@ -1200,10 +1183,10 @@ int main(int argc, char *argv[])
                                             }
                                         }
                                     }
-                                    fclose(f9);
+                                    fclose(f_estr);
                                 }
                             }
-                            fclose(f8);
+                            fclose(f5);
 
                             //Stampo il riepilogo delle vincite
                             strcat(superbuffer6, "\nRiepilogo vincite:\n");
@@ -1230,6 +1213,7 @@ int main(int argc, char *argv[])
                         }
                     }
 
+                    /* esci */
                     if (strncmp(buffer, "!esci", 5) == 0)
                     {
                         // Attendo dimensione dell'ID
@@ -1251,22 +1235,20 @@ int main(int argc, char *argv[])
                             ret = send(new_sd, (void *)&lmsg_signup, sizeof(uint16_t), 0);
                             ret = send(new_sd, (void *)msg_signup, len_msg_signup, 0);
 
-                            strcpy(superbuffer7, "Disconnessione avvenuta\n");
+                            strcpy(sbuffer7, "Disconnessione avvenuta\n");
 
-                            printf("%s", superbuffer7);
-
-                            //Mando le giocate ancora attive
-                            len_msg_signup = strlen(superbuffer7) + 1;
+                            //Mando il messaggio di disconnessione al client
+                            len_msg_signup = strlen(sbuffer7) + 1;
                             lmsg_signup = htons(len_msg_signup);
                             ret = send(new_sd, (void *)&lmsg_signup, sizeof(uint16_t), 0);
-                            ret = send(new_sd, (void *)superbuffer7, len_msg_signup, 0);
+                            ret = send(new_sd, (void *)sbuffer7, len_msg_signup, 0);
 
-                            close(new_sd);
+                            close(new_sd); //chiudo il socket della comunicazione
                             exit(0);
                         }
                         else
                         {
-                            printf("ID non valido");
+                            //ID non valido
                             strcpy(msg_signup, "ERROR_ID: Effettuare il LOGIN prima di poter cominciare a giocare\n");
                             len_msg_signup = strlen(msg_signup) + 1;
                             lmsg_signup = htons(len_msg_signup);
