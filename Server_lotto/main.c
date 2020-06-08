@@ -112,14 +112,14 @@ int Differenza(struct tm t1)
 {
     int diff;
     time_t tt;
-    struct tm *tmm;
+    struct tm *tmm; 
     char buf[N];
     struct tm tmmn;
 
-    tt = time(NULL);
-    tmm = localtime(&tt);
-    strftime(buf, sizeof(buf), "%d/%m/%Y-%H:%M", tmm);
-    strptime(buf, "%d/%m/%Y-%H:%M", &tmmn);
+    tt = time(NULL); //calcolo l'ora attuale
+    tmm = localtime(&tt); //rappresentazione in 'struct tm' dell'ora attuale
+    strftime(buf, sizeof(buf), "%d/%m/%Y-%H:%M", tmm); //converto l'ora puntata da tmm in stringa
+    strptime(buf, "%d/%m/%Y-%H:%M", &tmmn); //converto da stringa in 'struct tm'
 
     diff = (tmmn.tm_min - t1.tm_min) + (tmmn.tm_hour - t1.tm_hour) * 60 + (tmmn.tm_mday - t1.tm_mday) * 1440 + (tmmn.tm_mon - t1.tm_mon) * 44640 + (tmmn.tm_year - t1.tm_year) * 525600;
     return diff;
@@ -132,13 +132,15 @@ int main(int argc, char *argv[])
     u_long len_msg_signup;
     int attempt = 0; //intero per registrare il numero di tentativi di login falliti
     socklen_t len;
-    struct sockaddr_in my_addr;
-    struct sockaddr_in cl_addr;
-    pid_t pid, pid_estr;
-    uint16_t lmsg, lmsg_signup;
+    struct sockaddr_in my_addr; //indirizzo server
+    struct sockaddr_in cl_addr; //indirizzo client
+    pid_t pid; 
+    pid_t pid_estr;
+    uint16_t lmsg; //dimensione messaggi ricevuti
+    uint16_t lmsg_signup; //dimensione messaggi inviati
     char msg_signup[N]; // stringa usata per le comunicazioni con il client
     char buffer[BUFFER_SIZE];
-    char *buffer_ID = malloc(sizeof(char) * 11);
+    char *buffer_ID = malloc(sizeof(char) * 11); //stringa per salvare l'ID ricevuto dal client
 
     char *us;          //username inserito dall'utente nella signup
     char *pwd;         //password inserita dall'utente nella signup
@@ -152,7 +154,6 @@ int main(int argc, char *argv[])
 
     char numeri[N];     //stringa di appoggio per salvare i numeri giocati dall'utente
     int dimensione = 0; // quantità di numeri giocati dall'utente
-    const char s[2] = " ";
 
 // interi utilizzati per cicli e contatori
     int i, y, z, q, j,contatore, temprn;
@@ -183,6 +184,7 @@ int main(int argc, char *argv[])
     char lline2[BUFFER_SIZE];
     char lline5[BUFFER_SIZE];
     char lline4[BUFFER_SIZE];
+    const char s[2] = " ";
     char *eptr, *eptr2;
     ssize_t read;
 
@@ -192,7 +194,7 @@ int main(int argc, char *argv[])
     struct Schedina sched;
 
     char importo[25]; //stringa per salvare gli importi giocati dall'utente
-    int numero_estr = 1; //intero utile per trovare le ultime n estrazioni
+    int numero_estr = 1; //intero utile per trovare le ultime n estrazioni, è un identificatore assegnato a tutte le righe di una stessa estrazione
     int numero_estrazioni; //quantità di tutte le estrazioni che sono uscite
     int n_righe_f_estr = 1; // numero righe del file contenente tutte le estrazioni
 
@@ -248,31 +250,30 @@ int main(int argc, char *argv[])
         {
             f_estr = fopen("estrazione.txt", "a+");
             fprintf(f_estr, "%d ", numero_estr);
-            t = time(NULL);
+            t = time(NULL); //ora attuale
 
             next_t = time(NULL) + 300;        //in next_t ho l'orario della prossima estrazione
-            next_estr_p = localtime(&next_t);
+            next_estr_p = localtime(&next_t); //converto in rappresentazione 'struct tm'
 
-             // salvo l'orario della prossima estrazione in una istanza di struct tm che userò per controllare se una estrazione è attiva o meno
-            f7 = fopen("prossima_estrazione.txt", "w");
-            strftime(buf, sizeof(buf), "%d/%m/%Y-%H:%M", next_estr_p);
-            fprintf(f7, "%s ", buf);
+            f7 = fopen("prossima_estrazione.txt", "w"); // nel file "prossima_estrazione" salvo data e ora della prossima estrazione
+            strftime(buf, sizeof(buf), "%d/%m/%Y-%H:%M", next_estr_p); //converto in stringa
+            fprintf(f7, "%s ", buf); //stampo nel file 
             fclose(f7);
 
             //scrivo l'orario in cui esce l'estrazione
             timeptr = localtime(&t); 
             fprintf(f_estr, " O Estrazione del ");
-            strftime(buf, sizeof(buf), "%d/%m/%Y-%H:%M", timeptr);
+            strftime(buf, sizeof(buf), "%d/%m/%Y-%H:%M", timeptr); //converto in stringa per scriverlo nel file delle estrazioni
             fprintf(f_estr, "%s ", buf);
             fprintf(f_estr, "*************\n");
 
             for (i = 0; i < 11; i++)
             {
-                fprintf(f_estr, "%d ", numero_estr);
-                fprintf(f_estr, "%s %s%s", buf, ruote[i], spazi[i]);
+                fprintf(f_estr, "%d ", numero_estr); //stampo l'identificatore dell'estrazione
+                fprintf(f_estr, "%s %s%s", buf, ruote[i], spazi[i]); // stampo, orario estrazione, ruota
 
                 //riempio i campi di un array con numeri casuali che saranno i numeri dell'estrazione
-                for (j = 0; j < 90; j++)
+                for (j = 0; j < 90; j++) 
                 {
                     array[j] = j;
                 }
@@ -285,6 +286,7 @@ int main(int argc, char *argv[])
                     array[randomIndex] = temprn;
                 }
 
+                //per ogni riga (quindi per ogni ruota) stampo i numeri estratti
                 for (j = 0; j < 5; j++)
                 {
                     fprintf(f_estr, "%d ", (array[j]));
@@ -316,7 +318,6 @@ int main(int argc, char *argv[])
 
         printf("Ascolto\n");
         ret = listen(sd, 10);
-printf("Prima della accepttt");
 
         if (ret < 0)
         {
@@ -330,7 +331,6 @@ printf("Prima della accepttt");
             len = sizeof(cl_addr);
 
             // Accetto nuove connessioni
-			printf("Prima della accept");
             new_sd = accept(sd, (struct sockaddr *)&cl_addr, &len);
             printf("Connessione accettata");
 
@@ -364,7 +364,7 @@ printf("Prima della accepttt");
                     //salvo l'IP dell'host che sta provando a entrare in try
                     inet_ntop(AF_INET, &cl_addr.sin_addr, try, len);
 
-                    if (strcmp(try, tokl) == 0 && Differenza(tmm2) < 30)
+                    if (strcmp(try, tokl) == 0 && Differenza(tmm2) < 30) //se l'indirizzo IP dell'host che prova a entrare e uguale a uno scritto nel file dei tentativi e l'ora in cui prova ad accedere è entro i 30 minuti dall'ultimo terzo tentativo di accesso
                     {
                         strcpy(msg_signup, "Non sono ancora trascorsi 30 minuti dal suo ultimo tentativo di accesso. Aspettare\n");
                         len_msg_signup = strlen(msg_signup) + 1;
@@ -420,7 +420,7 @@ printf("Prima della accepttt");
                         f1 = fopen("utenti.txt", "a+");
 
                         flag = 0;
-                        while ((read = getline(&lline, &length, f1)) != -1)
+                        while ((read = getline(&lline, &length, f1)) != -1) //leggo riga per riga il file degli utenti registrati e controllo per ogni riga
                         {
 
                             if (strcmp(strtok(lline, s), us) == 0)
@@ -697,20 +697,18 @@ printf("Prima della accepttt");
                                 strptime(lline2, "%d/%m/%Y-%H:%M", &next_estr);
                                 fclose(f7);
 
-                                //leggo riga per riga il file delle giocate dell'utente
+                                //leggo riga per riga il file delle giocate dell'utente, per ogni riga una giocata
                                 f5 = fopen(nomefile, "a+");
                                 memset(&tmvg, 0, sizeof(struct tm));
                                 memset(&lline2, 0, sizeof(lline2));
-
                                 contatore = 0;
                                 while (fgets(lline2, 100, f5) != NULL)
                                 {
                                     tokl = strtok(lline2, " ");
                                     tokl2 = strtok(NULL, "\n"); //giocata
 
-                                    strcpy(tokl24, tokl);
+                                    strcpy(tokl24, tokl); //salvo in tokl24 stringa contenente data e ora giocata
                                     tokl26 = malloc(strlen(tokl2));
-
                                     strcpy(tokl26, tokl2);
 
                                     //prelevo la stringa contenente data e ora della giocata, la converto in tm e l'assegno a tmvg
@@ -718,15 +716,15 @@ printf("Prima della accepttt");
                                     // se ci sono 5 minuti di differenza o più tra la data della giocata e la data dell'ultima estrazione, allora la schedina non è più attiva e la copio nel buffer che invierò al client
                                     if (Diff(tmvg, next_estr) > 5 || Diff(tmvg, next_estr) == 5)
                                     {
-                                        contatore++;
+                                        contatore++; //conto quante sono le giocate non più attive
 
-                                        if (contatore == 1)
+                                        if (contatore == 1) //solo una, la copio
                                         {
                                             strcpy(buffer_per_c, tokl26);
                                             free(tokl26);
                                             strcat(buffer_per_c, "\n");
                                         }
-                                        else
+                                        else //più di una, scrivo in append
                                         {
                                             strcat(buffer_per_c, tokl26);
                                             free(tokl26);
@@ -862,6 +860,7 @@ printf("Prima della accepttt");
 
                                 f_estr = fopen("estrazione.txt", "r");
                                 memset(buffer_per_c3, 0, BUFFER_SIZE);
+                                //leggo riga per riga dal file delle estrazioni
                                 while (fgets(lline4, 100, f_estr) != NULL)
                                 {
                                     strcpy(lline2, lline4);
@@ -963,7 +962,7 @@ printf("Prima della accepttt");
                                 while (strncmp(tokl, "*", 1) != 0)
                                 {
                                     tokl = strtok(NULL, " ");
-                                    ver_giocata.ruote_v[i] = tokl;
+                                    ver_giocata.ruote_v[i] = tokl; //salvo in memoria le ruote giocate
                                     i++;
                                 }
                                 ver_giocata.num_ruote = i; //numero ruote giocate della schedina
@@ -1024,7 +1023,7 @@ printf("Prima della accepttt");
                                 //per ogni ruota giocata
                                 for (i = 0; i < ver_giocata.num_ruote - 1; i++)
                                 {
-                                    //leggo le estrazioni 
+                                    //leggo le estrazioni riga per riga
                                     f_estr = fopen("estrazione.txt", "a+");
                                     while (fgets(lline5, 100, f_estr) != NULL)
                                     {
@@ -1042,10 +1041,8 @@ printf("Prima della accepttt");
                                        // se la ruota è "Tutte"
                                         if (Diff(estr_v, ver_giocata.timestamp_giocata_v) < 0 && Diff(estr_v, ver_giocata.timestamp_giocata_v) > -5 && strcmp(ver_giocata.ruote_v[i], "Tutte") == 0 && strcmp(ruota_v, "Estrazione") != 0) // la schedina è relativa a un'estrazione se la differenza tra gli orari della schedina e dell'estrazione è < 5 minuti
                                         {
-                                            printf("%s\n", "Hai giocato tutte le ruote");
-
                                             j = 0;
-                                            while (*tokl != '\n' && j < 5)
+                                            while (*tokl != '\n' && j < 5) //leggo numero per numero della giocata fino alla fine della riga del file
                                             {
                                                 tokl = strtok(NULL, " ");
                                                 vett_num_v[j] = strtol(tokl, &eptr, 10); //salvo i numeri dell'estrazione in vett_num_v
@@ -1091,7 +1088,7 @@ printf("Prima della accepttt");
 
                                                 for (q = 0; q < z; q++)
                                                 {
-                                                    sprintf(superbuffer6 + strlen(superbuffer6), "%d ", ver_giocata.numeri_indovinati[q + 1]);
+                                                    sprintf(superbuffer6 + strlen(superbuffer6), "%d ", ver_giocata.numeri_indovinati[q + 1]); //scrivo nella stringa che mando al client i numeri indovinati
                                                 }
                                                 strcat(superbuffer6, ">> ");
 
@@ -1102,7 +1099,7 @@ printf("Prima della accepttt");
                                                         quanti_num = ver_giocata.dim_num - 1;
                                                         strcat(superbuffer6, sched.puntate[q]);
                                                         strcat(superbuffer6, " ");
-                                                        sprintf(superbuffer6 + strlen(superbuffer6), "%.2f EURO ", calcola_vincita(quanti_num, 11, q, ver_giocata.importi[q], ni));
+                                                        sprintf(superbuffer6 + strlen(superbuffer6), "%.2f EURO ", calcola_vincita(quanti_num, 11, q, ver_giocata.importi[q], ni)); //scrivo nel vettore che mando al client la vincita per quella schedina
                                                         riepilogo[q] += calcola_vincita(quanti_num, 11, q, ver_giocata.importi[q], ni); //mantengo aggiornato il vettore di riepilogo delle vincite
                                                     }
                                                 }
@@ -1194,6 +1191,7 @@ printf("Prima della accepttt");
                                 riepilogo[q] = 0;
                             }
 
+                            //Mando al client il buffer contenente le informazioni sulle vincite
                             len_msg_signup = strlen(superbuffer6) + 1;
                             lmsg_signup = htons(len_msg_signup);
                             ret = send(new_sd, (void *)&lmsg_signup, sizeof(uint16_t), 0);

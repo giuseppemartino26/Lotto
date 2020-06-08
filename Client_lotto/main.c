@@ -98,7 +98,7 @@ int main(int argc, char *argv[])
     //Ricevo il messaggio di risposta
     ret = recv(sd, (void *)buffer, len, 0);
 
-    if (strncmp(buffer, "Non", 3) == 0) //Ho ricevuto messaggio dal server che dice che sono bloccato per il massimo numero di tentativi effettuatu
+    if (strncmp(buffer, "Non", 3) == 0) //Ho ricevuto messaggio dal server che dice che sono bloccato per il massimo numero di tentativi effettuati
     {
         perror(buffer);
         close(sd);
@@ -116,13 +116,13 @@ int main(int argc, char *argv[])
 
         fgets(str_cmd, BUFFER_SIZE, stdin); //Attendo input da tastiera
 
-        /* help senza specificare il comando */
+        /* help  */
         if (strncmp(str_cmd, "!help ", 6) == 0)
         {
             help_cmd(str_cmd);
         }
 
-        /* !help  */
+        /* !help senza comando specificato */
         else if (strncmp(str_cmd, "!help", 5) == 0 && strlen(str_cmd) == 6)
         {
             printf("Sono disponibili i seguenti comandi:\n");
