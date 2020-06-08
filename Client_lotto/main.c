@@ -113,7 +113,6 @@ int main(int argc, char *argv[])
 
     while (1)
     {
-        printf("Mi trovo all'inizio\n");
 
         fgets(str_cmd, BUFFER_SIZE, stdin); //Attendo input da tastiera
 
@@ -126,17 +125,9 @@ int main(int argc, char *argv[])
         /* !help  */
         else if (strncmp(str_cmd, "!help", 5) == 0 && strlen(str_cmd) == 6)
         {
-            printf("Sono disponibili i seguenti comandi:\n"
-                   "1) !help <comando> --> mostra i dettagli di un comando\n"
-                   "2) !signup <username> <password> --> crea un nuovo utente \u2028\n"
-                   "3) !login <username> <password> --> autentica un utente\n"
-                   "4) !invia_giocata g --> invia una giocata g al server\n"
-                   "5) !vedi_giocate tipo --> visualizza le giocate precedenti dove tipo = {0,1}\n"
-                   " e permette di visualizzare le giocate passate ‘0’\n"
-                   "oppure le giocate attive ‘1’ (ancora non estratte)\n"
-                   "6) !vedi_estrazione <n> <ruota> --> mostra i numeri delle ultime n estrazioni\n"
-                   " sulla ruota specificata\n"
-                   "7) !esci --> termina il client\n");
+            printf("Sono disponibili i seguenti comandi:\n");
+                   
+                   //"7) !esci --> termina il client\n");
         }
 
         /* !signup */
@@ -289,7 +280,6 @@ int main(int argc, char *argv[])
             len = ntohs(lmsg);
             ret = recv(sd, (void *)buffer2, len, 0);
             printf("%s", buffer2);
-            printf("ciao");
         }
 
 

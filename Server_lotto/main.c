@@ -246,7 +246,7 @@ int main(int argc, char *argv[])
     {
         while (1)
         {
-            f_estr = fopen("/home/giuseppe/Scrivania/estrazione.txt", "a+");
+            f_estr = fopen("estrazione.txt", "a+");
             fprintf(f_estr, "%d ", numero_estr);
             t = time(NULL);
 
@@ -254,7 +254,7 @@ int main(int argc, char *argv[])
             next_estr_p = localtime(&next_t);
 
              // salvo l'orario della prossima estrazione in una istanza di struct tm che userò per controllare se una estrazione è attiva o meno
-            f7 = fopen("/home/giuseppe/Scrivania/prossima_estrazione.txt", "w");
+            f7 = fopen("prossima_estrazione.txt", "w");
             strftime(buf, sizeof(buf), "%d/%m/%Y-%H:%M", next_estr_p);
             fprintf(f7, "%s ", buf);
             fclose(f7);
@@ -316,6 +316,7 @@ int main(int argc, char *argv[])
 
         printf("Ascolto\n");
         ret = listen(sd, 10);
+printf("Prima della accepttt");
 
         if (ret < 0)
         {
@@ -329,6 +330,7 @@ int main(int argc, char *argv[])
             len = sizeof(cl_addr);
 
             // Accetto nuove connessioni
+			printf("Prima della accept");
             new_sd = accept(sd, (struct sockaddr *)&cl_addr, &len);
             printf("Connessione accettata");
 
@@ -343,7 +345,7 @@ int main(int argc, char *argv[])
 
                 //Verifico che l'host non sia bloccato a causa dei tentativi di login errati
                 //controllo nel file "tentativi.txt" se c'è una coppia di valori IP e timestamp ultimo tentativo e controllo che la differenza tra l'orario attuale e quello sul file sia > 30 minuti
-                f4 = fopen("/home/giuseppe/Scrivania/tentativi.txt", "r");
+                f4 = fopen("tentativi.txt", "a+");
 
                 memset(&tmm2, 0, sizeof(struct tm));
 
@@ -415,7 +417,7 @@ int main(int argc, char *argv[])
                         pwd = strtok(NULL, s);
 
                         // controllo se nel file degli utenti registrati c'è già un utente con lo stesso username
-                        f1 = fopen("/home/giuseppe/Scrivania/utenti.txt", "a+");
+                        f1 = fopen("utenti.txt", "a+");
 
                         flag = 0;
                         while ((read = getline(&lline, &length, f1)) != -1)
@@ -441,7 +443,7 @@ int main(int argc, char *argv[])
                             //salvo nel file username e password
                             fprintf(f1, "%s ", us);
                             fprintf(f1, "%s", pwd);
-                            fclose(f1);
+                            
 
                             //mando al client un messaggio di avvenuta registrazione
                             strcpy(msg_signup, "Registazione avvenuta con successo\n");
@@ -451,9 +453,7 @@ int main(int argc, char *argv[])
                             ret = send(new_sd, (void *)msg_signup, len_msg_signup, 0);
                         }
                         fclose(f1);
-                        /* if (lline) {
-                            free(lline);
-                        } */
+                        
                     }
 
                     /* login */
@@ -466,7 +466,7 @@ int main(int argc, char *argv[])
                         pwd = strtok(NULL, s);
 
                         // controllo nel file degli utenti se esiste la coppia username e password e se esiste setto il flag a 1
-                        f1 = fopen("/home/giuseppe/Scrivania/utenti.txt", "r");
+                        f1 = fopen("utenti.txt", "r");
 
                         flag = 0;
                         //leggo riga per riga, confronto username e password inseriti dall'utente (us_log e pwd_log) con quelli presenti nel file (us , pwd)
@@ -480,7 +480,7 @@ int main(int argc, char *argv[])
                             if (strcmp(us_log, us) == 0 && strcmp(pwd_log, pwd) == 0)
                             {
                                 //creo un file relativo all'utente in cui salverò tutte le sue giocate
-                                strcpy(nomefile, "/home/giuseppe/Scrivania/giocate_");
+                                strcpy(nomefile, "giocate_");
                                 strcat(nomefile, us);
                                 strcat(nomefile, ".txt");
 
@@ -510,6 +510,7 @@ int main(int argc, char *argv[])
                             ret = send(new_sd, (void *)msg_signup, len_msg_signup, 0);
 
                             attempt++; //incremento il numero di tentativi effettuati
+							printf("Tentativi effettuati sbagliati %d:", attempt);
 
                             //Se il client ha sbagliato per la terza volta
                             if (attempt == 3)
@@ -528,7 +529,7 @@ int main(int argc, char *argv[])
                                 timeptr = localtime(&t);
                                 strftime(buf, sizeof(buf), "%d/%m/%Y-%H:%M", timeptr); //converto l'orario in stringa di caratteri per salvarla nel file "tentativi.txt"
 
-                                f4 = fopen("/home/giuseppe/Scrivania/tentativi.txt", "a+");
+                                f4 = fopen("tentativi.txt", "a+");
                                 inet_ntop(AF_INET, &cl_addr.sin_addr, try, len);
                                 fprintf(f4, "%s %s\n", try, buf); //scrivo nel file l'orario e l'indirizzo IP dell'host che ha sbagliato per 3 volte
                                 fclose(f4);
@@ -540,10 +541,7 @@ int main(int argc, char *argv[])
                         }
 
                         fclose(f1);
-                        if (lline)
-                        {
-                            free(lline);
-                        }
+                        
                     }
 
                     /* invia giocata */
@@ -694,7 +692,7 @@ int main(int argc, char *argv[])
                             if (buffer[14] == '0')
                             {
                                 // salvo l'ora della prossima estrazione (scritta nel file "prossima_estrazione.txt") in next_estr
-                                f7 = fopen("/home/giuseppe/Scrivania/prossima_estrazione.txt", "r");
+                                f7 = fopen("prossima_estrazione.txt", "r");
                                 fgets(lline2, 17, f7);
                                 strptime(lline2, "%d/%m/%Y-%H:%M", &next_estr);
                                 fclose(f7);
@@ -755,7 +753,7 @@ int main(int argc, char *argv[])
                             //come la parte per le giocate non attive, cambia solo l'if alla riga 796
                             if (buffer[14] == '1')
                             {
-                                f7 = fopen("/home/giuseppe/Scrivania/prossima_estrazione.txt", "r");
+                                f7 = fopen("prossima_estrazione.txt", "r");
                                 fgets(lline2, 17, f7);
                                 strptime(lline2, "%d/%m/%Y-%H:%M", &next_estr);
                                 fclose(f7);
@@ -852,7 +850,7 @@ int main(int argc, char *argv[])
                             if (tokl == NULL) //nessuna ruota specificata --> tutte le ruote
                             {
                                 
-                                f_estr = fopen("/home/giuseppe/Scrivania/estrazione.txt", "r");
+                                f_estr = fopen("estrazione.txt", "r");
                                 n_righe_f_estr = 0;
                                 //leggo riga per riga dal file delle estrazioni
                                 while (fgets(lline2, 100, f_estr) != NULL)
@@ -862,7 +860,7 @@ int main(int argc, char *argv[])
                                 numero_estrazioni = n_righe_f_estr / 12; //per ogni estrazione ci sono 12 righe nel file
                                 fclose(f_estr);
 
-                                f_estr = fopen("/home/giuseppe/Scrivania/estrazione.txt", "r");
+                                f_estr = fopen("estrazione.txt", "r");
                                 memset(buffer_per_c3, 0, BUFFER_SIZE);
                                 while (fgets(lline4, 100, f_estr) != NULL)
                                 {
@@ -885,7 +883,7 @@ int main(int argc, char *argv[])
                             else //ruota specifica
                             {
                                 // come per tutte le ruote
-                                f_estr = fopen("/home/giuseppe/Scrivania/estrazione.txt", "r");
+                                f_estr = fopen("estrazione.txt", "r");
                                 n_righe_f_estr = 0;
                                 while (fgets(lline2, 100, f_estr) != NULL)
                                 {
@@ -894,7 +892,7 @@ int main(int argc, char *argv[])
                                 numero_estrazioni = n_righe_f_estr / 12;
                                 fclose(f_estr);
 
-                                f_estr = fopen("/home/giuseppe/Scrivania/estrazione.txt", "r");
+                                f_estr = fopen("estrazione.txt", "r");
                                 memset(buffer_per_c3, 0, BUFFER_SIZE);
                                 while (fgets(lline4, 100, f_estr) != NULL) 
                                 {
@@ -1027,7 +1025,7 @@ int main(int argc, char *argv[])
                                 for (i = 0; i < ver_giocata.num_ruote - 1; i++)
                                 {
                                     //leggo le estrazioni 
-                                    f_estr = fopen("/home/giuseppe/Scrivania/estrazione.txt", "a+");
+                                    f_estr = fopen("estrazione.txt", "a+");
                                     while (fgets(lline5, 100, f_estr) != NULL)
                                     {
                                         tokl = strtok(lline5, " ");
@@ -1267,4 +1265,3 @@ int main(int argc, char *argv[])
         }
     }
 }
-
