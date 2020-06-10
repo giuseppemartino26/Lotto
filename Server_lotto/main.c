@@ -869,8 +869,8 @@ int main(int argc, char *argv[])
 
                                     //prelevo la stringa contenente data e ora della giocata, la converto in tm e l'assegno a tmvg
                                     strptime(tokl24, "%d/%m/%Y-%H:%M", &tmvg);
-                                    // se ci sono 5 minuti di differenza o più tra la data della giocata e la data dell'ultima estrazione, allora la schedina non è più attiva e la copio nel buffer che invierò al client
-                                    if (Diff(tmvg, next_estr) > 5 || Diff(tmvg, next_estr) == 5)
+                                    // se ci sono più di 5 minuti di differenza tra la data della giocata e la data dell'ultima estrazione, allora la schedina non è più attiva e la copio nel buffer che invierò al client
+                                    if (Diff(tmvg, next_estr) > 5)
                                     {
                                         contatore++; //conto quante sono le giocate non più attive
 
@@ -914,7 +914,7 @@ int main(int argc, char *argv[])
                             }
 
                             //GIOCATE ATTIVE
-                            //come la parte per le giocate non attive, cambia solo l'if alla riga 796
+                            //come la parte per le giocate non attive
                             if (buffer[14] == '1')
                             {
                                 f7 = fopen("prossima_estrazione.txt", "r");
@@ -937,7 +937,7 @@ int main(int argc, char *argv[])
 
                                     strptime(tokl24, "%d/%m/%Y-%H:%M", &tmvg);
 
-                                    if (Diff(tmvg, next_estr) < 5) //se la prossima estrazione è tra meno di 5 minuti allora la giocata è ancora attiva
+                                    if (Diff(tmvg, next_estr) <= 5) //se la prossima estrazione è tra 5 minuti o meno allora la giocata è ancora attiva
                                     {
                                         contatore2++;
 
@@ -1287,7 +1287,7 @@ int main(int argc, char *argv[])
                                         strcpy(ruota_v, strtok(NULL, " "));
 
                                         // se la ruota è "Tutte"
-                                        if (Diff(estr_v, ver_giocata.timestamp_giocata_v) < 0 && Diff(estr_v, ver_giocata.timestamp_giocata_v) > -5 && strcmp(ver_giocata.ruote_v[i], "Tutte") == 0 && strcmp(ruota_v, "Estrazione") != 0) // la schedina è relativa a un'estrazione se la differenza tra gli orari della schedina e dell'estrazione è < 5 minuti
+                                        if (Diff(estr_v, ver_giocata.timestamp_giocata_v) < 0 && Diff(estr_v, ver_giocata.timestamp_giocata_v) >= -5 && strcmp(ver_giocata.ruote_v[i], "Tutte") == 0 && strcmp(ruota_v, "Estrazione") != 0) // la schedina è relativa a un'estrazione se la differenza tra gli orari della schedina e dell'estrazione è < 5 minuti
                                         {
                                             j = 0;
                                             while (*tokl != '\n' && j < 5) //leggo numero per numero della giocata fino alla fine della riga del file
@@ -1354,7 +1354,7 @@ int main(int argc, char *argv[])
                                         }
 
                                         //Giocate NON comprendenti la ruota "Tutte"
-                                        if (Diff(estr_v, ver_giocata.timestamp_giocata_v) < 0 && Diff(estr_v, ver_giocata.timestamp_giocata_v) > -5 && strcmp(ver_giocata.ruote_v[i], ruota_v) == 0) // considero solo le corrispondenze tra le ruote giocate della schedina e le ruote dell'estrazione corrispondenti
+                                        if (Diff(estr_v, ver_giocata.timestamp_giocata_v) < 0 && Diff(estr_v, ver_giocata.timestamp_giocata_v) >= -5 && strcmp(ver_giocata.ruote_v[i], ruota_v) == 0) // considero solo le corrispondenze tra le ruote giocate della schedina e le ruote dell'estrazione corrispondenti
                                         //il resto è come per "Tutte"
                                         {
                                             j = 0;
