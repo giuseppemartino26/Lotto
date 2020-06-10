@@ -1,5 +1,5 @@
 #define _GNU_SOURCE
-#define _XOPEN_SOURCE 
+#define _XOPEN_SOURCE
 #define __USE_XOPEN
 #include <arpa/inet.h>
 #include <sys/types.h>
@@ -23,7 +23,7 @@ struct Giocata_V
     int dim_num;                   //quanti numeri sono stati giocati
     float importi[5];
     float importi_vinti[5];
-    int numeri_indovinati[5];      //tutti i numeri indovinati
+    int numeri_indovinati[5]; //tutti i numeri indovinati
 };
 
 //struttura di una schedina giocata
@@ -53,27 +53,27 @@ float calcola_vincita(int ng, int nr, int x, float soldi, int n_i)
     int k = Fattoriale(ng) / (Fattoriale(ng - (x + 1)) * Fattoriale(x + 1));
     int w = Fattoriale(n_i) / (Fattoriale(n_i - (x + 1)) * Fattoriale(x + 1));
 
-//vincita Estratto
+    //vincita Estratto
     if (x == 0)
     {
         vincita = w * 11.23 * soldi / (nr * k);
     }
-//vincita Ambo
+    //vincita Ambo
     if (x == 1)
     {
         vincita = w * 250 * soldi / (nr * k);
     }
-//vincita Terno
+    //vincita Terno
     if (x == 2)
     {
         vincita = w * 4500 * soldi / (nr * k);
     }
-//vincita Quaterna
+    //vincita Quaterna
     if (x == 3)
     {
         vincita = w * 120000 * soldi / (nr * k);
     }
-//vincita Cinquina
+    //vincita Cinquina
     if (x == 4)
     {
         vincita = w * 6000000 * soldi / (nr * k);
@@ -107,19 +107,19 @@ int Diff(struct tm t1, struct tm t2)
     return diff;
 }
 
-/* Funzione che ritorna la differenza in minuti tra un orario passato come parametro e l'ora attuale */ 
+/* Funzione che ritorna la differenza in minuti tra un orario passato come parametro e l'ora attuale */
 int Differenza(struct tm t1)
 {
     int diff;
     time_t tt;
-    struct tm *tmm; 
+    struct tm *tmm;
     char buf[N];
     struct tm tmmn;
 
-    tt = time(NULL); //calcolo l'ora attuale
-    tmm = localtime(&tt); //rappresentazione in 'struct tm' dell'ora attuale
+    tt = time(NULL);                                   //calcolo l'ora attuale
+    tmm = localtime(&tt);                              //rappresentazione in 'struct tm' dell'ora attuale
     strftime(buf, sizeof(buf), "%d/%m/%Y-%H:%M", tmm); //converto l'ora puntata da tmm in stringa
-    strptime(buf, "%d/%m/%Y-%H:%M", &tmmn); //converto da stringa in 'struct tm'
+    strptime(buf, "%d/%m/%Y-%H:%M", &tmmn);            //converto da stringa in 'struct tm'
 
     diff = (tmmn.tm_min - t1.tm_min) + (tmmn.tm_hour - t1.tm_hour) * 60 + (tmmn.tm_mday - t1.tm_mday) * 1440 + (tmmn.tm_mon - t1.tm_mon) * 44640 + (tmmn.tm_year - t1.tm_year) * 525600;
     return diff;
@@ -127,18 +127,17 @@ int Differenza(struct tm t1)
 
 int main(int argc, char *argv[])
 {
-
     int sd, new_sd, ret; //socket
     u_long len_msg_signup;
     int attempt = 0; //intero per registrare il numero di tentativi di login falliti
     socklen_t len;
     struct sockaddr_in my_addr; //indirizzo server
     struct sockaddr_in cl_addr; //indirizzo client
-    pid_t pid; 
+    pid_t pid;
     pid_t pid_estr;
-    uint16_t lmsg; //dimensione messaggi ricevuti
+    uint16_t lmsg;        //dimensione messaggi ricevuti
     uint16_t lmsg_signup; //dimensione messaggi inviati
-    char msg_signup[N]; // stringa usata per le comunicazioni con il client
+    char msg_signup[N];   // stringa usata per le comunicazioni con il client
     char buffer[BUFFER_SIZE];
     char *buffer_ID = malloc(sizeof(char) * 11); //stringa per salvare l'ID ricevuto dal client
 
@@ -155,24 +154,26 @@ int main(int argc, char *argv[])
     char numeri[N];     //stringa di appoggio per salvare i numeri giocati dall'utente
     int dimensione = 0; // quantità di numeri giocati dall'utente
 
-// interi utilizzati per cicli e contatori
-    int i, y, z, q, j,contatore, temprn;
+    // interi utilizzati per cicli e contatori
+    int i, y, z, q, j, contatore, temprn;
     int k = 0;
     int a = 0;
     int contatore2 = 0;
 
-    FILE *f1; // file per salvare utenti e password  
-    FILE *f4; //file per salvare i tentativi degli utenti con i relativi host che bisogna bloccare nel caso si facciano 3 tentativi di login errati
-    FILE *f5; //file giocate dell'utente
+    FILE *f1;     // file per salvare utenti e password
+    FILE *f4;     //file per salvare i tentativi degli utenti con i relativi host che bisogna bloccare nel caso si facciano 3 tentativi di login errati
+    FILE *f5;     //file giocate dell'utente
     FILE *f_estr; //file estrazioni
-    FILE *f7; //file orario prossima estrazione
-    
-    char try [len];
+    FILE *f7;     //file orario prossima estrazione
+
+    char
+    try
+        [len];
 
     time_t t, next_t; //orario attuale e quello della prossima estrazione
-    struct tm tmm2; //timestamp terzo tentativo login fallito
+    struct tm tmm2;   //timestamp terzo tentativo login fallito
 
-// Variabili per spezzare e gestire le stringhe 
+    // Variabili per spezzare e gestire le stringhe
     char *tokl = NULL;
     char *tokl2 = NULL;
     char *lline = NULL;
@@ -182,24 +183,24 @@ int main(int argc, char *argv[])
     char *tokl26;
     char *temp;
     char lline2[BUFFER_SIZE];
+    char lline3[BUFFER_SIZE];
     char lline5[BUFFER_SIZE];
     char lline4[BUFFER_SIZE];
     const char s[2] = " ";
     char *eptr, *eptr2;
     ssize_t read;
 
-    char nomefile[N]; //stringa contenente il nome del file delle giocate di un utente
+    char nomefile[N];                             //stringa contenente il nome del file delle giocate di un utente
     char *id_session = malloc(sizeof(char) * 11); //puntatore a stringa alfanumerica per la session id
 
     struct Schedina sched;
 
-    char importo[25]; //stringa per salvare gli importi giocati dall'utente
-    int numero_estr = 1; //intero utile per trovare le ultime n estrazioni, è un identificatore assegnato a tutte le righe di una stessa estrazione
-    int numero_estrazioni; //quantità di tutte le estrazioni che sono uscite
+    char importo[25];       //stringa per salvare gli importi giocati dall'utente
+    int numero_estr = 1;    //intero utile per trovare le ultime n estrazioni, è un identificatore assegnato a tutte le righe di una stessa estrazione
+    int numero_estrazioni;  //quantità di tutte le estrazioni che sono uscite
     int n_righe_f_estr = 1; // numero righe del file contenente tutte le estrazioni
 
-
-    sched.puntate[0] = "Estratto"; 
+    sched.puntate[0] = "Estratto";
     sched.puntate[1] = "Ambo";
     sched.puntate[2] = "Terno";
     sched.puntate[3] = "Quaterna";
@@ -209,39 +210,37 @@ int main(int argc, char *argv[])
                      "Venezia", "Nazionale"};
     char *spazi[] = {"      ", "  ", "   ", "    ", "    ", "    ", "   ", "      ", "    ", "   ", " "};
 
-    struct tm tmvg; //per salvare l'orario di una giocata nella "!vedi_giocata"
+    struct tm tmvg;         //per salvare l'orario di una giocata nella "!vedi_giocata"
     struct tm *next_estr_p; //puntatore a orario della prossima estrazione
     struct tm next_estr;    //orario della prossima estrazione
-    
-// buffer per i messaggi da mandare ai client
+
+    // buffer per i messaggi da mandare ai client
     char buffer_per_c[BUFFER_SIZE];
     char buffer_per_c2[BUFFER_SIZE];
-    char buffer_per_c3[ BUFFER_SIZE];
+    char buffer_per_c3[BUFFER_SIZE];
     char buffer_per_c4[BUFFER_SIZE];
     char superbuffer6[BUFFER_SIZE];
     char sbuffer7[BUFFER_SIZE];
 
-    long n; // numero estrazioni da visualizzare nella !vedi_estrazione
+    long n;  // numero estrazioni da visualizzare nella !vedi_estrazione
     long n2; // n2 è il numero della i-esima estrazione per i = {1,..,numero_estrazioni} nella !vedi_estrazione
 
-    int array[5]; 
+    int array[5];
     int randomIndex; //stringa alfanumerica per il session_id
-    
 
-//Variabili usare in !vedi_vincite
-    char ruota_v[BUFFER_SIZE]; //ruote giocate
+    //Variabili usare in !vedi_vincite
+    char ruota_v[BUFFER_SIZE];    //ruote giocate
     struct Giocata_V ver_giocata; //salvo le giocate dell'utente in una struttura per fare il confronto con le estrazioni
-    struct tm estr_v; //salvo in estr_v ora e data estrazione per confrontarli con quelle delle giocate
-    int ni = 0; // quantità di numeri indovinati
+    struct tm estr_v;             //salvo in estr_v ora e data estrazione per confrontarli con quelle delle giocate
+    int ni = 0;                   // quantità di numeri indovinati
     char data_estr_vincente[N];
-    int quanti_num; //quantità di numeri giocati
-    float imp_temp; //importo puntato 
+    int quanti_num;    //quantità di numeri giocati
+    float imp_temp;    //importo puntato
     int vett_num_v[5]; //vettore contenente i numeri indovinati
     float riepilogo[5];
     int vittoria = 0;
 
-
-//Creo un processo che ogni 5 minuti crei una estrazione, scrivendola in un file e calcoli l'orario della prossima estrazione
+    //Creo un processo che ogni 5 minuti crei una estrazione, scrivendola in un file e calcoli l'orario della prossima estrazione
     pid_estr = fork();
 
     if (pid_estr == 0)
@@ -255,13 +254,13 @@ int main(int argc, char *argv[])
             next_t = time(NULL) + 300;        //in next_t ho l'orario della prossima estrazione
             next_estr_p = localtime(&next_t); //converto in rappresentazione 'struct tm'
 
-            f7 = fopen("prossima_estrazione.txt", "w"); // nel file "prossima_estrazione" salvo data e ora della prossima estrazione
+            f7 = fopen("prossima_estrazione.txt", "w");                // nel file "prossima_estrazione" salvo data e ora della prossima estrazione
             strftime(buf, sizeof(buf), "%d/%m/%Y-%H:%M", next_estr_p); //converto in stringa
-            fprintf(f7, "%s ", buf); //stampo nel file 
+            fprintf(f7, "%s ", buf);                                   //stampo nel file
             fclose(f7);
 
             //scrivo l'orario in cui esce l'estrazione
-            timeptr = localtime(&t); 
+            timeptr = localtime(&t);
             fprintf(f_estr, " O Estrazione del ");
             strftime(buf, sizeof(buf), "%d/%m/%Y-%H:%M", timeptr); //converto in stringa per scriverlo nel file delle estrazioni
             fprintf(f_estr, "%s ", buf);
@@ -269,11 +268,11 @@ int main(int argc, char *argv[])
 
             for (i = 0; i < 11; i++)
             {
-                fprintf(f_estr, "%d ", numero_estr); //stampo l'identificatore dell'estrazione
+                fprintf(f_estr, "%d ", numero_estr);                 //stampo l'identificatore dell'estrazione
                 fprintf(f_estr, "%s %s%s", buf, ruote[i], spazi[i]); // stampo, orario estrazione, ruota
 
                 //riempio i campi di un array con numeri casuali che saranno i numeri dell'estrazione
-                for (j = 0; j < 90; j++) 
+                for (j = 0; j < 90; j++)
                 {
                     array[j] = j;
                 }
@@ -311,17 +310,21 @@ int main(int argc, char *argv[])
         /* Creazione indirizzo di bind */
         memset(&my_addr, 0, sizeof(my_addr)); // Pulizia
         my_addr.sin_family = AF_INET;
-        my_addr.sin_port = htons(4242);
+        my_addr.sin_port = htons(atoi(argv[1])); //la porta su cui ascolta il server è specificata nella stringa argv[1], con atoi converto in intero e poi converto in formato network
         my_addr.sin_addr.s_addr = INADDR_ANY;
 
         ret = bind(sd, (struct sockaddr *)&my_addr, sizeof(my_addr));
+
+        // creo il file dove salverò tutti gli utenti registrati
+        f1 = fopen("utenti.txt", "a+");
+        fclose(f1);
 
         printf("Ascolto\n");
         ret = listen(sd, 10);
 
         if (ret < 0)
         {
-            perror("Errore in fase di bind: \n");
+            perror("Errore:\n");
             exit(-1);
         }
 
@@ -332,6 +335,13 @@ int main(int argc, char *argv[])
 
             // Accetto nuove connessioni
             new_sd = accept(sd, (struct sockaddr *)&cl_addr, &len);
+
+            if (new_sd < 0)
+            {
+                perror("Errore:\n");
+                exit(-1);
+            }
+
             printf("Connessione accettata");
 
             pid = fork();
@@ -370,7 +380,18 @@ int main(int argc, char *argv[])
                         len_msg_signup = strlen(msg_signup) + 1;
                         lmsg_signup = htons(len_msg_signup);
                         ret = send(new_sd, (void *)&lmsg_signup, sizeof(uint16_t), 0);
+                        if (ret == -1)
+                        {
+                            perror("Errore:\n");
+                            exit(-1);
+                        }
+
                         ret = send(new_sd, (void *)msg_signup, len_msg_signup, 0);
+                        if (ret == -1)
+                        {
+                            perror("Errore:\n");
+                            exit(-1);
+                        }
 
                         // Non sono ancora trascorsi 30 minuti, l'utente non può entrare con questo host: chiudo il file, il socket e termino il processo
                         fclose(f4);
@@ -382,7 +403,17 @@ int main(int argc, char *argv[])
                 len_msg_signup = strlen(msg_signup) + 1;
                 lmsg_signup = htons(len_msg_signup);
                 ret = send(new_sd, (void *)&lmsg_signup, sizeof(uint16_t), 0);
+                if (ret == -1)
+                {
+                    perror("Errore:\n");
+                    exit(-1);
+                }
                 ret = send(new_sd, (void *)msg_signup, len_msg_signup, 0);
+                if (ret == -1)
+                {
+                    perror("Errore:\n");
+                    exit(-1);
+                }
 
                 fclose(f4);
 
@@ -393,12 +424,22 @@ int main(int argc, char *argv[])
 
                     // Attendo dimensione del mesaggio
                     ret = recv(new_sd, (void *)&lmsg, sizeof(uint16_t), 0);
+                    if (ret == -1)
+                    {
+                        perror("Errore:\n");
+                        exit(-1);
+                    }
 
                     // Rinconverto in formato host
                     len = ntohs(lmsg);
 
                     // ricevo il messaggio effettivo di lunghezza len
                     ret = recv(new_sd, (void *)buffer, len, 0);
+                    if (ret == -1)
+                    {
+                        perror("Errore:\n");
+                        exit(-1);
+                    }
                     printf("Buffer ricevuto\n");
 
                     if (ret < 0)
@@ -432,7 +473,17 @@ int main(int argc, char *argv[])
                                 len_msg_signup = strlen(msg_signup) + 1;
                                 lmsg_signup = htons(len_msg_signup);
                                 ret = send(new_sd, (void *)&lmsg_signup, sizeof(uint16_t), 0);
+                                if (ret == -1)
+                                {
+                                    perror("Errore:\n");
+                                    exit(-1);
+                                }
                                 ret = send(new_sd, (void *)msg_signup, len_msg_signup, 0);
+                                if (ret == -1)
+                                {
+                                    perror("Errore:\n");
+                                    exit(-1);
+                                }
                             }
                         }
 
@@ -443,17 +494,25 @@ int main(int argc, char *argv[])
                             //salvo nel file username e password
                             fprintf(f1, "%s ", us);
                             fprintf(f1, "%s", pwd);
-                            
 
                             //mando al client un messaggio di avvenuta registrazione
                             strcpy(msg_signup, "Registazione avvenuta con successo\n");
                             len_msg_signup = strlen(msg_signup) + 1;
                             lmsg_signup = htons(len_msg_signup);
                             ret = send(new_sd, (void *)&lmsg_signup, sizeof(uint16_t), 0);
+                            if (ret == -1)
+                            {
+                                perror("Errore:\n");
+                                exit(-1);
+                            }
                             ret = send(new_sd, (void *)msg_signup, len_msg_signup, 0);
+                            if (ret == -1)
+                            {
+                                perror("Errore:\n");
+                                exit(-1);
+                            }
                         }
                         fclose(f1);
-                        
                     }
 
                     /* login */
@@ -495,7 +554,17 @@ int main(int argc, char *argv[])
                                 len_msg_signup = strlen(msg_signup) + 1;
                                 lmsg_signup = htons(len_msg_signup);
                                 ret = send(new_sd, (void *)&lmsg_signup, sizeof(uint16_t), 0);
+                                if (ret == -1)
+                                {
+                                    perror("Errore:\n");
+                                    exit(-1);
+                                }
                                 ret = send(new_sd, (void *)msg_signup, len_msg_signup, 0);
+                                if (ret == -1)
+                                {
+                                    perror("Errore:\n");
+                                    exit(-1);
+                                }
                             }
                         }
 
@@ -507,10 +576,20 @@ int main(int argc, char *argv[])
                             len_msg_signup = strlen(msg_signup) + 1;
                             lmsg_signup = htons(len_msg_signup);
                             ret = send(new_sd, (void *)&lmsg_signup, sizeof(uint16_t), 0);
+                            if (ret == -1)
+                            {
+                                perror("Errore:\n");
+                                exit(-1);
+                            }
                             ret = send(new_sd, (void *)msg_signup, len_msg_signup, 0);
+                            if (ret == -1)
+                            {
+                                perror("Errore:\n");
+                                exit(-1);
+                            }
 
                             attempt++; //incremento il numero di tentativi effettuati
-							printf("Tentativi effettuati sbagliati %d:", attempt);
+                            printf("Tentativi effettuati sbagliati %d:", attempt);
 
                             //Se il client ha sbagliato per la terza volta
                             if (attempt == 3)
@@ -522,7 +601,17 @@ int main(int argc, char *argv[])
                                 len_msg_signup = strlen(msg_signup) + 1;
                                 lmsg_signup = htons(len_msg_signup);
                                 ret = send(new_sd, (void *)&lmsg_signup, sizeof(uint16_t), 0);
+                                if (ret == -1)
+                                {
+                                    perror("Errore:\n");
+                                    exit(-1);
+                                }
                                 ret = send(new_sd, (void *)msg_signup, len_msg_signup, 0);
+                                if (ret == -1)
+                                {
+                                    perror("Errore:\n");
+                                    exit(-1);
+                                }
 
                                 //Salvo l'orario in cui è stato effettuato il terzo tentativo e l'indirizzo IP dell'host dell'utente che ha provato in un file
                                 t = time(NULL);
@@ -541,7 +630,6 @@ int main(int argc, char *argv[])
                         }
 
                         fclose(f1);
-                        
                     }
 
                     /* invia giocata */
@@ -552,10 +640,20 @@ int main(int argc, char *argv[])
 
                         // Attendo dimensione dell'ID
                         ret = recv(new_sd, (void *)&lmsg, sizeof(uint16_t), 0);
+                        if (ret == -1)
+                        {
+                            perror("Errore:\n");
+                            exit(-1);
+                        }
                         // Rinconverto in formato host
                         len = ntohs(lmsg);
                         // ricevo l'ID
                         ret = recv(new_sd, (void *)buffer_ID, len, 0);
+                        if (ret == -1)
+                        {
+                            perror("Errore:\n");
+                            exit(-1);
+                        }
 
                         // ID CORRETTO:
                         if (strcmp(buffer_ID, id_session) == 0)
@@ -567,7 +665,17 @@ int main(int argc, char *argv[])
                             len_msg_signup = strlen(msg_signup) + 1;
                             lmsg_signup = htons(len_msg_signup);
                             ret = send(new_sd, (void *)&lmsg_signup, sizeof(uint16_t), 0);
+                            if (ret == -1)
+                            {
+                                perror("Errore:\n");
+                                exit(-1);
+                            }
                             ret = send(new_sd, (void *)msg_signup, len_msg_signup, 0);
+                            if (ret == -1)
+                            {
+                                perror("Errore:\n");
+                                exit(-1);
+                            }
 
                             //calcolo data e ora della giocata e le salvo in una stringa, buf
                             t = time(NULL);
@@ -583,7 +691,6 @@ int main(int argc, char *argv[])
                             tokl = strtok(NULL, " ");
                             tokl = strtok(NULL, "-");
                             strcpy(numeri, tokl);
-                            printf("%s\n", numeri); // salvo i numeri giocati in una stringa
                             strcat(numeri, "$");
 
                             //scandisco la stringa, converto i numeri da carattere a long e li salvo in memoria nel campo vettore di long numeri_giocati della schedina Sched
@@ -603,7 +710,17 @@ int main(int argc, char *argv[])
                                 len_msg_signup = strlen(msg_signup) + 1;
                                 lmsg_signup = htons(len_msg_signup);
                                 ret = send(new_sd, (void *)&lmsg_signup, sizeof(uint16_t), 0);
+                                if (ret == -1)
+                                {
+                                    perror("Errore:\n");
+                                    exit(-1);
+                                }
                                 ret = send(new_sd, (void *)msg_signup, len_msg_signup, 0);
+                                if (ret == -1)
+                                {
+                                    perror("Errore:\n");
+                                    exit(-1);
+                                }
                             }
                             else
                             {
@@ -652,7 +769,17 @@ int main(int argc, char *argv[])
                                 len_msg_signup = strlen(msg_signup) + 1;
                                 lmsg_signup = htons(len_msg_signup);
                                 ret = send(new_sd, (void *)&lmsg_signup, sizeof(uint16_t), 0);
+                                if (ret == -1)
+                                {
+                                    perror("Errore:\n");
+                                    exit(-1);
+                                }
                                 ret = send(new_sd, (void *)msg_signup, len_msg_signup, 0);
+                                if (ret == -1)
+                                {
+                                    perror("Errore:\n");
+                                    exit(-1);
+                                }
                             }
                         }
                         else
@@ -662,7 +789,17 @@ int main(int argc, char *argv[])
                             len_msg_signup = strlen(msg_signup) + 1;
                             lmsg_signup = htons(len_msg_signup);
                             ret = send(new_sd, (void *)&lmsg_signup, sizeof(uint16_t), 0);
+                            if (ret == -1)
+                            {
+                                perror("Errore:\n");
+                                exit(-1);
+                            }
                             ret = send(new_sd, (void *)msg_signup, len_msg_signup, 0);
+                            if (ret == -1)
+                            {
+                                perror("Errore:\n");
+                                exit(-1);
+                            }
                         }
                     }
 
@@ -671,10 +808,20 @@ int main(int argc, char *argv[])
                     {
                         // Attendo dimensione dell'ID
                         ret = recv(new_sd, (void *)&lmsg, sizeof(uint16_t), 0);
+                        if (ret == -1)
+                        {
+                            perror("Errore:\n");
+                            exit(-1);
+                        }
                         // Rinconverto in formato host
                         len = ntohs(lmsg);
                         // ricevo l'ID
                         ret = recv(new_sd, (void *)buffer_ID, len, 0);
+                        if (ret == -1)
+                        {
+                            perror("Errore:\n");
+                            exit(-1);
+                        }
 
                         // ID CORRETTO:
                         if (strcmp(buffer_ID, id_session) == 0)
@@ -686,7 +833,17 @@ int main(int argc, char *argv[])
                             len_msg_signup = strlen(msg_signup) + 1;
                             lmsg_signup = htons(len_msg_signup);
                             ret = send(new_sd, (void *)&lmsg_signup, sizeof(uint16_t), 0);
+                            if (ret == -1)
+                            {
+                                perror("Errore:\n");
+                                exit(-1);
+                            }
                             ret = send(new_sd, (void *)msg_signup, len_msg_signup, 0);
+                            if (ret == -1)
+                            {
+                                perror("Errore:\n");
+                                exit(-1);
+                            }
 
                             // GIOCATE NON ATTIVE
                             if (buffer[14] == '0')
@@ -708,8 +865,7 @@ int main(int argc, char *argv[])
                                     tokl2 = strtok(NULL, "\n"); //giocata
 
                                     strcpy(tokl24, tokl); //salvo in tokl24 stringa contenente data e ora giocata
-                                    tokl26 = malloc(strlen(tokl2));
-                                    strcpy(tokl26, tokl2);
+                                    strcpy(lline3, tokl2);
 
                                     //prelevo la stringa contenente data e ora della giocata, la converto in tm e l'assegno a tmvg
                                     strptime(tokl24, "%d/%m/%Y-%H:%M", &tmvg);
@@ -720,14 +876,14 @@ int main(int argc, char *argv[])
 
                                         if (contatore == 1) //solo una, la copio
                                         {
-                                            strcpy(buffer_per_c, tokl26);
-                                            free(tokl26);
+                                            strcpy(buffer_per_c, lline3);
+
                                             strcat(buffer_per_c, "\n");
                                         }
                                         else //più di una, scrivo in append
                                         {
-                                            strcat(buffer_per_c, tokl26);
-                                            free(tokl26);
+                                            strcat(buffer_per_c, lline3);
+
                                             strcat(buffer_per_c, "\n");
                                         }
                                     }
@@ -744,7 +900,17 @@ int main(int argc, char *argv[])
                                 len_msg_signup = strlen(buffer_per_c) + 1;
                                 lmsg_signup = htons(len_msg_signup);
                                 ret = send(new_sd, (void *)&lmsg_signup, sizeof(uint16_t), 0);
+                                if (ret == -1)
+                                {
+                                    perror("Errore:\n");
+                                    exit(-1);
+                                }
                                 ret = send(new_sd, (void *)buffer_per_c, len_msg_signup, 0);
+                                if (ret == -1)
+                                {
+                                    perror("Errore:\n");
+                                    exit(-1);
+                                }
                             }
 
                             //GIOCATE ATTIVE
@@ -759,18 +925,15 @@ int main(int argc, char *argv[])
                                 f5 = fopen(nomefile, "a+");
                                 memset(&tmvg, 0, sizeof(struct tm));
                                 memset(&lline2, 0, sizeof(lline2));
-                                
+
                                 contatore2 = 0;
                                 while (fgets(lline2, 100, f5) != NULL)
                                 {
 
                                     tokl = strtok(lline2, " ");
                                     tokl2 = strtok(NULL, "\n");
-                                    printf("%s\n", tokl2);
                                     strcpy(tokl24, tokl);
-                                    tokl26 = malloc(strlen(tokl2));
-                                    strcpy(tokl26, tokl2);
-                                    printf("%s\n", tokl26);
+                                    strcpy(lline3, tokl2);
 
                                     strptime(tokl24, "%d/%m/%Y-%H:%M", &tmvg);
 
@@ -780,14 +943,14 @@ int main(int argc, char *argv[])
 
                                         if (contatore2 == 1)
                                         {
-                                            strcpy(buffer_per_c2, tokl26);
-                                            free(tokl26);
+                                            strcpy(buffer_per_c2, lline3);
+
                                             strcat(buffer_per_c2, "\n");
                                         }
                                         else
                                         {
-                                            strcat(buffer_per_c2, tokl26);
-                                            free(tokl26);
+                                            strcat(buffer_per_c2, lline3);
+
                                             strcat(buffer_per_c2, "\n");
                                         }
                                     }
@@ -797,13 +960,22 @@ int main(int argc, char *argv[])
                                 //Mando le giocate attive (se ci sono)
                                 if (contatore2 == 0)
                                 {
-                                    strcpy(buffer_per_c2, "Nessuna giocata attiva");
+                                    strcpy(buffer_per_c2, "Nessuna giocata attiva\n");
                                 }
                                 len_msg_signup = strlen(buffer_per_c2) + 1;
                                 lmsg_signup = htons(len_msg_signup);
                                 ret = send(new_sd, (void *)&lmsg_signup, sizeof(uint16_t), 0);
+                                if (ret == -1)
+                                {
+                                    perror("Errore:\n");
+                                    exit(-1);
+                                }
                                 ret = send(new_sd, (void *)buffer_per_c2, len_msg_signup, 0);
-                                
+                                if (ret == -1)
+                                {
+                                    perror("Errore:\n");
+                                    exit(-1);
+                                }
                             }
                         }
                         else
@@ -813,7 +985,17 @@ int main(int argc, char *argv[])
                             len_msg_signup = strlen(msg_signup) + 1;
                             lmsg_signup = htons(len_msg_signup);
                             ret = send(new_sd, (void *)&lmsg_signup, sizeof(uint16_t), 0);
+                            if (ret == -1)
+                            {
+                                perror("Errore:\n");
+                                exit(-1);
+                            }
                             ret = send(new_sd, (void *)msg_signup, len_msg_signup, 0);
+                            if (ret == -1)
+                            {
+                                perror("Errore:\n");
+                                exit(-1);
+                            }
                         }
                     }
 
@@ -822,10 +1004,20 @@ int main(int argc, char *argv[])
                     {
                         // Attendo dimensione dell'ID
                         ret = recv(new_sd, (void *)&lmsg, sizeof(uint16_t), 0);
+                        if (ret == -1)
+                        {
+                            perror("Errore:\n");
+                            exit(-1);
+                        }
                         // Rinconverto in formato host
                         len = ntohs(lmsg);
                         // ricevo l'ID
                         ret = recv(new_sd, (void *)buffer_ID, len, 0);
+                        if (ret == -1)
+                        {
+                            perror("Errore:\n");
+                            exit(-1);
+                        }
 
                         // ID CORRETTO:
                         if (strcmp(buffer_ID, id_session) == 0)
@@ -837,17 +1029,27 @@ int main(int argc, char *argv[])
                             len_msg_signup = strlen(msg_signup) + 1;
                             lmsg_signup = htons(len_msg_signup);
                             ret = send(new_sd, (void *)&lmsg_signup, sizeof(uint16_t), 0);
+                            if (ret == -1)
+                            {
+                                perror("Errore:\n");
+                                exit(-1);
+                            }
                             ret = send(new_sd, (void *)msg_signup, len_msg_signup, 0);
+                            if (ret == -1)
+                            {
+                                perror("Errore:\n");
+                                exit(-1);
+                            }
 
                             tokl = strtok(buffer, " ");
                             tokl2 = strtok(NULL, " ");
                             tokl = strtok(NULL, " "); // se la ruota è stata specificata, sarà puntata da tokl
 
                             n = strtol(tokl2, &eptr, 10); // salvo in n quante estrazioni il client vuole visualizzare
-       
+
                             if (tokl == NULL) //nessuna ruota specificata --> tutte le ruote
                             {
-                                
+
                                 f_estr = fopen("estrazione.txt", "r");
                                 n_righe_f_estr = 0;
                                 //leggo riga per riga dal file delle estrazioni
@@ -865,7 +1067,7 @@ int main(int argc, char *argv[])
                                 {
                                     strcpy(lline2, lline4);
                                     tokl3 = strtok(lline4, " ");
-                                    n2 = strtol(tokl3, &eptr2, 10); // n2 è il numero della i-esima estrazione per i = {1,..,numero_estrazioni}
+                                    n2 = strtol(tokl3, &eptr2, 10);   // n2 è il numero della i-esima estrazione per i = {1,..,numero_estrazioni}
                                     if (n2 > (numero_estrazioni - n)) //condizione per stampare nel buffer solo le ultime estrazioni richieste dal client
                                     {
                                         strcat(buffer_per_c3, lline2 + 19); // copia nel buffer le estrazioni richieste (ruote e numeri)
@@ -877,7 +1079,17 @@ int main(int argc, char *argv[])
                                 len_msg_signup = strlen(buffer_per_c3) + 1;
                                 lmsg_signup = htons(len_msg_signup);
                                 ret = send(new_sd, (void *)&lmsg_signup, sizeof(uint16_t), 0);
+                                if (ret == -1)
+                                {
+                                    perror("Errore:\n");
+                                    exit(-1);
+                                }
                                 ret = send(new_sd, (void *)buffer_per_c3, len_msg_signup, 0);
+                                if (ret == -1)
+                                {
+                                    perror("Errore:\n");
+                                    exit(-1);
+                                }
                             }
                             else //ruota specifica
                             {
@@ -893,19 +1105,17 @@ int main(int argc, char *argv[])
 
                                 f_estr = fopen("estrazione.txt", "r");
                                 memset(buffer_per_c3, 0, BUFFER_SIZE);
-                                while (fgets(lline4, 100, f_estr) != NULL) 
+                                while (fgets(lline4, 100, f_estr) != NULL)
                                 {
                                     strcpy(lline2, lline4);
                                     tokl3 = strtok(lline4, " ");
                                     tokl26 = strtok(NULL, " ");
                                     tokl26 = strtok(NULL, " "); // ruota di un'estrazione
-                                    n2 = strtol(tokl3, &eptr2, 10); 
-                                    
+                                    n2 = strtol(tokl3, &eptr2, 10);
 
                                     if (n2 > (numero_estrazioni - n) && strncmp(tokl, tokl26, strlen(tokl) - 1) == 0) //copio nel buffer da mandare al client solo le righe con la ruota specificata dal client
-                                    {                                 
+                                    {
                                         strcat(buffer_per_c3, lline2 + 2);
-                                        
                                     }
                                 }
                                 fclose(f_estr);
@@ -914,7 +1124,17 @@ int main(int argc, char *argv[])
                                 len_msg_signup = strlen(buffer_per_c3) + 1;
                                 lmsg_signup = htons(len_msg_signup);
                                 ret = send(new_sd, (void *)&lmsg_signup, sizeof(uint16_t), 0);
+                                if (ret == -1)
+                                {
+                                    perror("Errore:\n");
+                                    exit(-1);
+                                }
                                 ret = send(new_sd, (void *)buffer_per_c3, len_msg_signup, 0);
+                                if (ret == -1)
+                                {
+                                    perror("Errore:\n");
+                                    exit(-1);
+                                }
                             }
                         }
                         else
@@ -924,7 +1144,17 @@ int main(int argc, char *argv[])
                             len_msg_signup = strlen(msg_signup) + 1;
                             lmsg_signup = htons(len_msg_signup);
                             ret = send(new_sd, (void *)&lmsg_signup, sizeof(uint16_t), 0);
+                            if (ret == -1)
+                            {
+                                perror("Errore:\n");
+                                exit(-1);
+                            }
                             ret = send(new_sd, (void *)msg_signup, len_msg_signup, 0);
+                            if (ret == -1)
+                            {
+                                perror("Errore:\n");
+                                exit(-1);
+                            }
                         }
                     }
 
@@ -933,10 +1163,20 @@ int main(int argc, char *argv[])
                     {
                         // Attendo dimensione dell'ID
                         ret = recv(new_sd, (void *)&lmsg, sizeof(uint16_t), 0);
+                        if (ret == -1)
+                        {
+                            perror("Errore:\n");
+                            exit(-1);
+                        }
                         // Rinconverto in formato host
                         len = ntohs(lmsg);
                         // ricevo l'ID
                         ret = recv(new_sd, (void *)buffer_ID, len, 0);
+                        if (ret == -1)
+                        {
+                            perror("Errore:\n");
+                            exit(-1);
+                        }
 
                         // ID CORRETTO:
                         if (strcmp(buffer_ID, id_session) == 0)
@@ -948,7 +1188,17 @@ int main(int argc, char *argv[])
                             len_msg_signup = strlen(msg_signup) + 1;
                             lmsg_signup = htons(len_msg_signup);
                             ret = send(new_sd, (void *)&lmsg_signup, sizeof(uint16_t), 0);
+                            if (ret == -1)
+                            {
+                                perror("Errore:\n");
+                                exit(-1);
+                            }
                             ret = send(new_sd, (void *)msg_signup, len_msg_signup, 0);
+                            if (ret == -1)
+                            {
+                                perror("Errore:\n");
+                                exit(-1);
+                            }
 
                             f5 = fopen(nomefile, "a+");
                             //leggo riga per riga il file delle giocate dell'utente: per ogni riga c'è una schedina
@@ -966,14 +1216,13 @@ int main(int argc, char *argv[])
                                     i++;
                                 }
                                 ver_giocata.num_ruote = i; //numero ruote giocate della schedina
-                                
 
                                 tokl = strtok(NULL, " ");
                                 for (y = 0; y < 5; y++)
                                 {
                                     ver_giocata.numeri_giocati_v[y] = 0; //setto a 0 il vettore dei numeri giocati
                                 }
-                                
+
                                 //leggo e salvo nel vettore i numeri giocati della schedina
                                 ver_giocata.numeri_giocati_v[0] = strtol(tokl, &eptr, 10);
                                 i = 1;
@@ -984,7 +1233,6 @@ int main(int argc, char *argv[])
                                     i++;
                                 }
                                 ver_giocata.dim_num = i; //salvo quanti sono i numeri giocati della schedina
-                                
 
                                 for (q = 0; q < 5; q++)
                                 {
@@ -1017,7 +1265,7 @@ int main(int argc, char *argv[])
                                         ver_giocata.importi[4] = imp_temp;
                                     }
 
-                                    imp_temp = strtof(tokl, &eptr); //converto la parte di stringa contenente l'importo puntato per la giocata in float 
+                                    imp_temp = strtof(tokl, &eptr); //converto la parte di stringa contenente l'importo puntato per la giocata in float
                                 }
 
                                 //per ogni ruota giocata
@@ -1029,7 +1277,7 @@ int main(int argc, char *argv[])
                                     {
                                         tokl = strtok(lline5, " ");
                                         tokl = strtok(NULL, " ");
-                                        
+
                                         if (strncmp(tokl, "0 E", 3) != 0) //per saltare il "titolo di apertura"
                                         {
                                             strptime(tokl, "%d/%m/%Y-%H:%M", &estr_v); //salvo il timestamp dell'estrazione considerata
@@ -1038,7 +1286,7 @@ int main(int argc, char *argv[])
 
                                         strcpy(ruota_v, strtok(NULL, " "));
 
-                                       // se la ruota è "Tutte"
+                                        // se la ruota è "Tutte"
                                         if (Diff(estr_v, ver_giocata.timestamp_giocata_v) < 0 && Diff(estr_v, ver_giocata.timestamp_giocata_v) > -5 && strcmp(ver_giocata.ruote_v[i], "Tutte") == 0 && strcmp(ruota_v, "Estrazione") != 0) // la schedina è relativa a un'estrazione se la differenza tra gli orari della schedina e dell'estrazione è < 5 minuti
                                         {
                                             j = 0;
@@ -1046,7 +1294,6 @@ int main(int argc, char *argv[])
                                             {
                                                 tokl = strtok(NULL, " ");
                                                 vett_num_v[j] = strtol(tokl, &eptr, 10); //salvo i numeri dell'estrazione in vett_num_v
-                                                printf("%d\n", vett_num_v[j]);
                                                 j++;
                                             }
 
@@ -1058,10 +1305,9 @@ int main(int argc, char *argv[])
                                                     if (vett_num_v[k] == ver_giocata.numeri_giocati_v[y])
                                                     {
                                                         z++;
-       
-                                                        ver_giocata.numeri_indovinati[z] = vett_num_v[k]; //salvo i numeri indovinati                                                        
+
+                                                        ver_giocata.numeri_indovinati[z] = vett_num_v[k]; //salvo i numeri indovinati
                                                     }
-                                            
                                                 }
                                             }
 
@@ -1100,13 +1346,12 @@ int main(int argc, char *argv[])
                                                         strcat(superbuffer6, sched.puntate[q]);
                                                         strcat(superbuffer6, " ");
                                                         sprintf(superbuffer6 + strlen(superbuffer6), "%.2f EURO ", calcola_vincita(quanti_num, 11, q, ver_giocata.importi[q], ni)); //scrivo nel vettore che mando al client la vincita per quella schedina
-                                                        riepilogo[q] += calcola_vincita(quanti_num, 11, q, ver_giocata.importi[q], ni); //mantengo aggiornato il vettore di riepilogo delle vincite
+                                                        riepilogo[q] += calcola_vincita(quanti_num, 11, q, ver_giocata.importi[q], ni);                                             //mantengo aggiornato il vettore di riepilogo delle vincite
                                                     }
                                                 }
                                                 strcat(superbuffer6, "\n");
                                             }
                                         }
-
 
                                         //Giocate NON comprendenti la ruota "Tutte"
                                         if (Diff(estr_v, ver_giocata.timestamp_giocata_v) < 0 && Diff(estr_v, ver_giocata.timestamp_giocata_v) > -5 && strcmp(ver_giocata.ruote_v[i], ruota_v) == 0) // considero solo le corrispondenze tra le ruote giocate della schedina e le ruote dell'estrazione corrispondenti
@@ -1121,7 +1366,7 @@ int main(int argc, char *argv[])
                                             }
 
                                             z = 0;
-                                            
+
                                             for (k = 0; k < 5; k++)
                                             {
                                                 for (y = 0; y < 5; y++)
@@ -1145,7 +1390,7 @@ int main(int argc, char *argv[])
                                             }
                                             if (ni > 0 && vittoria > 0)
                                             {
-                                                
+
                                                 strcat(superbuffer6, "*******************************\n");
                                                 strcat(superbuffer6, "Estrazione del ");
                                                 strcat(superbuffer6, data_estr_vincente);
@@ -1173,7 +1418,7 @@ int main(int argc, char *argv[])
                                                         riepilogo[q] += calcola_vincita(quanti_num, ver_giocata.num_ruote - 1, q, ver_giocata.importi[q], ni);
                                                     }
                                                 }
-                                                
+
                                                 strcat(superbuffer6, "\n");
                                             }
                                         }
@@ -1195,8 +1440,18 @@ int main(int argc, char *argv[])
                             len_msg_signup = strlen(superbuffer6) + 1;
                             lmsg_signup = htons(len_msg_signup);
                             ret = send(new_sd, (void *)&lmsg_signup, sizeof(uint16_t), 0);
+                            if (ret == -1)
+                            {
+                                perror("Errore:\n");
+                                exit(-1);
+                            }
                             ret = send(new_sd, (void *)superbuffer6, len_msg_signup, 0);
                             strcpy(superbuffer6, "\n");
+                            if (ret == -1)
+                            {
+                                perror("Errore:\n");
+                                exit(-1);
+                            }
                         }
                         else
                         {
@@ -1205,7 +1460,17 @@ int main(int argc, char *argv[])
                             len_msg_signup = strlen(msg_signup) + 1;
                             lmsg_signup = htons(len_msg_signup);
                             ret = send(new_sd, (void *)&lmsg_signup, sizeof(uint16_t), 0);
+                            if (ret == -1)
+                            {
+                                perror("Errore:\n");
+                                exit(-1);
+                            }
                             ret = send(new_sd, (void *)msg_signup, len_msg_signup, 0);
+                            if (ret == -1)
+                            {
+                                perror("Errore:\n");
+                                exit(-1);
+                            }
                         }
                     }
 
@@ -1214,10 +1479,20 @@ int main(int argc, char *argv[])
                     {
                         // Attendo dimensione dell'ID
                         ret = recv(new_sd, (void *)&lmsg, sizeof(uint16_t), 0);
+                        if (ret == -1)
+                        {
+                            perror("Errore:\n");
+                            exit(-1);
+                        }
                         // Rinconverto in formato host
                         len = ntohs(lmsg);
                         // ricevo l'ID
                         ret = recv(new_sd, (void *)buffer_ID, len, 0);
+                        if (ret == -1)
+                        {
+                            perror("Errore:\n");
+                            exit(-1);
+                        }
 
                         // ID CORRETTO:
                         if (strcmp(buffer_ID, id_session) == 0)
@@ -1229,15 +1504,36 @@ int main(int argc, char *argv[])
                             len_msg_signup = strlen(msg_signup) + 1;
                             lmsg_signup = htons(len_msg_signup);
                             ret = send(new_sd, (void *)&lmsg_signup, sizeof(uint16_t), 0);
+                            if (ret == -1)
+                            {
+                                perror("Errore:\n");
+                                exit(-1);
+                            }
                             ret = send(new_sd, (void *)msg_signup, len_msg_signup, 0);
+                            if (ret == -1)
+                            {
+                                perror("Errore:\n");
+                                exit(-1);
+                            }
 
                             strcpy(sbuffer7, "Disconnessione avvenuta\n");
+                            printf("Client disconnesso\n");
 
                             //Mando il messaggio di disconnessione al client
                             len_msg_signup = strlen(sbuffer7) + 1;
                             lmsg_signup = htons(len_msg_signup);
                             ret = send(new_sd, (void *)&lmsg_signup, sizeof(uint16_t), 0);
+                            if (ret == -1)
+                            {
+                                perror("Errore:\n");
+                                exit(-1);
+                            }
                             ret = send(new_sd, (void *)sbuffer7, len_msg_signup, 0);
+                            if (ret == -1)
+                            {
+                                perror("Errore:\n");
+                                exit(-1);
+                            }
 
                             close(new_sd); //chiudo il socket della comunicazione
                             exit(0);
@@ -1249,7 +1545,17 @@ int main(int argc, char *argv[])
                             len_msg_signup = strlen(msg_signup) + 1;
                             lmsg_signup = htons(len_msg_signup);
                             ret = send(new_sd, (void *)&lmsg_signup, sizeof(uint16_t), 0);
+                            if (ret == -1)
+                            {
+                                perror("Errore:\n");
+                                exit(-1);
+                            }
                             ret = send(new_sd, (void *)msg_signup, len_msg_signup, 0);
+                            if (ret == -1)
+                            {
+                                perror("Errore:\n");
+                                exit(-1);
+                            }
                         }
                     }
                 }
